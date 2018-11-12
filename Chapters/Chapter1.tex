@@ -17,9 +17,11 @@
 
 \section{Goals}
 
+
 %----------------------------------------------------------------------------------------
 
 \section{Methods}
+
 
 %----------------------------------------------------------------------------------------
 
@@ -30,15 +32,18 @@
 %----------------------------------------------------------------------------------------
 
 \section{The key wants of safety-critical device manufacturers}
-This list comprises the key wants that manufactures of safety-critical devices want to achieve. In an ideal world you could satisfy every want individually but in reality they have complex interactions and need to be carefully balanced. The specifics of these interactions will be explored, in more detail, later. These wants will be used to compare the existing architectures with the hypervisor architecture.
+This list comprises the key wants that manufactures of safety-critical devices want to achieve. A want can be understood as a business driver for device manufacturers. Fulfilling all wants to the best degree possible, would result in a perfect device. These idealized wants will be used to compare the hypervisor architecture to existing device architectures.
 
-Additionally they are not equally strong for every device. Some devices might have less potential for causing damage and therefore need to adhere to less strict safety regulations. While others might be sold in a market where cost is practically irrelevant because there is only one seller and buyers are large governments. 
+In an ideal world you could satisfy each want individually but in reality they have complex interactions and need to be carefully balanced. The specifics of these interactions will be explored in more detail later.
 
+Additionally they are not equally desirable for every device. Some devices might have less potential for causing damage and therefore need to adhere to less strict safety regulations. While others might be sold in a market where cost is practically irrelevant because there is only one seller and buyers are very dependent on the product. 
 
 \subsection{Safety}
 It is self-evident that safety is going to be a key want in the engineering process of safety-critical devices. A device that is considered safer is often going to have an edge over that of a competitor. Furthermore, a perfectly safe device protects the manufacturer from expensive lawsuits.
 
 Because of this, it is often beneficial for the manufacturer to ensure higher safety than required. However, in terms of economic viability, there are even more critical wants, as will become clear in the next section.
+
+\paragraph{}
 
 \subsubsection{Regulatory compliance}
 To protect the end-customer of safety-critical devices, most regulatory bodies implement rules that govern how safety-critical devices have to be engineered and what quality level they have to fulfill.
@@ -47,6 +52,7 @@ Failing to achieve this is even more costly than lawsuits, since it will disallo
 For most regulations it’s not just enough to prove that the end result has a high level of quality, the engineering process itself needs to be of high quality as well. This means that it is normally completely infeasible to make a device safe in the eyes of the law, if it has not been developed with this goal from the start.
 
 \subsection{Lowest possible cost}
+[REWRITE]
 Ultimately every safety-critical device has to be economically viable, or at the very least be a good investment that provides returns another way. 
 Therefore every other want needs to be realized with the pressure of cost in mind. However, it can be said that most of the other wants only aim to reduce cost or cost variance indirectly anyway. In that case the methods that realize them need to balance cost against how well they resolve the want.
 
@@ -56,9 +62,35 @@ If the touchscreen and GUI need to be inherently safe the manufacturer doesn’t
 
 \subsubsection{Satisfying the time schedule}
 \subsection{Satisfying functional requirements}
-\subsubsection{Providing convenience features}
+This section follows the distinction of functional requirements made by the  Kano model \autocite{KanoNoriaki.1984}. 
+% [Do I have to explain these?]
+% TODO If I have to: import graph to drive the point home
+It states that there are three categories: 
+\paragraph{Must-be requirements} \textquote{If these requirements are not fulfilled, the customer will be extremely dissatisfied. [...] Fulfilling
+the must-be requirements will only lead to a state of "not dissatisfied"} \autocite{ElmarSauerwein.1996}
+
+\paragraph{One-dimensional requirements} \textquote{With regard to these requirements, customer satisfaction is
+proportional to the level of fulfillment.}\autocite{ElmarSauerwein.1996} 
+
+\paragraph{Attractive requirements} \textquote{Attractive requirements are
+neither explicitly expressed nor expected by the customer. Fulfilling these requirements leads to more
+than proportional satisfaction. If they are not met, however, there is no feeling of dissatisfaction.}\autocite{ElmarSauerwein.1996}
+
+Must-be requirements are not only crucial for "not dissatisfied" customers but also for the safety and regulatory compliance of the device. Satisfying these requirements is the most essential want. Any action that supports this, while keeping costs low, is desirable.
+
+% [REMOVE]
+\begin{comment}
+In projects that consist purely of software, customer dissatisfaction is the only negative factor. Projects that also require custom hardware have an additional cost. The hardware already needs to implement every functionality and all manufactured devices need to support it. If the feature is then not implemented the hardware costs more without offering the benefits.
+\end{comment}
+
+\subsubsection{Satisfying attractive and one-dimensional functional requirements}
+% TODO come back to this later
+
 \subsection{Satisfying non-functional requirements}
+
+
 \subsection{As few faults as possible}
+% TODO Also talk about fault severity. If an architecture doesn't reduce the total amount of faults but reduces the amount of faults that lead to defects or severe defects, it is still a win
 \subsection{Engaged and satisfied employees}
 \subsection{Low risk / Low variance}
 \subsection{Future-proof design}
