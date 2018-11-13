@@ -31,48 +31,61 @@
 
 %----------------------------------------------------------------------------------------
 
+\section{Temporary introduction}
+This section will explain some necessary concepts and give some more context on the following section so that it can be read and reviewed independently from the rest of the thesis.
+
+[This is a side note and may contain information or a request for the reviewer]
+
+My use of "fault" and "defect" is basically arbitrary and terrible. I will find a useful consistent definition and use that religiously in the future.
+
+Some sections are incomplete. Any ideas are still welcome however.
+
 \section{The key wants of safety-critical device manufacturers}
 % REVIEW This section has two goals for each want: Explain what the want means and explain why it is important (if it is not self-evident) and maybe explain how it relates to other wants
 % NOTE I specifically avoid talking about architecture in this section, maybe I'm actually sabotaging myself with that
-This list comprises the key wants that manufactures of safety-critical devices want to achieve. A want can be understood as a business driver for device manufacturers. Fulfilling all wants to the best degree possible, would result in a perfect device. These idealized wants will be used to compare the hypervisor architecture to existing device architectures.
+This list comprises the key wants that manufactures of safety-critical devices want to achieve, when engineering a device. A want can be understood as a business driver for device manufacturers. Fulfilling all wants to the best degree possible, would result in a perfect device. These idealized wants will be used to compare the hypervisor architecture to other device architectures and recommend the features to look for, when choosing a real-world hypervisor implementation.
 
-In an ideal world you could satisfy each want individually but in reality they have complex interactions and need to be carefully balanced. The specifics of these interactions will be explored in more detail later.
+In an ideal world each want could be satisfied individually but in reality they have complex interactions and need to be carefully balanced. The specifics of these interactions will be explored in more detail later.
 
-Additionally they are not equally desirable for every device. Some devices might have less potential for causing damage and therefore need to adhere to less strict safety regulations. While others might be sold in a market where cost is practically irrelevant because there is only one seller and buyers are very dependent on the product. 
+Additionally they are not equally desirable for every device. Some devices, for example, might have less potential for causing damage and therefore need to adhere to less strict safety regulations. Therefore choosing the absolute safest architecture is not paramount for the devices success.
 
 \subsection{Safety}
 It is self-evident that safety is going to be a key want in the engineering process of safety-critical devices. A device that is considered safer is often going to have an edge over that of a competitor. Furthermore, a perfectly safe device protects the manufacturer from expensive lawsuits.
 
 Because of this, it is often beneficial for the manufacturer to ensure higher safety than required. However, in terms of economic viability, there are even more critical wants, as will become clear in the next section.
 
-\paragraph{Real-time requirements}
-% NOTE I am only looking at it from a safety perspective but there can also be usability implications, specifically in the usability area.
-Some devices have to guarantee that an event can be completed in a certain amount of time. This has a significant impact on the entire device architecture, from the hardware, through the operating system to the actual application. This want only considers real-time requirements that are necessary for the device's safety.
-
-The actual time frame that has to be guaranteed can vary wildly and whether or not it is 500ms or 50ns does have an impact on how the device needs to be implemented. However, the analysis in the later parts of the thesis will focus on the core architectural differences that make satisfying this requirement possible. 
-
 \subsubsection{Regulatory compliance}
 To protect the end-customer of safety-critical devices, most regulatory bodies implement rules that govern how safety-critical devices have to be engineered and what quality level they have to fulfill.
-Failing to achieve this is even more costly than lawsuits, since it will disallow the manufacturer from selling the device in the first place. 
+Failing to achieve this is even more costly than lawsuits, since it will disallow the manufacturer from selling the device in the first place. All regulatory bodies then allow the manufacturer to make adjustments to his compliance documentation but for most regulations it’s not just enough to prove that the end result has a high level of quality, the engineering process itself needs to be of high quality as well. This means that it is normally completely infeasible to make a device safe in the eyes of the law, if it has not been developed with this goal from the start. 
 
-For most regulations it’s not just enough to prove that the end result has a high level of quality, the engineering process itself needs to be of high quality as well. This means that it is normally completely infeasible to make a device safe in the eyes of the law, if it has not been developed with this goal from the start.
+And while regulatory bodies almost always find some problems in the compliance, fixing them will cost additional money and time and getting it right the first time is therefore desirable.
+
+\paragraph{Real-time requirements}
+% NOTE I am only looking at it from a safety perspective but there can also be usability implications, specifically in the usability area.
+As a special safety requirement, some devices have to guarantee that an event can be completed in a certain amount of time. This has a significant impact on the entire device architecture, from the hardware, through the operating system to the actual application. Which is why it deserves special consideration.
+
+The actual time frame that has to be guaranteed can vary wildly and whether it is 500ms or 50ns does have an impact on how the device needs to be implemented. However, the analysis in the later parts of the thesis will focus more on the core architectural differences that make satisfying this requirement possible in the first place. 
 
 \subsection{Lowest possible cost}
 % TODO Remember to include the distinction between initial and life-cycle costs
-[REWRITE]
-Ultimately every safety-critical device has to be economically viable, or at the very least be a good investment that provides returns another way. 
-Therefore every other want needs to be realized with the pressure of cost in mind. However, it can be said that most of the other wants only aim to reduce cost or cost variance indirectly anyway. In that case the methods that realize them need to balance cost against how well they resolve the want.
+% NOTE Is this assumption necessary for any point I will make?
+There are conceivable edge cases where a company might decide to go through with an unprofitable device for strategic reasons. Prestige customers or the possibility for profitable long-term business come to  mind. But in the interest of simplicity this thesis will assume that the manufacturer wants project to be directly profitable.
 
-Let’s examine two examples of what this balance typically looks like: Imagine a device with a complex GUI and touchscreen functionality. These functions are expensive to implement from scratch [source] but there are already implementations out there. Specifically Linux offers a lot of drivers and frameworks that can make the implementation of this much cheaper. 
+With this assumption in mind, every other want needs to be realized with the pressure of cost in mind. However, it can be said that most of the other wants aim to reduce cost or cost variance indirectly anyway. In these cases the methods that realize them need to balance cost against how well they resolve the want.
 
-If the touchscreen and GUI need to be inherently safe the manufacturer doesn't have many options other than to implement and verify the functionality himself. But if the functionality ca beSo the manufacturer has multiple options:   
+The mixed criticality problem, explained in section [add section] is a good example of this cost balance. To reiterate: [Section hasn't been written yet, this will be added later]. 
+
+But keep in mind there doesn't have to be a conflict and a balance to be struck. Often, efforts will be both cheaper and solve their respective wants better than other options.
 
 \subsubsection{Satisfying the time schedule}
+Time does of course cost money directly through wages and lost revenue but it can also additional indirect impact in certain scenarios. That is why it will be analyzed separately.
+
+Being the first to market carries many advantages. [When I looked for research it turned out to not necessarily be true. If no one else can think of relevant distinctions between time and the associated cost, I will delete this section]
 \subsection{Satisfying functional requirements}
 This section follows the distinction of functional requirements made by the  Kano model \autocite{KanoNoriaki.1984}. 
 % [Do I have to explain these?]
 % TODO If I have to: import graph to drive the point home
-It states that there are three categories: 
+It states that there are three categories of functional requirements: 
 \paragraph{Must-be requirements} \textquote{If these requirements are not fulfilled, the customer will be extremely dissatisfied. [...] Fulfilling
 the must-be requirements will only lead to a state of "not dissatisfied"} \autocite{ElmarSauerwein.1996}
 
@@ -85,6 +98,8 @@ than proportional satisfaction. If they are not met, however, there is no feelin
 
 Must-be requirements are not only crucial for "not dissatisfied" customers but also for the safety and regulatory compliance of the device. Satisfying these requirements is the most essential want. Any action that supports this, while keeping costs low, is desirable.
 
+[I'm sure I have a point to make I just haven't found a way to express it. I will write the sections on criticality and mixed criticality first and then come back to this]
+
 % [REMOVE]
 \begin{comment}
 In projects that consist purely of software, customer dissatisfaction is the only negative factor. Projects that also require custom hardware have an additional cost. The hardware already needs to implement every functionality and all manufactured devices need to support it. If the feature is then not implemented the hardware costs more without offering the benefits.
@@ -92,26 +107,32 @@ In projects that consist purely of software, customer dissatisfaction is the onl
 
 \subsubsection{Satisfying attractive and one-dimensional functional requirements}
 % TODO come back to this later
+[Same as above]
 
 \subsection{Satisfying non-functional requirements}
 % NOTE Is it possible there are other important requirements? Usability for example?
-There are a large number of possible non-functional requirements that are very dependent on the device's specific use-case. Analyzing them all is not in the scope of this thesis, the most crucial have, however, been listed as their own wants. 
+There are a large number of possible non-functional requirements and their relevance is very dependent on the device's specific use-case. Analyzing them all is not in the scope of this thesis, the most crucial have, however, been listed as their own wants. 
+
 
 \subsection{As few faults as possible}
 % TODO Also talk about fault severity. If an architecture doesn't reduce the total amount of faults but reduces the amount of faults that lead to defects or severe defects, it is still a win
 % NOTE what is "possible"
 % NOTE I exclusively mention software faults here!
 % NOTE I think I accidentally took away some content from "Maintainability"
+Faults are undesirable in any engineering environment. They are inherently unpredictable and can incur significant costs, both directly through the cost it takes to find and fix them and indirectly through customer dissatisfaction among other things.
+
 Reducing the amount of faults to a minimum has multiple dimensions. 
+[I mention mostly how software architecture addresses these problems. I plan to bridge the gap between software architecture and general architecture in a previous sections. !Hovewer!! any hardware perspective would be very much appreciated!]
 \paragraph{Reducing the frequency of fault implementation}
 It is still the common understanding that all non-trivial software that isn't formally verified [Include source for formal verification] will contain bugs [Source necessary, or self-evident?]. But in the decades since the software crisis it has become evident that development processes and architectures can have a positive impact on how many bugs are built into the software [source].  
 \paragraph{Finding faults effectively}
-But not just frequency of fault implementation can be improved. After a significant period of sophisticated testing, almost all "hard" bugs will be found. That is bugs that can be found with standard techniques. Most of the remaining bugs will be "soft" bugs, often called "Heisenbugs" [source Why do computers stop and what can be done about it?]. Named after the Heisenberg uncertainty principal because they often disappear when you look for them. 
+But not just frequency of fault implementation can be improved by a strong architecture. After a significant period of sophisticated testing, almost all "hard" bugs will be found. That is bugs that can be found easily and reliably
+with standard techniques. Most of the remaining bugs will be "soft" bugs, often called "Heisenbugs" [source Why do computers stop and what can be done about it?]. Named after the Heisenberg uncertainty principal because they often disappear when you look for them. 
 
 A system that can aid the discovery of these bugs, maybe through clever compartmentalization or logging, can save time and money.
 \paragraph{Fixing faults effectively}
 % TODO Find some sources that detail how software architectures positively affect this. Concepts like "information hiding" "interfaces" etc. apply. The book clean code might be a good source
-Once a fault has been found it also has to be fixed. Software that is easy to modify usually utilizes the virtues of information hiding and similar  concepts. Changing any line of code only has the readily apparent effect and no other part of the software is magically dependent on it.
+Once a fault has been found it also has to be fixed. Software that is easy to modify usually utilizes the virtues of information hiding and similar  concepts [WIP]. Changing any line of code only has the readily apparent effect and no other part of the software is magically dependent on it.
 
 How many work hours ultimately need to be invested into fixing the fault, really depends on the fault but a perfectly modifiable software will make it as easy as possible.
 \subsubsection{The lowest possible fault severity}
@@ -119,11 +140,13 @@ How many work hours ultimately need to be invested into fixing the fault, really
 Having the smallest amount of faults possible is great but ideally these faults also cause the least amount of damage possible. 
 
 % NOTE Does the explanation of why an informal definition is enough have a place here. Should I not mention it at all, should I explain it somewhere else?
-If a fault never manifests in a defect in the first place it also can't cause any damage. If it does however result in a defect its severity can be informally specified by a couple of factors. Using a formal definition is of little use here, as a comprehensive quantitative analysis of fault severity for the hypervisor architecture is out of the scope of this thesis. An informal definition will be enough as a basis for analytic reasoning on a high level.
+If a fault never manifests in a defect in the first place it also can't cause any damage. If it does however result in a defect its severity can be informally specified by a couple of factors. Using a formal definition is of little use here, as a comprehensive quantitative analysis of fault severity for the hypervisor architecture is out of the scope of this thesis. An informal definition will be enough as a basis for analytic reasoning on a theoretical level.
 \paragraph{How much of the system is affected}
-Ideally  a fault only affects the parts it has to. An unrecoverable defect in the USB driver, for example, would only cause the USB port to stop working and nothing else. A negative example of this would be if the fault instead caused a kernel panic that prompted the entire system to go down immediately.
+% PHRASING first sentence 
+Ideally,  a fault only affects the parts it absolutely has to. An unrecoverable defect in the USB driver, for example, would ideally only cause the USB port to stop working and nothing else. A negative example of this would be if the fault instead caused a kernel panic that prompted the entire system to go down immediately.
 \paragraph{How critical the affected parts are}
-This relates to the levels of criticality introduced in section [section goes here]. This really is by definition, since the level of criticality is normally chosen by the amount of damage that can be caused if a defect occurs. 
+% NOTE Unhappy with this
+This relates to the levels of criticality introduced in section [section goes here]. Since the level of criticality is normally determined by the amount of damage that can be caused if a defect occurs this goes back to how much damage the fault could cause. 
 \paragraph{Whether the fault can be detected and potentially mitigated}
 % TODO Maybe at least explore some examples
 This is typically referred to as fault tolerance. There are many ways to achieve this relating to both hardware and software [Link some sources]. [Some more examples will be explored in the analysis of the architectures]
@@ -131,29 +154,36 @@ This is typically referred to as fault tolerance. There are many ways to achieve
 \subsection{Engaged and satisfied employees}
 This \textit{want} may seem odd at first [Is saying this unprofessional?] but employees are the ones that are ultimately responsible for the success and failure of the project.
 
-If we take the software tools that have to be used as an example: The software could be annoying to work with or include many repetitive tasks. Repetitive tasks are shown to decrease efficiency and increase the chance for mistakes [Source Fatigue and Boredom in Repetitive Work]. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. For example a software tool that is overly complicated. In this instance the employee dissatisfaction is only an indicator for a hidden root cause.
+If we take software tools as an example: The software could be annoying to work with or include many repetitive tasks. Repetitive tasks are shown to decrease efficiency and increase the chance for mistakes [Source Fatigue and Boredom in Repetitive Work]. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. For example a software tool that is overly complicated. In this instance the employee dissatisfaction is only an indicator for a hidden root cause.
 
 An employee that is unsatisfied with his job, for whatever reason, is also more likely to leave the company [Source necessary?]. If the person was critical to the project this can have hugely detrimental effects. Furthermore, if enough key people leave, the entire project can be endangered. 
-\subsection{Low risk / Low variance}
+\subsection{Worthwhile risk / Low negative variance}
+% REWRITE This section
+Imagine two device architectures \textit{A} and \textit{B}. Architecture \textit{A} has the potential to create perfectly reusable software, much better than architecture \textit{B}. But it is possible that \textit{A} introduces expensive safety problems later in the development process.
+In this case architecture \textit{A} has a much higher associated risk but also  some positive variance. This example is very abstract and some more concrete architectural risks will be introduced in future sections. 
+
+Which risks are considered "worthwhile" is very dependent on other circumstances and even in this example it is not clear what would be the better architecture (even assuming that they have no other defining criteria). However, just considering the possible risks of architectures can give important insights into when they should be used.
+
 \subsection{Future-proof design}
 Whenever there is an associated hardware , future-proof design is especially important. Software can be reproduced and shipped with practically no cost but devices can not. [Give more points]
 
-Safety-critical devices are particularly notable in this respect, since they are often very complex and have an expensive engineering process. Airplanes are typically used for 3 decades [source] and hospitals have notoriously tight budgets and have to squeeze as much lifetime out of their devices as possible. }
+Safety-critical devices are particularly notable in this respect, since they are often very complex and have an expensive engineering process. Airplanes are typically used for 3 decades [source] and hospitals have notoriously tight budgets and have to squeeze as much lifetime out of their devices as possible. 
 \subsubsection{Extendibility}
-Nowadays it is becoming increasingly more plausible that it will be possible to deliver software updates to all devices [source?]. Along with the previously mentioned long life cycle it is a beneficial strategy [what do I mean by that], if not an expected service, to provide updates for the device.
+Nowadays it is becoming increasingly more plausible that it is possible to deliver software updates to an embedded device [source?]. Along with the previously mentioned long life cycle it is a beneficial strategy [what do I mean by that], if not an expected service, to provide updates for the device.
 
 If the device's hardware supports it new features could be implemented but the currently more typical scenario are updates of a more basic kind [source?]. Meaning, bug fixes and security updates.
 
-In any case an easily extendable device can have significant benefits
+In any case an easily extendable device can have significant benefits.
 \subsubsection{Maintainability}
 % Relates to faults as described above but also changing functionality
+[I ended up explaining a lot of this in the "faults" section, I am currently thinking about how I best reconcile that]
 \subsubsection{Reusable software}
-This \textit{want} relates to another aspect of future oriented design. Towards the end of a device's life cycle, manufacturers are starting to plan the next generation. Often with the newest hardware and other additions. If the software from the previous generation is reusable and suitably portable, a lot of time and money can be saved on this new generation.
+This \textit{want} relates to another aspect of future oriented design. Towards the end of a device's life cycle, manufacturers are starting to plan the next generation with upgraded hardware and new features. If the software from the previous generation is reusable and suitably portable, a lot of time and money can be saved on this new generation.
 
 % NOTE In fact it might be so easy to obsolete my point
 Another scenario for this is the \textit{device platform}, where there is a core device and several variations for different markets. In this example it is presumably even easier to profit from reusable software.
 
-The next device generation and another device on the same platform have the advantage that they presumably share most of the business logic. That makes reusing a lot of the software more plausible. However, if the software is reusable suitably generic software could conceivably even be used in entirely different devices.
+The next device generation and another device on the same platform have the advantage that they presumably share most of the business logic with the original device. That makes reusing a lot of the software plausible. However, if the software is reusable suitably generic software could conceivably even be used in entirely different devices.
 %----------------------------------------------------------------------------------------
 
 \section{Existing device architectures}
