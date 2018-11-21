@@ -93,14 +93,34 @@ To achieve this a system architecture is required that can reliably separate com
 %----------------------------------------------------------------------------------------
 
 \section{The separation architecture}
+% TODO Cite Wittenstein white papers
 % NOTE Think about where and how to mention real-time requirements
 There are four attributes the separation architecture needs to solve the mixed criticality problem.
 \subsection{Spatial separation}
 
-\subsection{Temporal separation}
+\begin{comment}
+\begin{figure}
+\centering
+\includegraphics{Figures/Drawing1}
+\decoRule
+\caption{Test}
+\label{fig:sepArch}
+\end{figure}
+\end{comment}
 
-\subsection{Independence}
+Spatial separation means that access of physical resources cannot lead to conflicts or corruption. This includes memory access as well as system resources such as hardware peripherals. 
+
+If shared access to any system resources is necessary, some kind of arbiter needs to be in place to give consistent access to components. 
+\subsection{Temporal separation}
+Temporal separation is achieved, if it is impossible for any system software to compromise the processing demands of another.
+Managing access to available processing resources is the main part of temporal separation. However, system events and triggers may also require analysis. Excessive interrupt routine run time, for example, can cause processing resources to be unavailable to the main system. 
+\subsection{Data integrity and validity}
+Data passed through unsafe components has to be either not safety related or protected. Whereas protection refers to ensuring the data's integrity and validity after it has passed through the unsafe components and before it is used in safety related processing.
+
+In practice this doesn't have to be part of the architecture but may be handled in the application software. Nevertheless it is an important aspect that needs to be kept in mind.
 \subsection{Certifiable compliance}
+It may not come as a surprise that the separation architecture also needs to fulfill these requirements in the eyes of the regulatory bodies, as they are the reason for the architecture's inception.
+How this may be achieved differs based on architecture and standard but it needs to be feasible at the very least.
 
 %----------------------------------------------------------------------------------------
 
@@ -130,6 +150,8 @@ Multi
 
 \section{Embedded safety hypervisor origins}
 \subsection{Virtualization}
+\paragraph{Paravirtualization}
+\paragraph{Full virtualization}
 \subsection{Original hypervisor use case}
 \subsection{Microkernels}
 \subsection{Unification of the two concepts}
