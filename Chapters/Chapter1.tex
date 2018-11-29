@@ -14,6 +14,7 @@
 \newcommand{\option}[1]{\texttt{\itshape#1}}
 
 \newcommand{\mfg}{manufacturer}
+\newcommand{\gls}{}
 
 \section{Goals}
 
@@ -88,7 +89,7 @@ To achieve this a system architecture is required that can reliably separate com
 
 %----------------------------------------------------------------------------------------
 
-\section{The separation architecture}
+\section{The separation architecture} \label{separation-arch}
 % TODO Cite Wittenstein white papers
 % NOTE Think about where and how to mention real-time requirements
 There are four attributes the separation architecture needs to solve the mixed criticality problem.
@@ -162,16 +163,24 @@ Although this hardware supervision has limited functionality, it has a clear adv
 
 This architecture should be considered when designing a safety-critical device but it is still fairly new and a full analysis of it is not in the scope of this thesis.
 \subsection{Hardware separated subsystems / Multiprocessor system}
-Multiprocessor systems or even completely separate subsystems are the current status quo for dealing with the mixed criticality problem. 
+% NOTE review http://www.ia.pw.edu.pl/~tkruk/edu/eopsya/lecture/eopsy08.pdf and http://www-5.unipv.it/mferretti/cdol/aca/Charts/07-multiprocessors-MF.pdf and if these are viable
+% TODO https://witekio.com/blog/introduction-heterogeneous-multicore-processing-architecture/ Read about the need for software support on this architecture
+% TODO actually explain what they are
+Multiprocessor systems or even completely separate subsystems are the current status quo for dealing with the mixed criticality problem. The multiprocessor architecture should not be confused with the multicore architecture, as it has distinct processors, usually with their own resources, on the same or different \gls{PCB}s.
 
+Such a system starts out with perfect temporal and spatial separation because the systems are fully independent. The \mfg{} can then reintroduce dependence in very deliberate and controlled ways, that don't impact the device's safety rating. For example by introducing a dedicated communication channel between the processors. 
 
+% NOTE Is this a qualitative assessment better reserved for the analysis part?
+Keep in mind however that, while sharing external peripherals is theoretically possible, it is not commonly done and poses some difficult concurrency challenges. This means that any external peripheral that could theoretically be shared has to be duplicated instead. The same goes for memory.
+
+More specific advantages and disadvantages of this architecture will be analyzed in more detail later in the thesis.
 
 %----------------------------------------------------------------------------------------
 
 \section{Embedded safety hypervisor origins}
 % TODO Add dat sauce
 Now let's examine the main subject of analysis, the embedded safety hypervisor. In this section it will be established where it comes from and some basic associated concepts.
-\subsection{Hardware virtualization}
+\subsection{Hardware virtualization} \label{hw-virt}
 The act of \keyword{hardware virtualization} refers to the creation of a virtual machine  that acts exactly like a real device. Software executed on this machine has no direct access to the underlying hardware resources. Virtual machines are typically called guests, whereas the device virtualizing them is referred to as the host machine
 There are two types of \keyword{hardware virtualization}.
 \paragraph{Para-virtualization}

@@ -16,27 +16,88 @@
 %----------------------------------------------------------------------------------------
 
 \section{Architecture}
+% NOTE Where to talk about static configuration?
+Now that any misconceptions concerning the purpose of the safety hypervisor have been cleared up, it is time to examine its architecture and features. For this, a "basic safety hypervisor" will be proposed, that embodies the typical characteristics of a microkernel based safety hypervisor.
+
+% NOTE I think I am mixing microkernel architecture with hypervisor architecture
 \subsection{Minimal trusted computing base}
+Minimality is the most essential principal of microkernel design. It proves particularly useful for hypervisors with a focus on certification because a strong rule of thumb is: Less code means less verification effort. 
+Where the original microkernels were just thin wrapper around the hardware, a \gls{CPU} driver so to speak, the microkernel based hypervisor adds a bit more code for the virtualization [source Heiser]. These systems still have around a couple ten thousand lines of code [source].
+
 \subsection{Capability-based access control}
-\subsection{Resource partitions}
-\subsection{[Time partition]}
+Capabilities are unforgeable tokens that grant access rights to an object. They contain the identification of the object and associated rights, for example read and write.
+They can be given to other entities which in turn grants them access according to the capability [Further source]. A capability could be for a specific memory region, a communication endpoint or to a hypervisor \gls{API} call.
+
+This mechanism for access control has dominated in microkernels because of its flexibility and because it doesn't require extensive kernel involvement. Since, the typical safety hypervisor sits on top of a microkernel, this mechanism has propagated to them as well.
+
+\subsection{Scheduling}
+% NOTE I might have to explain or at least source what these are
+There is really no unified scheduling behavior that all hypervisors share. Global scheduling is the typical behavior with common algorithms being preemptive priority based scheduling and time-sliced round-robin scheduling. Additionally, hypervisors running on multicore platforms usually have the ability to assign complete cores to guests.
+
+Some also offer hierarchical scheduling, where a so-called container task is scheduled that then schedules its children according to a global scheduling algorithm. This can have the benefit of reducing scheduling slack [source Mollison]. 
+
+\begin{comment}
+\subsection{Static configuration}
+Any mechanism to increase a guests rights at runtime poses the risk of exploitation, be it accidental or purposeful. That is why these systems are typically statically configured and if configuration runtime is at all possible, it is restricted to reducing privilege. For example, a guest that is allowed to spawn other guests may give them his own rights or less than his own but never more.
+\end{comment}
+
+\subsection{Explicit access}
+Any configuration that grants rights, be it communication with another guest or resource access, has to be explicitly enabled by the system integrator. This makes sure that no unintended access is granted to guests, potentially compromising the system.
 \subsection{Available guest environments}
+The typical hypervisor supports several different guest environments.
+\paragraph{Paravirtualized versus fully virtualized}
+A key distinction between virtualized guest environments is their virtualization type \ref{hw-virt}. Expect paravirtualization to always be available in a hypervisor, full virtualization support on the other hand is more rare. One reason could be that virtualization extensions are still relatively new, especially on ARM processors. In any case, full virtualization can only be offered if the platform supports hardware virtualization extensions.
+
+There also appears to be some contention on whether or not full virtualization can be as performant, and more importantly as deterministic, as paravirtualization [are there sources?]. A lack of determinism could endanger certification, if the device has hard real-time requirements. This thesis does not try to offer evidence for either claim, whether or not full virtualization can be justified in front of the regulatory body depends on the specific scenario. 
+
+Nevertheless, the importance of the outcome is likely not trivial, since full virtualization has a number of advantages: First, it means the cost and time of modifying the guest operating system can be saved. Alternatively, it could be reduced by using an already modified \gls{OS}, provided by the hypervisor developer but this is bound to be a very restricted choice that further increase the dependence on the developer.
+
+Second, the amount of viable operating systems is higher. The modification efforts to an \gls{OS} can only be made if the source code is available, but for many commercial products this is not the case. 
+
+Ultimately, it is important to verify that full virtualization is plausible for your device and analyze what the consequences of a lack thereof are.
+\paragraph{\gls{RTOS} and \gls{GPOS}}
+The basic hypervisor offers both \gls{RTOS} and \gls{GPOS} guests. What kinds and how much variety depends on the points raised in the previous sections about virtualization types. 
+\paragraph{Native \gls{API}}
+Typically there is also the option to have guests that are not a fully fledged operating system but a virtualized bare-metal environment with access to the hypervisor \gls{API} instead. 
+
+The applications of this are wide-ranging but one example would be to implement a driver that is required by both an \gls{RTOS} and \gls{GPOS} running on the system. Both partitions could then use the hypervisor's messaging mechanism to communicate with the driver. This would be especially useful for peripherals that are difficult to share normally.
 
 %----------------------------------------------------------------------------------------
 
 \section{Core features}
-\subsection{Verifiable safety}
-\subsection{Spatial separation}
-\subsection{Temporal separation}
+[This entire section is problematic. For one, it tries to capture emerging properties of the hypervisor architecture and make sense of the previous section. But qualitative judgments are supposed to be handled in the analysis section. This leads to clumsy explanations that leave much to be desired and a constantly recurring reminder that "this will be further analyzed in a later section". -> I'm not sure how to handle this: Split the section entirely to the analysis section, move it to the conclusion afterwards or just explain the concepts here, while trying to avoid judgment?]
+% NOTE (as always) how to handle qualitative statements in this section?
+\subsection{Separation}
+% REWRITE Unhappy with this section
+% NOTE Maybe too informal and inflammatory?
+The requirements of a separation architecture have been introduced in section \ref{separation-arch}. Clearly the basic safety hypervisor can fulfill these requirements, if configured properly. 
+
+% TODO include notable hv list
+% NOTE Does this point belong into long-form analysis, and if yes, where?
+Prominent implementations like [include here] offer a certification kit that offers a starting point for proving the hypervisors ability to separate its guests. But more specific risk analysis usually still needs to be carried out on a project by project basis.
+
+Furthermore, being able to fulfill the requirements in principal does not mean there are no caveats. Expect these to be explored in chapter \ref{Chapter4}.
 \subsection{Hard real-time capabilities}
+% TODO More?
+Without making any claim about the realistically achievable time windows, the basic safety hypervisor is able to satisfy hard real-time requirements. 
 \subsection{Hardware abstraction}
+% TODO Go into more detail here (or later) about specifics and examples
+The fact that the hypervisor sits between the hardware and its guests lends itself naturally to providing a certain level of hardware abstraction. 
 
 %----------------------------------------------------------------------------------------
 
 \section{Limitations}
-\subsection{Current hardware restrictions}
-\subsection{[...]}
 
+\subsection{Current hardware restrictions}
+* A type of hardware memory protection is necessary because software solutions are way too slow
+* Currently an MMU is required but there are developments that will only need an MPU (Cortex R52)
+* This need for an MMU excluded microcontrollers and DSPs. These weaker processors also don't come with virtualization extensions, making them even less attractive
+* Again this will change
+* Because the ARM virtualization extensions have made huge leap from ARMv7 to ARMv8 and hypervisor developers presumably need to focus their resources, most offer no, or little support for ARMv7 boards.
+* Even though hardware virtualization extensions aren't necessary to make the VM work in the first place, they are very effective at blocking the VM from doing things it shouldn't. Like preventing access to special registers or certain instructions % (reference the ARM manual https://static.docs.arm.com/ddi0487/da/DDI0487D_a_armv8_arm.pdf?_ga=2.107188996.763906419.1543418758-795050915.1528805110 let them prove me wrong)
+* Therefore even a paravirtualizing hypervisor is better off with virtualization extensions.
+\subsection{Effective multicore isolation}
+* If there is any shared cache between cores a non-critical partition could evict the cached data of the safety critical partition. This can cause massive interference between partitions [source cache times]. In the worst case this is entirely unpredictable and leads to the system failing verification. In the best case it leads to an extremely pessimistic \gls{WCET} analysis, leading to an inefficient use of resources.[source challenges paper]
 %----------------------------------------------------------------------------------------
 
 \section{Noteworthy implementations}
