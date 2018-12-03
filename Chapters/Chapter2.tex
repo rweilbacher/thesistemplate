@@ -32,10 +32,15 @@ This mechanism for access control has dominated in microkernels because of its f
 
 \subsection{Scheduling}
 % NOTE I might have to explain or at least source what these are
+% NOTE Better name?
 There is really no unified scheduling behavior that all hypervisors share. Global scheduling is the typical behavior with common algorithms being preemptive priority based scheduling and time-sliced round-robin scheduling. Additionally, hypervisors running on multicore platforms usually have the ability to assign complete cores to guests.
 
 Some also offer hierarchical scheduling, where a so-called container task is scheduled that then schedules its children according to a global scheduling algorithm. This can have the benefit of reducing scheduling slack [source Mollison]. 
 
+Whatever the specific implementation is, at the very least it satisfies the temporal separation requirement from the section \ref{separation-arch}. 
+
+\paragraph{Real-time requirements}
+Additionally, the safety hypervisor's scheduling is deterministic and can therefore satisfy hard real-time requirements. To what degree can't really be generalized.
 \begin{comment}
 \subsection{Static configuration}
 Any mechanism to increase a guests rights at runtime poses the risk of exploitation, be it accidental or purposeful. That is why these systems are typically statically configured and if configuration runtime is at all possible, it is restricted to reducing privilege. For example, a guest that is allowed to spawn other guests may give them his own rights or less than his own but never more.
@@ -61,28 +66,13 @@ The basic hypervisor offers both \gls{RTOS} and \gls{GPOS} guests. What kinds an
 Typically there is also the option to have guests that are not a fully fledged operating system but a virtualized bare-metal environment with access to the hypervisor \gls{API} instead. 
 
 The applications of this are wide-ranging but one example would be to implement a driver that is required by both an \gls{RTOS} and \gls{GPOS} running on the system. Both partitions could then use the hypervisor's messaging mechanism to communicate with the driver. This would be especially useful for peripherals that are difficult to share normally.
+\subsection{Hardware abstraction}
+While the hypervisor does not get around having to implement a minimal \gls{BSP} for each platform, it can offer significant hardware abstraction to its guests. The \keyword{Native \gls{API}} mentioned in the previous section is not just available to bare-metal guests but also to virtualized ones. Some examples of this are: Getting information about the system, communication with other guests and centralized logging.
 
 %----------------------------------------------------------------------------------------
 
-\section{Core features}
-[This entire section is problematic. For one, it tries to capture emerging properties of the hypervisor architecture and make sense of the previous section. But qualitative judgments are supposed to be handled in the analysis section. This leads to clumsy explanations that leave much to be desired and a constantly recurring reminder that "this will be further analyzed in a later section". -> I'm not sure how to handle this: Split the section entirely to the analysis section, move it to the conclusion afterwards or just explain the concepts here, while trying to avoid judgment?]
-% NOTE (as always) how to handle qualitative statements in this section?
-\subsection{Separation}
-% REWRITE Unhappy with this section
-% NOTE Maybe too informal and inflammatory?
-The requirements of a separation architecture have been introduced in section \ref{separation-arch}. Clearly the basic safety hypervisor can fulfill these requirements, if configured properly. 
+\section{Delete this section}
 
-% TODO include notable hv list
-% NOTE Does this point belong into long-form analysis, and if yes, where?
-Prominent implementations like [include here] offer a certification kit that offers a starting point for proving the hypervisors ability to separate its guests. But more specific risk analysis usually still needs to be carried out on a project by project basis.
-
-Furthermore, being able to fulfill the requirements in principal does not mean there are no caveats. Expect these to be explored in chapter \ref{Chapter4}.
-\subsection{Hard real-time capabilities}
-% TODO More?
-Without making any claim about the realistically achievable time windows, the basic safety hypervisor is able to satisfy hard real-time requirements. 
-\subsection{Hardware abstraction}
-% TODO Go into more detail here (or later) about specifics and examples
-The fact that the hypervisor sits between the hardware and its guests lends itself naturally to providing a certain level of hardware abstraction. 
 
 %----------------------------------------------------------------------------------------
 
@@ -109,4 +99,4 @@ In the best case this scenario just leads to an excessively pessimistic \gls{WCE
 
 %----------------------------------------------------------------------------------------
 
-\section{Noteworthy implementations}
+\section{Delete this section}

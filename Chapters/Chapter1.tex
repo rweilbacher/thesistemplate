@@ -62,10 +62,71 @@ A failed certification attempt is undesirable, as it is associated with addition
 The rigour that is demanded by regulatory bodies is dependent on the risk category that can be assigned to the safety functions of the device. These risk categories will be called \keyword{criticality levels} from here on out. 
 
 \subsubsection{Criticality levels}
-% TODO explain what they are and source
+% TODO Verify that this is actually all true
+% REWRITE 
+[Unhappy with how this section is written]
+IEC 61508 calls criticality levels \keyword{Safety integrity levels} or  \gls{SIL} for short. The standard defines \keyword{safety integrity} as \textquote{the likelihood of a safety-related system satisfactorily performing the required safety functions under all the stated conditions, within a stated period of time}[source IEC 61508]. The SIL of a safety function is the target probability of a dangerous failure occurring within a certain time [Table of probabilities is not yet added]. In IEC 61508 there are safety integrity levels from 1 to 4, where SIL 1 is the lowest and SIL 4 the highest. The level basically defines the rigor that is required during the development process.
+
+% TODO Maybe explain the basics of the risk assessment in IEC 61508
+Risk assessment is the process that drives the categorization of a system into the safety integrity levels and if the SIL of a system is too high it can be reduced by introducing risk mitigation mechanisms. For example, if the software of a device would be SIL 4 initially, it might be reduced by adding a second processor that runs distinct software, that can verify the validity of the initial software's output.  In fact SIL 4 is considered too high to be feasible and is practically always reduced [source "An introduction to Functional Safety and IEC 61508"]
+
+\begin{comment}
+\begin{table}[H]
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Category} & \textbf{Definition}                & \textbf{Range (failures per year)} \\ \hline
+Frequent          & Many times in system lifetime      & >$10^{-3}$                         \\ \hline
+Probable          & Several times in system lifetime   & $10^{-3}$ to $10^{-4}$             \\ \hline
+Occasional        & Once in system lifetime            & $10^{-4}$ to $10^{-5}$             \\ \hline
+Remote            & Unlikely in system lifetime        & $10^{-5}$ to $10^{-6}$             \\ \hline
+Improbable        & Very unlikely to occur             & $10^{-6}$ to $10^{-7}$             \\ \hline
+Incredible        & Cannot believe that it could occur & >$10^{-7}$                         \\ \hline
+\end{tabular}
+\caption{Categories of likelihood in IEC-61508}
+\label{categories-of-likelihood}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Category} & \textbf{Definition}                   \\ \hline
+Catastrophic      & Multiple loss of life                 \\ \hline
+Critical          & Loss of a single life                 \\ \hline
+Marginal          & Major injuries to one or more persons \\ \hline
+Negligible        & Minor injuries at worst               \\ \hline
+\end{tabular}
+\caption{Categories of consequence in IEC-61508}
+\label{consequence-categories}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+                    & \multicolumn{4}{c|}{\textbf{Consequence}}       \\ \hline
+\textbf{Likelihood} & Catastrophic & Critical & Marginal & Negligible \\ \hline
+Frequent            & I            & I        & I        & II         \\ \hline
+Probable            & I            & I        & II       & III        \\ \hline
+Occasional          & I            & II       & III      & III        \\ \hline
+Remote              & II           & III      & III      & IV         \\ \hline
+Improbable          & III          & III      & IV       & IV         \\ \hline
+Incredible          & IV           & IV       & IV       & IV         \\ \hline
+\end{tabular}
+\caption{Typical risk class matrix for IEC-61508}
+\label{risk-class-matrix}
+\end{table}
+
+\begin{itemize}
+    \item Class I: Unacceptable in any circumstance
+    \item Class II: Undesirable: tolerable only if risk reduction is impracticable or if the costs are grossly disproportionate to the improvement gained
+    \item Class III: Tolerable if the cost of risk reduction would exceed the improvement
+    \item Class IV: Acceptable as it stands, though it may need to be monitored
+\end{itemize}
+\end{comment}
 
 % NOTE Do I gloss over this point too much? Or should it be mentioned here in the first place?
-No matter what definition of criticality levels is applicable, they all share some properties that motivate the rest of this thesis: A function with a higher criticality level is more expensive to implement and verify than one with a lower level. because there is more documentation effort, more rigorous risk analysis and verification / validation. Two units of a device are only allowed to have differing criticality levels, if there is sufficient evidence that the higher criticality function is independent from the lower criticality function [source].  % NOTE Is there something missing here?
+Other standards define criticality levels differently, but no matter what definition of criticality levels is applied, they all share two properties that motivate the rest of this thesis: First, a function with a higher criticality level is more expensive to implement and verify than one with a lower level. There is more documentation effort, more rigorous risk analysis, verification and validation. 
+
+Second, two units of a device are only allowed to have differing criticality levels, if there is sufficient evidence that the higher criticality function is independent from the lower criticality function [source].  % NOTE Is there something missing here?
 
 % NOTE There is a weird jump from the last section to this one
 This constellation of heterogeneous criticality levels within the device is very common and usually referred to as mixed criticality. Its motivations and problems will be explored in the next section.
