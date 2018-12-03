@@ -67,20 +67,18 @@ Time does of course cost money directly through wages and lost revenue but it ca
 Being the first to market carries many advantages. [When I looked for research it turned out to not necessarily be true. If no one else can think of relevant distinctions between time and the associated cost, I will delete this section]
 \subsection{Satisfying functional requirements}
 This section follows the distinction of functional requirements made by the  Kano model \autocite{KanoNoriaki.1984}. 
-% [Do I have to explain these?]
-% TODO If I have to: import graph to drive the point home
+% TODO Graph maybe
 It states that there are three categories of functional requirements: 
 \paragraph{Must-be requirements} \textquote{If these requirements are not fulfilled, the customer will be extremely dissatisfied. [...] Fulfilling
 the must-be requirements will only lead to a state of "not dissatisfied"} \autocite{ElmarSauerwein.1996}
 
 \paragraph{One-dimensional requirements} \textquote{With regard to these requirements, customer satisfaction is
 proportional to the level of fulfillment.}\autocite{ElmarSauerwein.1996} 
-
 \paragraph{Attractive requirements} \textquote{Attractive requirements are
 neither explicitly expressed nor expected by the customer. Fulfilling these requirements leads to more
 than proportional satisfaction. If they are not met, however, there is no feeling of dissatisfaction.}\autocite{ElmarSauerwein.1996}
 
-Must-be requirements are not only crucial for "not dissatisfied" customers but also for the safety and regulatory compliance of the device. Satisfying these requirements is the most essential want. Any action that supports this, while keeping costs low, is desirable.
+
 
 [I'm sure I have a point to make I just haven't found a way to express it. I will write the sections on criticality and mixed criticality first and then come back to this]
 
@@ -89,8 +87,11 @@ Must-be requirements are not only crucial for "not dissatisfied" customers but a
 In projects that consist purely of software, customer dissatisfaction is the only negative factor. Projects that also require custom hardware have an additional cost. The hardware already needs to implement every functionality and all manufactured devices need to support it. If the feature is then not implemented the hardware costs more without offering the benefits.
 \end{comment}
 
-\subsubsection{Satisfying attractive and one-dimensional functional requirements}
+\subsubsection{Satisfying attractive functional requirements}
 % TODO come back to this later
+* These requirements are a powerful tool for gaining customer satisfaction
+* They are likely not the highest criticality function in the device
+* Therefore they introduce mixed criticality or are left at the wayside because they are infeasible
 [Same as above]
 
 \subsection{Satisfying non-functional requirements}

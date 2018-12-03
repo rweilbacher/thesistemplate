@@ -22,7 +22,7 @@ Now that any misconceptions concerning the purpose of the safety hypervisor have
 % NOTE I think I am mixing microkernel architecture with hypervisor architecture
 \subsection{Minimal trusted computing base}
 Minimality is the most essential principal of microkernel design. It proves particularly useful for hypervisors with a focus on certification because a strong rule of thumb is: Less code means less verification effort. 
-Where the original microkernels were just thin wrapper around the hardware, a \gls{CPU} driver so to speak, the microkernel based hypervisor adds a bit more code for the virtualization [source Heiser]. These systems still have around a couple ten thousand lines of code [source].
+Where the original microkernels were just thin wrapper around the hardware, a \gls{CPU} driver so to speak, the microkernel based hypervisor adds a bit more code for the virtualization [source Heiser]. These systems have around a couple ten thousand lines of code [source].
 
 \subsection{Capability-based access control}
 Capabilities are unforgeable tokens that grant access rights to an object. They contain the identification of the object and associated rights, for example read and write.
@@ -89,15 +89,24 @@ The fact that the hypervisor sits between the hardware and its guests lends itse
 \section{Limitations}
 
 \subsection{Current hardware restrictions}
-* A type of hardware memory protection is necessary because software solutions are way too slow
-* Currently an MMU is required but there are developments that will only need an MPU (Cortex R52)
-* This need for an MMU excluded microcontrollers and DSPs. These weaker processors also don't come with virtualization extensions, making them even less attractive
-* Again this will change
-* Because the ARM virtualization extensions have made huge leap from ARMv7 to ARMv8 and hypervisor developers presumably need to focus their resources, most offer no, or little support for ARMv7 boards.
-* Even though hardware virtualization extensions aren't necessary to make the VM work in the first place, they are very effective at blocking the VM from doing things it shouldn't. Like preventing access to special registers or certain instructions % (reference the ARM manual https://static.docs.arm.com/ddi0487/da/DDI0487D_a_armv8_arm.pdf?_ga=2.107188996.763906419.1543418758-795050915.1528805110 let them prove me wrong)
-* Therefore even a paravirtualizing hypervisor is better off with virtualization extensions.
+Hypervisors are overall still limited to the more powerful \keyword{application processors} and have not really penetrated the \keyword{microcontroller} market. There are several reasons for this hardware restriction. 
+
+% PHRASING 
+First, microcontrollers typically have no \gls{MMU} only an \gls{MPU} or no memory protection at all. Hypervisors need at least some hardware memory protection, as the corresponding software isolation is far too slow. \gls{MPU}s have a limited number of partitions they can isolate and therefore impose uncomfortable restrictions on hypervisor developers and users.
+
+Second, the hardware virtualization extensions are not yet available on microcontrollers. And even though the typical safety hypervisor prefers paravirtualized guests, virtualization extensions are still beneficial for preventing the guest from doing things it is not supposed to. ARM, for example, offers a trap mechanism that allows the hypervisor to disable certain instructions and special registers for the guest [source ARM manual]. 
+% (reference the ARM manual https://static.docs.arm.com/ddi0487/da/DDI0487D_a_armv8_arm.pdf?_ga=2.107188996.763906419.1543418758-795050915.1528805110 let them prove me wrong)
+
+And finally, a hypervisor is fundamentally about isolating software components from each other. It is more likely that this is necessary on a stronger processor and not on a microcontroller.
+
+However, with all of these restrictions laid out, there are developments that aim to make hypervisors viable on microcontrollers. Read more about this in section \ref{tech-progress}.
+
 \subsection{Effective multicore isolation}
-* If there is any shared cache between cores a non-critical partition could evict the cached data of the safety critical partition. This can cause massive interference between partitions [source cache times]. In the worst case this is entirely unpredictable and leads to the system failing verification. In the best case it leads to an extremely pessimistic \gls{WCET} analysis, leading to an inefficient use of resources.[source challenges paper]
+% NOTE Maybe add a graphic
+Imagine a system with two partitions, one safety-critical one not safety-critical, runs on a two-core \gls{CPU} with a shared cache between the two cores. During its allocated time the safety-critical partition may fill up the cache with relevant values. Once the non-safety-critical software runs it can evict all of the cache values by populating it with its own values. This can lead to large and potentially unpredictable interference across domains [source challenges paper].
+
+In the best case this scenario just leads to an excessively pessimistic \gls{WCET} analysis and to compensate this the safety-critical partition would get a lot more allocated time than it actually needed, leading to a worse average case performance. There are efforts to solve this issue reliably [source Anup Patel paper]
+
 %----------------------------------------------------------------------------------------
 
 \section{Noteworthy implementations}
