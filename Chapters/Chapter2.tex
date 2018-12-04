@@ -17,11 +17,11 @@
 
 \section{Architecture}
 % NOTE Where to talk about static configuration?
-Now that any misconceptions concerning the purpose of the safety hypervisor have been cleared up, it is time to examine its architecture and features. For this, a "basic safety hypervisor" will be proposed, that embodies the typical characteristics of a microkernel based safety hypervisor.
+Now that any misconceptions concerning the purpose of the safety hypervisor have been cleared up, it is time to examine its architecture and features. For this, a "basic safety hypervisor" will be proposed, that embodies the typical characteristics of a microkernel based safety hypervisor. Where there is no discernible consensus, differences will be highlighted.
 
 % NOTE I think I am mixing microkernel architecture with hypervisor architecture
 \subsection{Minimal trusted computing base}
-Minimality is the most essential principal of microkernel design. It proves particularly useful for hypervisors with a focus on certification because a strong rule of thumb is: Less code means less verification effort. 
+Minimality is the most essential principal of microkernel design. It proves particularly useful for hypervisors with a focus on certification because a strong rule of thumb is: Less code means less verification effort as well as faults \cite{Lipow.1982}.  
 Where the original microkernels were just thin wrapper around the hardware, a \gls{CPU} driver so to speak, the microkernel based hypervisor adds a bit more code for the virtualization \cite{Heiser.2010}. These systems have around ten thousand lines of code.
 
 \subsection{Capability-based access control}
@@ -47,21 +47,24 @@ Any mechanism to increase a guests rights at runtime poses the risk of exploitat
 \end{comment}
 
 \subsection{Explicit access}
-Any configuration that grants rights, be it communication with another guest or resource access, has to be explicitly enabled by the system integrator. This makes sure that no unintended access is granted to guests, potentially compromising the system.
+Any configuration that grants rights, be it communication with another guest or resource access, has to be explicitly enabled by the system integrator. This makes sure that no unintended access is granted to guests that could potentially compromise the system.
 \subsection{Available guest environments}
+% TODO Explain what a guest environment is
 The typical hypervisor supports several different guest environments.
 \paragraph{Paravirtualized versus fully virtualized}
 A key distinction between virtualized guest environments is their virtualization type \ref{hw-virt}. Expect paravirtualization to always be available in a hypervisor, full virtualization support on the other hand is more rare. One reason could be that virtualization extensions are still relatively new, especially on ARM processors. In any case, full virtualization can only be offered if the platform supports hardware virtualization extensions.
 
+% NOTE Meh...
 There also appears to be some contention on whether or not full virtualization can be as performant, and more importantly as deterministic, as paravirtualization [are there sources?]. A lack of determinism could endanger certification, if the device has hard real-time requirements. This thesis does not try to offer evidence for either claim, whether or not full virtualization can be justified in front of the regulatory body depends on the specific scenario. 
 
-Nevertheless, the importance of the outcome is likely not trivial, since full virtualization has a number of advantages: First, it means the cost and time of modifying the guest operating system can be saved. Alternatively, it could be reduced by using an already modified \gls{OS}, provided by the hypervisor developer but this is bound to be a very restricted choice that further increase the dependence on the developer.
+% TODO Move this section
+[This section goes into too much qualitative analysis and will probably be moved] Nevertheless, the importance of the outcome is likely not trivial, since full virtualization has a number of advantages: First, it means the cost and time of modifying the guest operating system can be saved. Alternatively, it could be reduced by using an already modified \gls{OS}, provided by the hypervisor developer but this is bound to be a very restricted choice that further increase the dependence on the developer.
 
 Second, the amount of viable operating systems is higher. The modification efforts to an \gls{OS} can only be made if the source code is available, but for many commercial products this is not the case. 
 
 Ultimately, it is important to verify that full virtualization is plausible for your device and analyze what the consequences of a lack thereof are.
 \paragraph{\gls{RTOS} and \gls{GPOS}}
-The basic hypervisor offers both \gls{RTOS} and \gls{GPOS} guests. What kinds and how much variety depends on the points raised in the previous sections about virtualization types. 
+The basic hypervisor offers both \gls{RTOS} and \gls{GPOS} guests. What kinds and how much variety depends on the points raised in the previous section about virtualization types. 
 \paragraph{Native \gls{API}}
 Typically there is also the option to have guests that are not a fully fledged operating system but a virtualized bare-metal environment with access to the hypervisor \gls{API} instead. 
 
@@ -71,21 +74,20 @@ While the hypervisor does not get around having to implement a minimal \gls{BSP}
 
 %----------------------------------------------------------------------------------------
 
-\section{Delete this section}
+\section{Placeholder}
 
 
 %----------------------------------------------------------------------------------------
 
 \section{Limitations}
-
+Before getting into the full-fledged analysis it is best to expose some limitations of the current safety hypervisor landscape. 
 \subsection{Current hardware restrictions}
 Hypervisors are overall still limited to the more powerful \keyword{application processors} and have not really penetrated the \keyword{microcontroller} market. There are several reasons for this hardware restriction. 
 
 % PHRASING 
-First, microcontrollers typically have no \gls{MMU} only an \gls{MPU} or no memory protection at all. Hypervisors need at least some hardware memory protection, as the corresponding software isolation is far too slow. \gls{MPU}s have a limited number of partitions they can isolate and therefore impose uncomfortable restrictions on hypervisor developers and users.
+First of all, microcontrollers typically have no \gls{MMU} only an \gls{MPU} or no memory protection at all. Hypervisors need at least some hardware memory protection, as the corresponding software isolation is far too slow. \gls{MPU}s have a limited number of partitions they can isolate and therefore impose uncomfortable restrictions on hypervisor developers and users.
 
 Second, the hardware virtualization extensions are not yet available on microcontrollers. And even though the typical safety hypervisor prefers paravirtualized guests, virtualization extensions are still beneficial for preventing the guest from doing things it is not supposed to. ARM, for example, offers a trap mechanism that allows the hypervisor to disable certain instructions and special registers for the guest \cite{ARM.v8.2018}. 
-% (reference the ARM manual https://static.docs.arm.com/ddi0487/da/DDI0487D_a_armv8_arm.pdf?_ga=2.107188996.763906419.1543418758-795050915.1528805110 let them prove me wrong)
 
 And finally, a hypervisor is fundamentally about isolating software components from each other. It is more likely that this is necessary on a stronger processor and not on a microcontroller.
 
@@ -93,10 +95,10 @@ However, with all of these restrictions laid out, there are developments that ai
 
 \subsection{Effective multicore isolation}
 % NOTE Maybe add a graphic
-Imagine a system with two partitions, one safety-critical one not safety-critical, runs on a two-core \gls{CPU} with a shared cache between the two cores. During its allocated time the safety-critical partition may fill up the cache with relevant values. Once the non-safety-critical software runs it can evict all of the cache values by populating it with its own values. This can lead to large and potentially unpredictable interference across domains \cite{AlessandroBiondi.2018}.
+Imagine a system with two partitions, one safety-critical one not safety-critical, that runs on a two-core \gls{CPU} with a shared cache between the two cores. During its allocated time the safety-critical partition may fill up the cache with relevant values. Once the non-safety-critical software runs it can evict all of the cache values by populating it with its own values. This can lead to large and potentially unpredictable interference across domains \cite{AlessandroBiondi.2018}.
 
-In the best case this scenario just leads to an excessively pessimistic \gls{WCET} analysis and to compensate this the safety-critical partition would get a lot more allocated time than it actually needed, leading to a worse average case performance. There are efforts to solve this issue reliably \cite{PaoloModica.2018}
+In the best case this scenario just leads to an excessively pessimistic \gls{WCET} analysis and to compensate this the safety-critical partition would get a lot more allocated time than it actually needed, leading to a worse average case performance. There are efforts to solve this issue reliably \cite{PaoloModica.2018}.
 
 %----------------------------------------------------------------------------------------
 
-\section{Delete this section}
+\section{Placeholder}

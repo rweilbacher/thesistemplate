@@ -33,10 +33,10 @@ The failure or malfunction of a safety-critical system has the potential to caus
 \item damage to property
 \item environmental harm
 \end{itemize}
-A safety-critical device is consequently an embedded device with a dedicated function that has the above mentioned property. Such a device always contains electronic hardware but may also have mechanical and/or software components.
+A safety-critical device is consequently an embedded device with a dedicated function that has one or more of the above mentioned properties. Such a device always contains electronic hardware but may also have mechanical and/or software components. This thesis will mostly examine devices with medium to high complexity, which all include software.
 
 % TODO Verify that that is actually part of IEC-61508
-The legal entity responsible for designing and manufacturing the device will be referred to as \mfg{}, to stay consistent with IEC-61508. 
+The legal entity responsible for designing and manufacturing the device will be referred to as \mfg{}.
 \subsection{Basic concepts}
 \subsubsection{Safety regulations}
 % REWRITE Sounds a bit bad
@@ -57,7 +57,7 @@ The specific instructions and required level of rigour differ between the standa
 
 The \mfg{} also has to present the documents that he generated along the way to the authorities. There are exceptions to this rule, if third-party or legacy parts are used but these need to be justified as well. Therefore, it is usually infeasible to certify a device after the development process, if it was not designed with certification in mind. 
 
-A failed certification attempt is undesirable, as it is associated with additional cost and time but it is also not a death sentence for the device. The regulatory body will point out the problems and give the \mfg{} the option to fix them and resubmit the device for certification.
+A failed certification attempt is undesirable, as it is associated with additional cost and time but it is also not a death sentence for the device. In fact most fail initially. The regulatory body will point out the problems and give the \mfg{} the option to fix them and resubmit the device for certification.
 
 The rigour that is demanded by regulatory bodies is dependent on the risk category that can be assigned to the safety functions of the device. These risk categories will be called \keyword{criticality levels} from here on out. 
 
@@ -128,18 +128,21 @@ Incredible          & IV           & IV       & IV       & IV         \\ \hline
 % NOTE Do I gloss over this point too much? Or should it be mentioned here in the first place?
 Other standards define criticality levels differently, but no matter what definition of criticality levels is applied, they all share two properties that motivate the rest of this thesis: First, a function with a higher criticality level is more expensive to implement and verify than one with a lower level. There is more documentation effort, more rigorous risk analysis, verification and validation. 
 
-Second, two units of a device are only allowed to have differing criticality levels, if there is sufficient evidence that the higher criticality function is independent from the lower criticality function \cite{IEC.2010-1}\cite{IEC.2010-2}.  % NOTE Is there something missing here?
+Second, two units of a device are only allowed to be implemented according to differing criticality levels, if there is sufficient evidence that the higher criticality function is independent from the lower criticality function \cite{IEC.2010-1}\cite{IEC.2010-2}.  % NOTE Is there something missing here?
 
 % NOTE There is a weird jump from the last section to this one
 This constellation of heterogeneous criticality levels within the device is very common and usually referred to as mixed criticality. Its motivations and problems will be explored in the next section.
 \subsection{Mixed criticality} \label{mixed-criticality}
 \subsubsection{Motivations}
-The core motivation for assigning different criticality levels within a device has already been mentioned; it is cheaper to implement and verify a low criticality part. But this is not the only motivation, as it only applies to functionality that is implemented by the \mfg{} and not by a third-party.
+% NOTE Unhappy with the word assigning
+The core motivation for assigning different criticality levels within a device has already been mentioned; it is cheaper to implement and verify a low criticality part \cite{perez2013safety}. But this is not the only motivation, as it only applies to functionality that is implemented by the \mfg{} and not by a third-party.
 
 % NOTE Get a hardware perspective
-Using third-party software can save costs and accelerate time to market. Currently the default is to use pre-certified software that is specifically developed for this purpose. This can limit the problems that mixed criticality entails all together but because of the narrow target audience this kind of software is more expensive and more limited in its functionality. Ideally it would be possible to use regular off-the-shelf software or even free open-source software but as established earlier certifying this software according to a level of criticality is completely infeasible.
+Using third-party software can save costs and accelerate time to market. Currently the default is to use pre-certified software that is specifically developed for this purpose. This can limit the problems that mixed criticality entails all together but because of the narrow target audience this kind of software is more expensive and more limited in its functionality. Ideally it would be possible to use regular off-the-shelf software or even free open-source software but as established earlier, certifying this software in accordance with a high level of criticality after the fact is infeasible.
 
 In fact, being able to use third-party software unhindered can have even more drastic impacts than saving some money on the certification process. It can make certain functionality, especially in the realm of usability, feasible in the first place. And with the growing consumer demands, even in the safety-critical sector \cite{ITA.May2016}, this can really differentiate a device from the rest of the market.
+
+The uncomfortable reality is that mixed criticality is most beneficial in the cases where it is also most difficult to mitigate the associated problems efficiently. If the highest criticality level is SIL 2, there is less to gain from developing other components at SIL 1 than when the highest level is SIL 3. But a higher criticality level also means that, whatever facilities independence between components,  needs to withstand more rigorous scrutiny. 
 
 Now it is clear why mixed criticality is actually a desirable property in a lot of devices. It can save cost and time, as well as provide functionality indirectly that would have been infeasible to realize without.
 \subsubsection{Problems}
@@ -147,7 +150,7 @@ Now it is clear why mixed criticality is actually a desirable property in a lot 
 As alluded to earlier, mixed criticality does not come without problems. Regulatory standards require sufficient evidence for independence between functions of different criticality be shown to them \cite{IEC.2010-1}\cite{IEC.2010-2}. If \mfg{} can not provide this evidence all functions need to comply to the highest criticality level.
 
 Sufficient independence is given, if it can be shown that a dependent failure between the higher and lower criticality function is sufficiently low in the context of the highest level.
-To achieve this a system architecture is required that can reliably separate components. The precise requirements this separation architecture needs to fulfill will be tackled in the next section.
+To achieve this, a system architecture is required that can reliably separate components. The precise requirements this separation architecture needs to fulfill will be tackled in the next section.
 
 %----------------------------------------------------------------------------------------
 
@@ -185,6 +188,7 @@ How this may be achieved differs based on architecture and standard but it needs
 
 \section{Existing architectures}
 % TODO Refrain from comparing architectures (or even making qualitative judgments) unless I am building the argument for not analyzing them later. Or I guess only talk about quality of separation (more sources!)
+There are some possible contenders for feasible separation architectures. This section will give an overview and narrow down the options for the more detailed analysis in the latter parts of this thesis.
 \subsection{Embedded operating systems}
 % NOTE There is a gap between this section and the previous
 Apart from bare-metal software, which is reserved for the most trivial cases,  embedded operating systems are the simplest approach to device architecture. 
@@ -192,7 +196,7 @@ Apart from bare-metal software, which is reserved for the most trivial cases,  e
 \subsubsection{General purpose operating system}
 Even though this section's title is \keyword{General purpose operating system} (GPOS) realistically it can be substituted with Linux, as other options are usually not considered adequate for embedded devices. But the same arguments should apply to other general purpose operating systems.
 
-With the help of an \gls{MMU} or \gls{MPU}  a \gls{GPOS} can achieve the spatial separation of memory between applications. The operating system's access control can be used to limit peripheral access and drivers can arbitrate conflicts. 
+With the help of an \gls{MMU} or \gls{MPU}  a \gls{GPOS} can achieve the spatial separation of memory between applications. The operating system's access control may be used to limit peripheral access and drivers can arbitrate conflicts. 
 
 % NOTE Am i confusing temporal separation with being able to satisfy real-time requirements?
 Temporal separation is usually not possible and may even be counter-productive to the standard processing model of general purpose operating systems, since they are designed to optimize average case performance and sacrifice determinism for it. There are however ongoing efforts to introduce temporal separation as well as the ability to reliably satisfy real-time requirements into the Linux kernel \cite{SiroArthur.2007}.
@@ -210,7 +214,7 @@ Providing temporal separation is practically the main purpose of an RTOS, so the
 
 One thing to keep in mind though is that a lot of RTOS developers offer no multicore support, which can severely limit the complexity of an application. But perhaps the biggest limitation of application complexity on the RTOS architecture is its narrow target audience.
 
-As a result of this, there is a distinct lack of sophisticated middleware [source?]. Especially cutting edge usability technology, like touch gesture recognition, is likely not available on these platforms. At the same time consumers are becoming increasingly adept at recognizing good design and are demanding strong user interfaces \cite{HBR.September2015}.
+As a result of this, there is a distinct lack of sophisticated middleware [source?]. Especially cutting edge usability technology, like touch gesture recognition [Pretty strange example...], is likely not available on these platforms. At the same time consumers are becoming increasingly adept at recognizing good design and are demanding strong user interfaces \cite{HBR.September2015}.
 Additionally, a problem outlined in the section \ref{mixed-criticality} applies to RTOS middleware as well: These libraries have a similarly narrow target audience and can therefore be quite expensive for the functionality they offer.
 
 Although the RTOS architecture remains quite a dominant one, it quickly loses its appeal with growing application complexity. Therefore it will be excluded from further analysis in this thesis.
@@ -219,17 +223,17 @@ More and more silicon vendors are offering multicore systems with a dedicated sa
 
 But the cores in these systems share hardware resources like peripherals and memory. Consequently, it can be challenging to show sufficient evidence for spatial separation. An \gls{MMU} or \gls{MPU} can be useful to enforce spatial separation but it is not a perfect solution, especially for peripherals [Why?]. 
 \subsection{Hardware supervised AMP / Hardware supervised Multicore system}
-These systems are identical to the ones described in the previous section, except they contain additional hardware to control and arbitrate peripheral access, as well as inter-core communication.
+These systems are identical to the ones described in the previous section, except they contain additional hardware to control and arbitrate peripheral access, as well as providing inter-core communication.
 Because there is no standard for this, the implementation is entirely up to the silicon vendor. 
 
-Although this hardware supervision has limited functionality, it has a clear advantage over comparable software solutions, like a hypervisor: Hardware is less error prone than software and this is recognized by regulatory bodies, in the form that software has to adhere to much stricter rules \cite{IEC.2010-3}. It is therefore possible that these systems are cheaper than hypervisors overall. 
+Although this hardware supervision has limited functionality, it has a clear advantage over comparable software solutions, like a hypervisor: Hardware is less error prone than software and this is recognized by regulatory bodies. Software typically has to adhere to a more rigorous development and verification process \cite{IEC.2010-3}. It is therefore possible that these systems are cheaper than hypervisors overall. 
 
 This architecture should be considered when designing a safety-critical device but it is still fairly new and a full analysis of it is not in the scope of this thesis.
 \subsection{Hardware separated subsystems / Multiprocessor system}
 % NOTE review http://www.ia.pw.edu.pl/~tkruk/edu/eopsya/lecture/eopsy08.pdf and http://www-5.unipv.it/mferretti/cdol/aca/Charts/07-multiprocessors-MF.pdf and if these are viable
 % TODO https://witekio.com/blog/introduction-heterogeneous-multicore-processing-architecture/ Read about the need for software support on this architecture
 % TODO actually explain what they are
-Multiprocessor systems or even completely separate subsystems are the current status quo for dealing with the mixed criticality problem. The multiprocessor architecture should not be confused with the multicore architecture, as it has distinct processors, usually with their own resources, on the same or different \gls{PCB}s.
+Multiprocessor systems or even completely separate subsystems are the current status quo for dealing with the mixed criticality problem. The multiprocessor architecture should not be confused with the multicore architecture, as it has distinct processors, usually with their own resources, on the same or even different \gls{PCB}s.
 
 Such a system starts out with perfect temporal and spatial separation because the systems are fully independent. The \mfg{} can then reintroduce dependence in very deliberate and controlled ways, that don't impact the device's safety rating. For example by introducing a dedicated communication channel between the processors. 
 
@@ -242,7 +246,7 @@ More specific advantages and disadvantages of this architecture will be analyzed
 
 \section{Embedded safety hypervisor origins}
 % TODO Add dat sauce
-Now let's examine the main subject of analysis, the embedded safety hypervisor. In this section it will be established where it comes from and some basic associated concepts. This should get rid of some common misconceptions about hypervisors and their applicability in the embedded sector.
+Now let's examine the main subject of analysis, the embedded safety hypervisor. In this section it will be established where it comes from and some associated concepts. This should get rid of some common misconceptions about hypervisors and their applicability in the embedded sector.
 \subsection{Hardware virtualization} \label{hw-virt}
 The act of \keyword{hardware virtualization} refers to the creation of a virtual machine  that acts exactly like a real device. Software executed on this machine has no direct access to the underlying hardware resources. Virtual machines are typically called guests, whereas the device virtualizing them is referred to as the host machine
 There are two types of \keyword{hardware virtualization}.
@@ -253,13 +257,13 @@ In full virtualization the entire guest hardware is simulated, allowing guest so
 
 Doing this kind of simulation entirely in software is very computationally expensive and has only really become feasible with hardware virtualization extensions. These virtualization extensions add an additional level of privilege to the processor, along with additional instructions and hardware enhancements that make virtualization a lot more efficient \cite{ARM.v8.2018}.
 
-Notably, while these extensions where originally limited to high powered hardware, they have since become available in more embedded focused processor lines like the Intel Atom and ARMv7/v8.
+Notably, while these extensions were originally limited to high powered hardware, they have since become available in more embedded focused processor lines like the Intel Atom and ARMv7/v8 processors.
 \subsection{Original hypervisor use case}
 Hypervisors were originally conceived in the 1960s as a way of accommodating multiple users on mainframe computers. After a hiatus they enjoyed their resurgence in the 2000s when the demand on servers rose again. 
 
 So they started out as a way to maximize resource utilization in large servers. However, low resource utilization is usually not an issue in embedded systems, quite the opposite in fact. Therefore these original hypervisors are not the point of discussion for this thesis.
 \subsection{Microkernels}
-At this point it is useful to make a quick excursion to the realm of microkernels. As the name implies their guiding principal is that of minimal trusted computing base. Basically everything that doesn't absolutely have to be handled in kernel space for the device to work is implemented in user space.
+At this point it is useful to make a quick excursion to the realm of microkernels. As the name implies their guiding principal is that of a minimal kernel. Basically, everything that doesn't absolutely have to be handled in kernel space for the device to work is implemented in user space.
 
 This kind of system was exclusive to academia for a long time, until it somewhat matured in the late 90s \cite{Liedtke.1995}\cite{Liedtke.1996}. With this development they had already become attractive to safety-critical device manufacturers and saw some large scale deployment.
 
