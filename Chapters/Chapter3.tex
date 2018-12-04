@@ -1,6 +1,6 @@
 % Chapter 1
 
-\chapter{Analysis of how the architectures satisfy the key wants} % Main chapter title
+\chapter{The key wants of safety-critical device manufacturers} % Main chapter title
 
 \label{Chapter3} % For referencing the chapter elsewhere, use \ref{Chapter1} 
 
@@ -101,12 +101,12 @@ There are a large number of possible non-functional requirements and their relev
 Faults are undesirable in any engineering environment. They are inherently unpredictable and can incur significant costs, both directly through the cost it takes to find and fix them and indirectly through customer dissatisfaction among other things.
 
 Reducing the amount of faults to a minimum has multiple dimensions. 
-[I mention mostly how software architecture addresses these problems. I plan to bridge the gap between software architecture and general architecture in a previous sections. !Hovewer!! any hardware perspective would be very much appreciated!]
+[I mention mostly how software architecture addresses these problems. I plan to bridge the gap between software architecture and general architecture in a previous sections. However, any hardware perspective would be very much appreciated!]
 \paragraph{Reducing the frequency of fault implementation}
-It is still the common understanding that all non-trivial software that isn't formally verified [Include source for formal verification] will contain bugs [Source necessary, or self-evident?]. But in the decades since the software crisis it has become evident that development processes and architectures can have a positive impact on how many bugs are built into the software [source].  
+It is still the common understanding that all non-trivial software that isn't formally verified will contain faults \cite{Klein.2009}. But in the decades since the software crisis it has become evident that development processes and architectures can have a positive impact on how many bugs are built into the software \cite{Randell.1996}.  
 \paragraph{Finding faults effectively}
 But not just frequency of fault implementation can be improved by a strong architecture. After a significant period of sophisticated testing, almost all "hard" bugs will be found. That is bugs that can be found easily and reliably
-with standard techniques. Most of the remaining bugs will be "soft" bugs, often called "Heisenbugs" [source Why do computers stop and what can be done about it?]. Named after the Heisenberg uncertainty principal because they often disappear when you look for them. 
+with standard techniques. Most of the remaining bugs will be "soft" bugs, often called "Heisenbugs" \cite{Gray.1986}. Named after the Heisenberg uncertainty principal because they often disappear when you look for them. 
 
 A system that can aid the discovery of these bugs, maybe through clever compartmentalization or logging, can save time and money.
 \paragraph{Fixing faults effectively}
@@ -133,9 +133,9 @@ This is typically referred to as fault tolerance. There are many ways to achieve
 \subsection{Engaged and satisfied employees}
 This \textit{want} may seem odd at first [Is saying this unprofessional?] but employees are the ones that are ultimately responsible for the success and failure of the project.
 
-If we take software tools as an example: The software could be annoying to work with or include many repetitive tasks. Repetitive tasks are shown to decrease efficiency and increase the chance for mistakes [Source Fatigue and Boredom in Repetitive Work]. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. For example a software tool that is overly complicated. In this instance the employee dissatisfaction is only an indicator for a hidden root cause.
+If we take software tools as an example: The software could be annoying to work with or include many repetitive tasks. Repetitive tasks are shown to decrease efficiency and increase the chance for mistakes \cite{Wyatt.1937}. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. For example a software tool that is overly complicated. In this instance the employee dissatisfaction is only an indicator for a hidden root cause.
 
-An employee that is unsatisfied with his job, for whatever reason, is also more likely to leave the company [Source necessary?]. If the person was critical to the project this can have hugely detrimental effects. Furthermore, if enough key people leave, the entire project can be endangered. 
+An employee that is unsatisfied with his job, for whatever reason, is also more likely to leave the company. If the person was critical to the project this can have hugely detrimental effects. Furthermore, if enough key people leave, the entire project can be endangered. 
 \subsection{Worthwhile risk / Low negative variance}
 % REWRITE This section
 Imagine two device architectures \textit{A} and \textit{B}. Architecture \textit{A} has the potential to create perfectly reusable software, much better than architecture \textit{B}. But it is possible that \textit{A} introduces expensive safety problems later in the development process.
@@ -146,11 +146,10 @@ Which risks are considered "worthwhile" is very dependent on other circumstances
 \subsection{Future-proof design}
 Whenever there is an associated hardware , future-proof design is especially important. Software can be reproduced and shipped with practically no cost but devices can not. [Give more points]
 
-Safety-critical devices are particularly notable in this respect, since they are often very complex and have an expensive engineering process. Airplanes are typically used for 3 decades [source] and hospitals have notoriously tight budgets and have to squeeze as much lifetime out of their devices as possible. 
+Safety-critical devices are particularly notable in this respect, since they are often very complex and have an expensive engineering process. Airplanes are typically used for 3 decades and hospitals have notoriously tight budgets and have to squeeze as much lifetime out of their devices as possible. 
 \subsubsection{Extendibility}
-Nowadays it is becoming increasingly more plausible that it is possible to deliver software updates to an embedded device [source?]. Along with the previously mentioned long life cycle it is a beneficial strategy [what do I mean by that], if not an expected service, to provide updates for the device.
-
-If the device's hardware supports it new features could be implemented but the currently more typical scenario are updates of a more basic kind [source?]. Meaning, bug fixes and security updates.
+Nowadays it is becoming increasingly more plausible that it is possible to deliver software updates to an embedded device \cite{OndrejKachman.2016}. Along with the previously mentioned long life cycle it is a beneficial strategy [what do I mean by that], if not an expected service, to provide updates for the device.
+If the device's hardware supports it, new features could be implemented but the currently more typical scenario are updates of a more basic kind. Meaning, bug fixes and security updates.
 
 In any case an easily extendable device can have significant benefits.
 \subsubsection{Maintainability}

@@ -22,11 +22,11 @@ Now that any misconceptions concerning the purpose of the safety hypervisor have
 % NOTE I think I am mixing microkernel architecture with hypervisor architecture
 \subsection{Minimal trusted computing base}
 Minimality is the most essential principal of microkernel design. It proves particularly useful for hypervisors with a focus on certification because a strong rule of thumb is: Less code means less verification effort. 
-Where the original microkernels were just thin wrapper around the hardware, a \gls{CPU} driver so to speak, the microkernel based hypervisor adds a bit more code for the virtualization [source Heiser]. These systems have around a couple ten thousand lines of code [source].
+Where the original microkernels were just thin wrapper around the hardware, a \gls{CPU} driver so to speak, the microkernel based hypervisor adds a bit more code for the virtualization \cite{Heiser.2010}. These systems have around ten thousand lines of code.
 
 \subsection{Capability-based access control}
 Capabilities are unforgeable tokens that grant access rights to an object. They contain the identification of the object and associated rights, for example read and write.
-They can be given to other entities which in turn grants them access according to the capability [Further source]. A capability could be for a specific memory region, a communication endpoint or to a hypervisor \gls{API} call.
+They can be given to other entities which in turn grants them access according to the capability \cite{Levy.1984}. A capability could be for a specific memory region, a communication endpoint or to a hypervisor \gls{API} call.
 
 This mechanism for access control has dominated in microkernels because of its flexibility and because it doesn't require extensive kernel involvement. Since, the typical safety hypervisor sits on top of a microkernel, this mechanism has propagated to them as well.
 
@@ -35,7 +35,7 @@ This mechanism for access control has dominated in microkernels because of its f
 % NOTE Better name?
 There is really no unified scheduling behavior that all hypervisors share. Global scheduling is the typical behavior with common algorithms being preemptive priority based scheduling and time-sliced round-robin scheduling. Additionally, hypervisors running on multicore platforms usually have the ability to assign complete cores to guests.
 
-Some also offer hierarchical scheduling, where a so-called container task is scheduled that then schedules its children according to a global scheduling algorithm. This can have the benefit of reducing scheduling slack [source Mollison]. 
+Some also offer hierarchical scheduling, where a so-called container task is scheduled that then schedules its children according to a global scheduling algorithm. This can have the benefit of reducing scheduling slack \cite{MalcolmS.Mollison.2010}. 
 
 Whatever the specific implementation is, at the very least it satisfies the temporal separation requirement from the section \ref{separation-arch}. 
 
@@ -84,7 +84,7 @@ Hypervisors are overall still limited to the more powerful \keyword{application 
 % PHRASING 
 First, microcontrollers typically have no \gls{MMU} only an \gls{MPU} or no memory protection at all. Hypervisors need at least some hardware memory protection, as the corresponding software isolation is far too slow. \gls{MPU}s have a limited number of partitions they can isolate and therefore impose uncomfortable restrictions on hypervisor developers and users.
 
-Second, the hardware virtualization extensions are not yet available on microcontrollers. And even though the typical safety hypervisor prefers paravirtualized guests, virtualization extensions are still beneficial for preventing the guest from doing things it is not supposed to. ARM, for example, offers a trap mechanism that allows the hypervisor to disable certain instructions and special registers for the guest [source ARM manual]. 
+Second, the hardware virtualization extensions are not yet available on microcontrollers. And even though the typical safety hypervisor prefers paravirtualized guests, virtualization extensions are still beneficial for preventing the guest from doing things it is not supposed to. ARM, for example, offers a trap mechanism that allows the hypervisor to disable certain instructions and special registers for the guest \cite{ARM.v8.2018}. 
 % (reference the ARM manual https://static.docs.arm.com/ddi0487/da/DDI0487D_a_armv8_arm.pdf?_ga=2.107188996.763906419.1543418758-795050915.1528805110 let them prove me wrong)
 
 And finally, a hypervisor is fundamentally about isolating software components from each other. It is more likely that this is necessary on a stronger processor and not on a microcontroller.
@@ -93,9 +93,9 @@ However, with all of these restrictions laid out, there are developments that ai
 
 \subsection{Effective multicore isolation}
 % NOTE Maybe add a graphic
-Imagine a system with two partitions, one safety-critical one not safety-critical, runs on a two-core \gls{CPU} with a shared cache between the two cores. During its allocated time the safety-critical partition may fill up the cache with relevant values. Once the non-safety-critical software runs it can evict all of the cache values by populating it with its own values. This can lead to large and potentially unpredictable interference across domains [source challenges paper].
+Imagine a system with two partitions, one safety-critical one not safety-critical, runs on a two-core \gls{CPU} with a shared cache between the two cores. During its allocated time the safety-critical partition may fill up the cache with relevant values. Once the non-safety-critical software runs it can evict all of the cache values by populating it with its own values. This can lead to large and potentially unpredictable interference across domains \cite{AlessandroBiondi.2018}.
 
-In the best case this scenario just leads to an excessively pessimistic \gls{WCET} analysis and to compensate this the safety-critical partition would get a lot more allocated time than it actually needed, leading to a worse average case performance. There are efforts to solve this issue reliably [source Anup Patel paper]
+In the best case this scenario just leads to an excessively pessimistic \gls{WCET} analysis and to compensate this the safety-critical partition would get a lot more allocated time than it actually needed, leading to a worse average case performance. There are efforts to solve this issue reliably \cite{PaoloModica.2018}
 
 %----------------------------------------------------------------------------------------
 
