@@ -14,16 +14,43 @@
 \newcommand{\option}[1]{\texttt{\itshape#1}}
 
 %----------------------------------------------------------------------------------------
-
-After 
+% TODO Missing intro
+* It has been established that mixed criticality is desirable.
+* It has also been established that the architectures in the analysis fulfill the requirements of the separation architecture but maybe to varying degrees. 
+* Therefore the analysis is about auxiliary factors to the mixed criticality problems and maybe differences in how well they solve that problem. 
 
 \section{Safety and regulatory compliance}
+* Hardware is easier to verify than software
+    * Especially because there is comparatively little room for crossover
+* HSS can add safety beyond separation, namely redundancy 
+* HV needs to be newly verified for every platform but not from scratch
+* Hypervisor is gaining a lot of traction but may have not reached the same confidence as HSS
+* Complex hardware  is getting more error prone [source] because of manufacturing
+* Hypervisors can often monitor all system events and may have integrated health monitoring that can take corrective or preventative actions
+* HSS ultimately offers much more control
+* HSS is less scalable. Functionality will continue to increase but power of single cores will not. That means new processors need to be added which, purely in terms of safety, introduces issues with EMC (and reliability?). It of course also negatively impacts other wants 
+* HV can safely sit on top of a multicore CPU (with some caveats)
+
+-> If there are not very many subsystems HSS provides the best possible safety and separation. The hypervisor's safety convenience features are unlikely to make a big difference. If the system is scaled up far enough however the added issues by EMC and reliabilty may degrade the devices safety. And this is purely from a safety perspective.
 \subsection{Hardware separated subsystems}
 \subsection{Hypervisor}
 
 %----------------------------------------------------------------------------------------
 
 \section{Lowest possible cost and keeping the schedule}
+* Higher Size, weight and power means higher material cost per unit
+* I kind of need to quantify the cost difference between two smaller CPUs + duplicate peripherals and one slightly bigger CPU with potentially shared peripherals
+* HV cost is very project dependent. Cost of HV implementations varies and furthermore prices are not public and will be based on amount of units produced etc.
+    * The price may be one-time, continuous or per unit (or multiple)
+* Hypervisors are meant to be general and can probably be used in a lot of projects. Prices may be favourable in long term relationships
+* Depending on how the hypervisor is set up, there might also be further license costs associated with the guest OSes 
+* When using a new technology there will be some "spinup-time"
+* HSS is a very specific and personalized solution meaning that more "boilerplate" will need to be implemented in comparison to HV. This applies especially to hardware. This will impact TTM but maybe not overall price.
+    * Establish hypothesis about cost being spread across multiple users with general solution vs. focused on one with specific solution (Only applies if there is no significant markup. Also you might be paying for stuff you are not using)
+* There are also dev time issues associated with the HSS environment of multiple platforms with different compilers etc. -> More challenging build env and duplicate BSP
+* HV can come with abstraction and convenience features (ref to section where I mention those) that generally speed up development.
+
+    
 \subsection{Hardware separated subsystems}
 \subsection{Hypervisor}
 
@@ -35,7 +62,7 @@ After
 
 %----------------------------------------------------------------------------------------
 
-\section{Satisfying non-functional requirements}
+\section{Placeholder}
 \subsection{Hardware separated subsystems}
 \subsection{Hypervisor}
 
