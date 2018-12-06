@@ -50,13 +50,22 @@
 * There are also dev time issues associated with the HSS environment of multiple platforms with different compilers etc. -> More challenging build env and duplicate BSP
 * HV can come with abstraction and convenience features (ref to section where I mention those) that generally speed up development.
 
-    
+
+* HSS is not very scalable, therefore the amount of partitions is very limited. In a hypervisor there is probably also a limit because of overhead etc. but it is likely much higher because the cost of adding a new partition is lower. This means it can solve the mixed criticality problem more efficiently.
+* 
 \subsection{Hardware separated subsystems}
 \subsection{Hypervisor}
 
 %----------------------------------------------------------------------------------------
 
 \section{Satisfying functional requirements and convenience features}
+% NOTE I should probably call convenience "attractive" functional requirements in accordance with Kano
+
+* Projects have an ideal time schedule and if things take less time to accomplish there can be more time planned for features.
+    -> This should be in the section explaining this want (Maybe in cost/time)
+    
+* Not really a big generalizable difference because functional requirements are so different from project to project
+*  
 \subsection{Hardware separated subsystems}
 \subsection{Hypervisor}
 
@@ -69,6 +78,14 @@
 %----------------------------------------------------------------------------------------
 
 \section{As few faults as possible}
+\paragraph{Reducing the frequency of fault implementation}
+\paragraph{Finding faults effectively}
+\paragraph{Fixing faults effectively}
+\subsection{The lowest possible fault severity}
+\paragraph{How much of the system is affected}
+\paragraph{How critical the affected parts are}
+\paragraph{Whether the fault can be detected and potentially mitigated}
+
 \subsection{Hardware separated subsystems}
 \subsection{Hypervisor}
 
