@@ -157,7 +157,8 @@ To achieve this, a system architecture is required that can reliably separate co
 \section{The separation architecture} \label{separation-arch}
 % TODO Cite Wittenstein white papers
 % NOTE Think about where and how to mention real-time requirements
-There are four attributes the separation architecture needs to solve the mixed criticality problem.
+There are four attributes a separation architecture needs to solve the mixed criticality problem. % TODO Explain where it sits and what this would look like
+% TODO Introduce the concept of a partition
 \subsection{Spatial separation}
 
 \begin{comment}
@@ -229,7 +230,7 @@ Because there is no standard for this, the implementation is entirely up to the 
 Although this hardware supervision has limited functionality, it has a clear advantage over comparable software solutions, like a hypervisor: Hardware is less error prone than software and this is recognized by regulatory bodies. Software typically has to adhere to a more rigorous development and verification process \cite{IEC.2010-3}. It is therefore possible that these systems are cheaper than hypervisors overall. 
 
 This architecture should be considered when designing a safety-critical device but it is still fairly new and a full analysis of it is not in the scope of this thesis.
-\subsection{Hardware separated subsystems / Multiprocessor system}
+\subsection{Hardware separated subsystems / Multiprocessor system \label{HSS}}
 % NOTE review http://www.ia.pw.edu.pl/~tkruk/edu/eopsya/lecture/eopsy08.pdf and http://www-5.unipv.it/mferretti/cdol/aca/Charts/07-multiprocessors-MF.pdf and if these are viable
 % TODO https://witekio.com/blog/introduction-heterogeneous-multicore-processing-architecture/ Read about the need for software support on this architecture
 % TODO actually explain what they are
@@ -239,6 +240,9 @@ Such a system starts out with perfect temporal and spatial separation because th
 
 % NOTE Is this a qualitative assessment better reserved for the analysis part?
 Keep in mind however that, while sharing external peripherals is theoretically possible, it is not commonly done and poses some difficult concurrency challenges. This means that any external peripheral that could theoretically be shared has to be duplicated instead. The same goes for memory.
+
+% TODO Give an example and make an architecture diagram
+So what exactly does this architecture look like? Because this is more so a design methodology than a general solution, specific implementations are bound to look very different. In theory there is no limit on the number of processors or how they communicate, that depends on the size of the overall system and the safety requirements. 
 
 More specific advantages and disadvantages of this architecture will be analyzed in more detail later in the thesis.
 
