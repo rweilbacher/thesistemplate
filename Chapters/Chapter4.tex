@@ -175,6 +175,21 @@ The \gls{HSS} architecture provides the best possible safety and separation, eve
 %----------------------------------------------------------------------------------------
 
 \section{Engaged and satisfied employees}
+Ease of use for a hypervisor is mostly dependent on the development tools provided and therefore hard to generalize. The most sophisticated examples might have a fully fledged \gls{IDE} that aids the configuration of the hypervisor and perhaps even fully integrated debugging and tracing for devices currently running a hypervisor. % TODO add a counter example
+
+% NOTE Too informal, biased
+However, hypervisors are still a new technology and especially in such a conservative industry as safety-critial device manufacturing there is bound to be scepticism. If engineers are not willing to commit to the new technology they might be quick to blame the hypervisor.
+
+For \gls{HSS} there is no specialzed tooling as it is a unique configuration of hardware components. In fact, typically the subsystems are heterogenous processors wich means there is a number of complications with the build, debug and deploy process:
+\begin{enumerate}
+\item Separately compiled binaries
+\item Multiple distinct bootstrapping processes
+\item Duplicate efforts for the \gls{HAL} % TODO I think this should go in another section
+\item Separate debugging and tracing mechanisms % TODO Figure out what this could look like
+\item More difficult to replicate bugs because only one can be debugged at a time (kind off)
+\item [...]
+\end{enumerate}
+These complications can make finding faults in the code more challenging and generally make life for the developers more difficult.
 
 * HV ease of use is very dependent on the tools provided by the HV developer and how well it integrates with other tools the company might use.
 * HSS can be very frustrating with multiple platforms and strange build / deploy mechanisms. also difficult to debug because it is two systems. (Try to find some research or examples for these difficulties).
@@ -211,6 +226,9 @@ The \gls{HSS} architecture provides the best possible safety and separation, eve
 %----------------------------------------------------------------------------------------
 
 \section{Extendibility}
+% NOTE I have written this a million times by now
+Not only is software more easy to modify than hardware but adding partitions is also cheaper in the hypervisor than in the \gls{HSS} architecture. Therefore, it is conceivable that another partition may be added in a future release, assuming that the necessary computational resources are still available on the platform. 
+
 * If the device is designed to accommodate for
 it, it could be possible to simply add another partition with more functionality without touching the others and having to certify them
 * If a partition needs to be changed, regression analysis should be as easy as saying: We showed the hypervisor isolates so the other parts can not be affected (Apart from maybe communication channels). Recertification should therefore be significantly simpler and cheaper
