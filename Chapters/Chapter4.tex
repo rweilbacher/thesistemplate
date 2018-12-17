@@ -89,58 +89,39 @@ A hypervisor is a general software solution that can afford to have additional s
 \paragraph{Conclusion}
 The \gls{HSS} architecture provides the best possible safety and separation, even though this performance may degrade, if more subsystems are added. But ultimately a hypervisor only needs to be safe enough, not safer than \gls{HSS}. It is possible that hypervisor technology is not yet mature enough to compete in the most critical environments where absolute certainty is required. Therefore, if the hypervisor architecture is being considered for a future project it should be clarified, whether or not it can pass the certification. If it turns out to be sufficient however, the manufacturer can take advantage of its other benefits detailed in the following sections.
 
-\subsection{Hardware separated subsystems}
-\subsection{Hypervisor}
 
 %----------------------------------------------------------------------------------------
 
 \section{Lowest possible cost and keeping the schedule}
-* Higher Size, weight and power means higher material cost per unit
-	* I kind of need to quantify the cost difference between two smaller CPUs 		+ duplicate peripherals and one slightly bigger CPU with potentially 		shared peripherals
-* HV cost is very project dependent. Cost of HV implementations varies and furthermore prices are not public and will be based on amount of units produced etc.
-    * The price may be one-time, continuous or per unit (or multiple)
-* Hypervisors are meant to be general and can probably be used in a lot of projects. Prices may be favourable in long term relationships
-* Depending on how the hypervisor is set up, there might also be further license costs associated with the guest OSes 
-* When using a new technology there will be some "spinup-time"
-* HSS is a very specific and personalized solution meaning that more "boilerplate" will need to be implemented in comparison to HV. This applies especially to hardware. This will impact TTM but maybe not overall price.
-    * Establish hypothesis about cost being spread across multiple users with general solution vs. focused on one with specific solution (Only applies if there is no significant markup. Also you might be paying for stuff you are not using)
-* There are also dev time issues associated with the HSS environment of multiple platforms with different compilers etc. -> More challenging build env and duplicate BSP
-* HV can come with abstraction and convenience features (ref to section where I mention those) that generally speed up development.
+\paragraph{Development costs}
+Unfortunately, there is no general quantitative analysis of the development costs associated with the two architectures. Hypervisor developers do not make their license costs, or even their license models, public, as they are subject to negotiation and dependent on other factors like amount of produced units among other things. Since the \gls{HSS} architecture is usually a custom solution its price is equally difficult to predict. Nevertheless, there are some arguments that can be made on the relative price differences. 
+
+Hypervisors, whether written in-house or by a third-party, are meant to be general solutions, applicable in many projects. In contrast, the \gls{HSS} architecture is reimplemented for each device or device family. This gives the developers more control but general solutions have a significant benefit: The cost of the hypervisor will be spread across multiple projects, or in the case of a third-party hypervisor even across multiple customers. Another benefit of using a third-party hypervisor is that in a long-term relationship with the developer, prices may be favourable for the manufacturer.
+
+But there is a problem with general solutions: It is possible that the manufacturer is forced to pay for functionality he would not have included in the device, had he used a specialized architecture. 
+
+In the hypervisor architecture the manufacturer also needs to pay the potential license costs for the operating systems, running on the device, on top of the original hypervisor license costs.
+
+% TODO Think about this point and incorporate it
 * Mention how the cost not being known impacts the analysis. HV is really only interesting if it can be done cheaper than HSS and enable mixed criticality in different scenarios and projects. 
 
-* HSS is not very scalable, therefore the amount of partitions is very limited. In a hypervisor there is probably also a limit because of overhead etc. but it is likely much higher because the cost of adding a new partition is lower. This means it can solve the mixed criticality problem more efficiently.
-* 
-\subsection{Hardware separated subsystems}
-\subsection{Hypervisor}
+\paragraph{Hardware costs}
+% TODO Read this again.
+Each additional subsystem in the \gls{HSS} architecture will add another processor, memory and peripherals and consequently increase the device's hardware cost significantly. A hypervisor would usually require a more advanced processor with slightly more memory and computational power but this is less expensive in most cases [source Roy Master thesis?]. Additionally, most peripherals can be shared between hypervisor partitions with some exceptions.
+* Higher Size, weight and power means higher material cost per unit
+	* I kind of need to quantify the cost difference between two smaller CPUs 		+ duplicate peripherals and one slightly bigger CPU with potentially 		shared peripherals
 
-%----------------------------------------------------------------------------------------
+\subsection{Optimal time to market}
+In section \ref{optimal-ttm} the concepts of \keyword{attractive and must-be functional requirements}, as well as the\keyword{ideal time to market} have been introduced. Now it will be analyzed how each architecture can impact the time to market and therefore not only the unit cost of the device but also what features are feasible to integrate.
 
-\section{Satisfying functional requirements and convenience features}
-% NOTE I should probably call convenience "attractive" functional requirements in accordance with Kano
+Both architectures have in common, that they can enable the use of unverified third-party or even open-source software for the less critical  components of the device. However, the hypervisor has the advantage that partitions are cheaper to add. This means it is more likely that the cost of adding a partition is outweighed by the benefits of satisfying more attractive functional requirements. Assuming that the license cost of the hypervisor does not negate this benefit for a specific project.
 
-* Open source
-	-> My theory about "attractive" functional requirements being more readily available in open source software or at least application processor software
-* Modifiability
-* Hardware abstraction
-* Development environments
+Another way for the architectures to impact the development time is the implementation time of the architecture itself. Not only is the \gls{HSS} architecture typically implemented individually for each project, but some development efforts even have to be duplicated. If the subsystems are heterogeneous the \gls{HAL} will also need to be implemented multiple times. 
 
-* My "hypothesis" about ideal timeline and what can be implemented in that time
+Assuming that the hypervisor is developed by a third-party the development efforts of the device manufacturer are reduced. They still need to potentially modify the hypervisor to run on the target platform and configure it but the separation itself is taken care of.
 
-* Projects have an ideal time schedule and if things take less time to accomplish there can be more time planned for features.
-    -> This should be in the section explaining this want (Maybe in cost/time)
-    
-* Not really a big generalizable difference because functional requirements are so different from project to project
-* They both allow for the separation of
-    -> HV might do it cheaper 
-\subsection{Hardware separated subsystems}
-\subsection{Hypervisor}
-
-%----------------------------------------------------------------------------------------
-
-\section{Optimal Time-to-market}
-* Open source or even unverified purchased third-party software can be more feasible in HV because it is cheaper to add partitions (?)
-* Hypervisor itself may be able to save time or cost over designing HSS
-* Hypervisor comes partially pre-certified, meaning only business applications need to go through the process
+% TODO Find a better way to phrase this
+One last type of time saving factor is the impact on the development process itself. These are, however highly dependent on the actual situation and the differences listed here are to be understood as criteria too look out for and not guaranteed benefits of a hypervisor: Oftentimes the software team can't begin work until the hardware team has assembled a first prototype of the device. The hypervisor architecture has both a less complex hardware and significant hardware abstraction. Consequently, software development could begin sooner both in a simulated environment and on the first prototype. Additionally, a hypervisor developer is able to provide a fully fledged \gls{IDE} to make configuration of the architecture easier.
 
 %----------------------------------------------------------------------------------------
 
@@ -169,34 +150,25 @@ The \gls{HSS} architecture provides the best possible safety and separation, eve
 * Hypervisor often offers Health monitoring. Because it has a full view of the system it can monitor dangerous system events and take action.
 * HV can not necessarily recognize faulty hardware or "flipped bits". HSS can have a completely separate processors running distinct software that can recognize and maybe mitigate errors of the main processors. This is a typical scenario. HV can only do this through software redundancy (maybe also on another core), which is a debated method.
 
-\subsection{Hardware separated subsystems}
-\subsection{Hypervisor}
-
 %----------------------------------------------------------------------------------------
 
 \section{Engaged and satisfied employees}
-Ease of use for a hypervisor is mostly dependent on the development tools provided and therefore hard to generalize. The most sophisticated examples might have a fully fledged \gls{IDE} that aids the configuration of the hypervisor and perhaps even fully integrated debugging and tracing for devices currently running a hypervisor. % TODO add a counter example
+% TODO Call this "Human factors" and include environmental protection
+Ease of use for a hypervisor is mostly dependent on the development tools provided, and therefore hard to generalize. The most sophisticated examples might have a fully fledged \gls{IDE} that aids the configuration of the hypervisor and perhaps even fully integrated debugging and tracing for devices currently running a hypervisor. % TODO add a counter example
 
 % NOTE Too informal, biased
-However, hypervisors are still a new technology and especially in such a conservative industry as safety-critial device manufacturing there is bound to be scepticism. If engineers are not willing to commit to the new technology they might be quick to blame the hypervisor.
+However, hypervisors are still a new technology and especially in such a conservative industry as safety-critical device manufacturing there is bound to be skepticism. This could increase the technological risk on a project using the architecture significantly.
 
-For \gls{HSS} there is no specialzed tooling as it is a unique configuration of hardware components. In fact, typically the subsystems are heterogenous processors wich means there is a number of complications with the build, debug and deploy process:
+For \gls{HSS} there is no specialized tooling as it is a unique configuration of hardware components. In fact, typically the subsystems are heterogeneous processors which means they need to be build separately. There are a number of complications with the build, debug and deploy process on these kinds of systems:
 \begin{enumerate}
-\item Separately compiled binaries
-\item Multiple distinct bootstrapping processes
+\item Binaries have to be compiled differently.
+\item Multiple, distinct bootstrapping processes
 \item Duplicate efforts for the \gls{HAL} % TODO I think this should go in another section
 \item Separate debugging and tracing mechanisms % TODO Figure out what this could look like
-\item More difficult to replicate bugs because only one can be debugged at a time (kind off)
+\item More difficult to replicate bugs because only one processor be debugged at a time (kind off)
 \item [...]
 \end{enumerate}
 These complications can make finding faults in the code more challenging and generally make life for the developers more difficult.
-
-* HV ease of use is very dependent on the tools provided by the HV developer and how well it integrates with other tools the company might use.
-* HSS can be very frustrating with multiple platforms and strange build / deploy mechanisms. also difficult to debug because it is two systems. (Try to find some research or examples for these difficulties).
-* HV is a new and scary technology that might question established design principles.
-* 
-\subsection{Hardware separated subsystems}
-\subsection{Hypervisor}
 
 %----------------------------------------------------------------------------------------
 
@@ -204,15 +176,11 @@ These complications can make finding faults in the code more challenging and gen
 * In the conservative realm of safety-critical device manufacturing, the hypervisor is still a new technology and as such regarded with skepticism. "Proven in use" is still an important argument for a technologies safety
 * Software solutions ultimately involve more risk than hardware solutions.
 * 
-\subsection{Hardware separated subsystems}
-\subsection{Hypervisor}
 
 %----------------------------------------------------------------------------------------
 
 \section{Future-proof design}
 [Might wanna get rid of this "upper section"]
-\subsection{Hardware separated subsystems}
-\subsection{Hypervisor}
 
 %----------------------------------------------------------------------------------------
 
@@ -220,8 +188,6 @@ These complications can make finding faults in the code more challenging and gen
 * Hypervisors enable some hardware abstraction because a API is available that can be programmed against and the actual application software is not reliant on the hardware (or HAL) beneath.
 * Hypervisor itself is general and reusable (with caveats)
 * 
-\subsection{Hardware separated subsystems}
-\subsection{Hypervisor}
 
 %----------------------------------------------------------------------------------------
 
@@ -233,14 +199,10 @@ Not only is software more easy to modify than hardware but adding partitions is 
 it, it could be possible to simply add another partition with more functionality without touching the others and having to certify them
 * If a partition needs to be changed, regression analysis should be as easy as saying: We showed the hypervisor isolates so the other parts can not be affected (Apart from maybe communication channels). Recertification should therefore be significantly simpler and cheaper
 * 
-\subsection{Hardware separated subsystems}
-\subsection{Hypervisor}
 
 %----------------------------------------------------------------------------------------
 
 \section{Maintainability}
-\subsection{Hardware separated subsystems}
-\subsection{Hypervisor}
 
 %----------------------------------------------------------------------------------------
 

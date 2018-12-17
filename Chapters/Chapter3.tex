@@ -48,23 +48,17 @@ The actual time frame that has to be guaranteed can vary wildly and whether it i
 % NOTE Maybe make it clear that the actual Kano analysis is not necessary. I'm just making a point on the theoretical level
 There are conceivable edge cases where a company might decide to go through with an unprofitable device for strategic reasons. Prestige customers or the possibility for profitable long-term business come to  mind. But in the interest of simplicity this thesis will assume that the manufacturer wants every project to be directly profitable.
 
-With this assumption in mind, every other want needs to be realized with the pressure of cost in mind. However, it can be said that most of the other wants aim to reduce cost or cost variance indirectly anyway. In these cases the methods that realize them need to balance cost against how well they resolve the want.
+With this assumption in mind, every other want needs to be realized with the pressure of cost in mind. To analyze the architecture effects, cost will be split into multiple subcategories:
+\paragraph{Development costs}
+The biggest part of the development cost is based on how many developers work on the project, how  much they are paid and for how long they are working on the project. This is true for both hardware and software but the specific numbers may differ. 
 
-The mixed criticality problem, explained in section [add section] is a good example of this cost balance. To reiterate: [Section hasn't been written yet, this will be added later]. 
+If third-party software is used, the corresponding license costs are another factor. 
+\paragraph{Hardware costs}
+How much the hardware in the device costs can be very important in some projects. Most costs associated with development are one-time costs, while hardware costs have to be paid for each produced unit. Therefore, this is an especially important factor in devices that are produced in high volume.
 
-But keep in mind there doesn't have to be a conflict and a balance to be struck. Often, efforts will be both cheaper and solve their respective wants better than other options.
-[The section above is kind of a mess and as a key want it might be too general in the first place]
-\subsection{Satisfying the time schedule}
-% TODO Put arguments about time to market here
-Time does of course cost money directly through wages and lost revenue but it can also have additional indirect impact in certain scenarios. That is why it will be analyzed separately.
-
-[I should probably find some good evidence for why Time to market is important (other than cost)]
-[Also a mess]
-\section{Satisfying functional requirements}
-[I think this section lacks details and additional important factors]
-This section follows the distinction of functional requirements made by the  Kano model \autocite{KanoNoriaki.1984}. 
-% TODO Graph maybe
-It states that there are three categories of functional requirements: 
+\subsection{Optimal time to market \label{optimal-ttm}}
+Time ultimately costs money but a faster development process can have additional benefits that will be examined in more detail. To help with this, we will lean on the categorization of functional requirements established by the Kano model \cite{KanoNoriaki.1984}\cite{ElmarSauerwein.1996}. According to the Kano model there are three types of functional requirements.
+% TODO Add graph
 \paragraph{Must-be requirements} \textquote{If these requirements are not fulfilled, the customer will be extremely dissatisfied. [...] Fulfilling
 the must-be requirements will only lead to a state of "not dissatisfied"} \autocite{ElmarSauerwein.1996}
 
@@ -75,17 +69,10 @@ proportional to the level of fulfillment.}\autocite{ElmarSauerwein.1996}
 neither explicitly expressed nor expected by the customer. Fulfilling these requirements leads to more
 than proportional satisfaction. If they are not met, however, there is no feeling of dissatisfaction.}\autocite{ElmarSauerwein.1996}
 
-% [REMOVE]
-\begin{comment}
-In projects that consist purely of software, customer dissatisfaction is the only negative factor. Projects that also require custom hardware have an additional cost. The hardware already needs to implement every functionality and all manufactured devices need to support it. If the feature is then not implemented the hardware costs more without offering the benefits.
-\end{comment}
+This analysis is only based on the theoretical concepts and does not mean a Kano model analysis needs to be carried out. Furthermore, one-dimensional requirements will not be further considered as they can be simplified to be must-be requirements below zero satisfaction and attractive above zero satisfaction. 
 
-\subsection{Satisfying attractive functional requirements}
-% TODO Migrate the entire Kano reasoning to the mixed criticality section
-Attractive functional requirements are less likely to have the highest criticality level in the device. That means that they either introduce mixed criticality, are certified to a higher level than necessary or are left by the wayside entirely. This is another good reason for why an effective solution for mixed criticality is important [and therefore this entire Kano chain of reasoning should maybe migrate to the section about mixed criticality motivations (or get removed all together]
-\section{Satisfying non-functional requirements}
-% NOTE Is it possible there are other important requirements? Usability for example?
-There are a large number of possible non-functional requirements and their relevance is very dependent on the device's specific use-case. Analyzing them all is not in the scope of this thesis, the most crucial have, however, been listed as their own wants. 
+% TODO Maybe elaborate on TTM benefits
+Projects typically have an ideal time to market [source] that maximizes potential revenue and units sold. If functionally takes less time to implement, more can be achieved within this ideal timeline. Especially, attractive requirements can be more easily considered and give the manufacturer and edge over his competitors. One way to reduce the time it takes to include functionality is to use third-party software, either free open-source or paid for. 
 
 \section{As few faults as possible}
 % TODO Also talk about fault severity. If an architecture doesn't reduce the total amount of faults but reduces the amount of faults that lead to defects or severe defects, it is still a win
