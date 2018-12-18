@@ -29,13 +29,14 @@ Even though the hypervisor can be supported by hardware the separation is still 
 There are a number of differences between hardware and software developments that are relevant to this analysis.
 \begin{itemize}
 \item Software is cheaper to change than hardware. 
+\item Hardware complexity is restricted by physical laws. Software complexity is only really limited by our ability to manage it.
 \item Software is more likely to contain unfound systematic faults.
 \item Software is more expensive to verify as a result.
 \end{itemize}
 \subsection{Specialized or general}
 A hypervisor is a general software solution that is meant to be usable in a lot of cases with minor modification. It is often procured from an external company and not developed in-house specifically for a project.
 
-\gls{HSS} is a specialized solution for one project or project line. This does not mean there is no overlap between different projects using hardware separated subsystem sbut that there is little room for reuse of the architecture implementation.
+\gls{HSS} is a specialized solution for one project or project line. This does not mean there is no overlap between different projects using hardware separated subsystems but that there is little room for reuse of the architecture implementation.
 
 An advantage of a more general solution is that the one-time development costs can be spread across multiple projects, or in the case of third-party solutions, across multiple customers.   
 \subsection{Cost of adding a partition}
@@ -49,7 +50,7 @@ So only looking at the final unit cost, adding a partition to a hypervisor is ch
 While hypervisors have already been deployed in safety-critical devices, the ind
 * HSS is a very established method and HV is still new
 
-\section{Safety and regulatory compliance}
+\section{Safety and regulatory compliance \label{safety-analysis}}
  Let's move on to the first and most important want, safety and regulatory compliance. 
  \paragraph{Hardware redundancy}
  % TODO Fix terminology and think if this is even a separation architecture
@@ -101,6 +102,7 @@ Hypervisors, whether written in-house or by a third-party, are meant to be gener
 But there is a problem with general solutions: It is possible that the manufacturer is forced to pay for functionality he would not have included in the device, had he used a specialized architecture. 
 
 In the hypervisor architecture the manufacturer also needs to pay the potential license costs for the operating systems, running on the device, on top of the original hypervisor license costs.
+ 
 
 % TODO Think about this point and incorporate it
 * Mention how the cost not being known impacts the analysis. HV is really only interesting if it can be done cheaper than HSS and enable mixed criticality in different scenarios and projects. 
@@ -125,30 +127,44 @@ One last type of time saving factor is the impact on the development process its
 
 %----------------------------------------------------------------------------------------
 
-\section{As few faults as possible in the end product}
+\section{As few faults as possible [feasible?] in the end product}
+There are two ways for an architecture to influence the faults in a device. First, the architecture itself may be faulty. Second, the architecture may impact the faults in the business software on top of the architecture positively or negatively.
+\paragraph{Faults in the architectures themselves}
+
+* Hardware vs. software
+* Complexity breeds faults
+* A general solution is reused and there are more opportunities to fix bugs, especially if there is a large user base \cite{palix2011faults}. Granted, hypervisors do not enjoy the same popularity as Linux but they have much less code and safety hypervisors are used by very scrutinous  parties. [This is similar to the point of general vs specialized solution]
+* As stated in the section \ref{safety-analysis} HV lends itself less well to methods such as replication and redundancy. Furthermore, it can only implement software diversity.
+
+% NOTE Is "reducing" the best term?
 \paragraph{Reducing the frequency of fault implementation}
 * Development tools can help. Hypervisor has the ability to provide more sophisticated tools because the system is more restricted and more is known about it. HSS is a very general solution
-* seL4: *exists*
-* Hypothesis: Hypervisor is mostly plagued by systematic faults, whereas HSS itself is mostly random faults. Whatever is running on HSS is still suspectible to systematic faults. Probabilistic analysis can be carried out on random faults, which makes it easier to reason about.
 * If adding partitions in HV is cheap enough it can be used to enforce modularity and prevent fault implementation through the paradigms of software architecture
+* HSS might be more complex to develop for (Points mirrored in "Human factors")
+* HV could be misconfigured
 \paragraph{Finding  faults effectively}
 * Hypervisor can potentially support more distinct partitions, which can make finding faults easier. 
 * If there are faults that are either in the hypervisor directly or caused by its behavior finding them could be difficult. Depends on the tooling the hypervisor developer offers and whether or not there is source code.
 * Hypervisors might allow for a more easily testable product [Why though? Can I back this up?]
+* HSS can be more difficult to debug (Points mirrored in "Human factors")
+* HSS might have more difficult to replicate bugs
+* Ultimately HSS has less control over the entire system at runtime (Which is kind of the point)
+* HV can offer debugging and tracing for partitions 
 \paragraph{Fixing faults effectively}
 * Hypervisor internal faults would probably need the hypervisor dev to fix
 * Talk about recertification
 \subsection{The lowest possible fault severity}
+\paragraph{Fault isolation}
+* Both are separation architectures. Hypervisor can potentially establish more partitions and therefore reduce the impact even more.
 * HSS has almost perfect separation but reliability may suffer in very large systems
 * HV can be seen as a single point of failure. It is fairly small and usually well certified but a single point of failure nevertheless. 
-\paragraph{How much of the system is affected}
-* Both are separation architectures. Hypervisor can potentially establish more partitions and therefore reduce the impact even more.
 \paragraph{How critical the affected parts are}
-* Both are sufficient separation architectures
+% TODO Add this as a subpoint to How much of the system is effected and delete this section. 
 * If the components are extremely high risk HSS can be a better choice. Its separation is basically perfect and most likely offers much more control over the critical parts environment
-\paragraph{Whether the fault can be detected and potentially mitigated}
+\paragraph{Fault tolerance}
 * Hypervisor often offers Health monitoring. Because it has a full view of the system it can monitor dangerous system events and take action.
 * HV can not necessarily recognize faulty hardware or "flipped bits". HSS can have a completely separate processors running distinct software that can recognize and maybe mitigate errors of the main processors. This is a typical scenario. HV can only do this through software redundancy (maybe also on another core), which is a debated method.
+* 
 
 %----------------------------------------------------------------------------------------
 
@@ -160,14 +176,13 @@ Ease of use for a hypervisor is mostly dependent on the development tools provid
 However, hypervisors are still a new technology and especially in such a conservative industry as safety-critical device manufacturing there is bound to be skepticism. This could increase the technological risk on a project using the architecture significantly.
 
 For \gls{HSS} there is no specialized tooling as it is a unique configuration of hardware components. In fact, typically the subsystems are heterogeneous processors which means they need to be build separately. There are a number of complications with the build, debug and deploy process on these kinds of systems:
-\begin{enumerate}
+\begin{itemize}
 \item Binaries have to be compiled differently.
-\item Multiple, distinct bootstrapping processes
-\item Duplicate efforts for the \gls{HAL} % TODO I think this should go in another section
+\item Multiple, distinct bootstrapping processes. % TODO I think this also goes somewhere else
 \item Separate debugging and tracing mechanisms % TODO Figure out what this could look like
 \item More difficult to replicate bugs because only one processor be debugged at a time (kind off)
 \item [...]
-\end{enumerate}
+\end{itemize}
 These complications can make finding faults in the code more challenging and generally make life for the developers more difficult.
 
 %----------------------------------------------------------------------------------------

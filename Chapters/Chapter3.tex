@@ -101,13 +101,10 @@ Having the smallest amount of faults possible is great but ideally these faults 
 
 % NOTE Does the explanation of why an informal definition is enough have a place here. Should I not mention it at all, should I explain it somewhere else?
 If a fault never manifests in a defect in the first place it also can't cause any damage. If it does however result in a defect its severity can be informally specified by a couple of factors. Using a formal definition is of little use here, as a comprehensive quantitative analysis of fault severity for the hypervisor architecture is out of the scope of this thesis. An informal definition will be enough as a basis for analytic reasoning on a theoretical level.
-\paragraph{How much of the system is affected}
+\paragraph{Fault isolation}
 % PHRASING first sentence 
 Ideally,  a fault only affects the parts it absolutely has to. An unrecoverable defect in the USB driver, for example, would ideally only cause the USB port to stop working and nothing else. A negative example of this would be if the fault instead caused a kernel panic that prompted the entire system to go down immediately.
-\paragraph{How critical the affected parts are}
-% NOTE Unhappy with this
-This relates to the levels of criticality introduced in section [section goes here]. Since the level of criticality is normally determined by the amount of damage that can be caused if a defect occurs this goes back to how much damage the fault could cause [What does that even mean?! Needs to be reworked]. 
-\paragraph{Whether the fault can be detected and potentially mitigated}
+\paragraph{Fault tolerance}
 % TODO Maybe at least explore some examples
 This is typically referred to as fault tolerance. There are many ways to achieve this relating to both hardware and software [Link some sources]. [Some more examples will be explored in the analysis of the architectures]
 
