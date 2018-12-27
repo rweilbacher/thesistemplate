@@ -54,6 +54,7 @@ This does not mean debugging problems in hypervisor implementations are impossib
 
 \section{Advanced fault-tolerance} \label{no-redundancy}
 % NOTE Name?
+% TODO Mention that DSP can not be used with a HV at the moment
 
 \subsection{Cost of adding a partition}
 The core of the \gls{HSS} architecture is that every partition is its own computation domain with separate resources. In the hypervisor architecture the most expensive partition to add is the second one, as it involves accommodating for the hypervisor in the first place. Any partition that is added beyond the second just requires the appropriate amount of memory and computational resources to be available. Naturally, there are limits to this as each partition also introduces some overhead in terms of kernel memory and process switching times.  Furthermore, a partition requires a certain amount of resources to even do useful work in the first place.
@@ -238,13 +239,24 @@ A point that applies to both extending the device as well as resolving bugs is o
 
 %----------------------------------------------------------------------------------------
 
-\section{Why the hypervisor architecture is the focus}
-% TODO Rename
+\section{Conclusion}
+* The hypervisor can not provide the absolute highest level of safety.
+* But it is probably sufficient for a lot of devices.
 
-* Not quit the same level of safety probably but as far as we know sufficient in most cases. 
+* The final hypervisor cost is unclear but it is fairly possible that all the benefits of SWaP, license costs etc. will impact unit cost less than the HSS arch. This would lower the barrier of entry for the separation architecture and enable its benefits for more projects.
+* Beyond being a potentially cheaper sep-arch it can also have some more benefits. Cheaper partitions can enable a stronger architecture that can strengthen the devices safety and development efficiency.Hypervisor scales better and can therefore support more granular partitions. This can aid modifiability and regression analysis.
+* The centralized nature can furthermore enable it to work as an effective system monitor
+* List the wants it negatively and positively impacted and how.
+
+-> This theoretical analysis presented the broad differences between the architectures and how they may influence safety-critical device design. To equip the reader with a stronger toolset for making the final decision the next chapter will go into more detail on the hypervisor architecture and what it may look like.
+
+-> After this free form analysis of the two separation architectures it is now time
+
+
+* Not quit the same level of safety probably but as far as we know sufficient in most cases. Has to be analyzed for each individual project
 * License cost is unclear and depends on the project but if it is cheaper than HSS mixed criticality could be cheaper to integrate
 -> Definitely a win in SWaP
-* Hypervisor scales better and can therefore support more granular partitions. This can aid modifiability and regression analysis.
+* 
 
 * Now the general qualitative differences that can be expected between HSS and HV have been established it has become evident that a hypervisor can add value through more scalable separation and features beyond. As a software solution it can incoroporate many smaller features that would not be possible in HSS.
 * Now let's get into some specific examples to highlight when it should best be used and what should be considered when choosing an implementation.

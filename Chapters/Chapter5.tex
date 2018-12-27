@@ -14,19 +14,59 @@
 \newcommand{\option}[1]{\texttt{\itshape#1}}
 
 %----------------------------------------------------------------------------------------
-
-\section{Requirements that can't be satisfied by using a hypervisor}
-\subsection{Hardware redundancy}
-\subsection{Specialized hardware necessary}
-\subsection{[...]}
-
-%----------------------------------------------------------------------------------------
-
+After the free form analysis of chapter \ref{Chapter4} it is now time to give more concrete examples on when and why the hypervisor architecture should be chosen. For this purpose several \keyword{reference projects} will be laid out and it will be discussed what makes them good or bad examples for the architecture. Afterwards some basic guidance will be given on how a specific third-party hypervisor implementation should be chosen and what metrics need to be gathered.
 \section{Reference projects}
+* Imaginary!!!
+* Requirements and goals are chosen to align with the message. There may be parts that are unrealistic but a manufacturer consulting this thesis for advice should be able to draw parallels to his upcoming and ongoing projects. 
+*  As in \ref{Chapter3} only the hypervisor and hardware separated subsystems architectures will be considered. 
+* Mention that metrics like cost etc. can't really be considered
+* Intended as some examples not a definitive decision making process.
+* Trivial cases are not examined because they don't warrant the effort of explaining an entire device architecture.
+* Say what the preconditions for a reference project are
+\subsection{Portable gas detector}
+% https://www.elektroniknet.de/markt-technik/elektronikfertigung/perfekte-symbiose-von-oem-und-ems-151254.html
+\subsubsection{Introduction}
+This example project is a general, portable gas detector that measures the concentration of different gases by detecting the color change of a chemical, sensitive to the gas in question. Cartridges with clear, sealed tubes can be inserted into the device and once a measurement begins, one of the tubes is punctured and air is pumped through at a specific rate. Then the color change is observed by a \gls{CMOS} sensor. Because the color change, pump speed and other metrics are different for every gas, information can be extracted from the cartridge via an \gls{NFC} tag. This tag also contains general information about the cartridge in question.
+
+In this thought experiment the first version of this device has already been on the market for some time and now the manufacturer is looking to create the next generation. The current generation is equipped with an ARM Cortex-M4, a USB port for transmitting measurement data and an LCD display with a simplistic \gls{GUI}. All of the software sits on top of a small \gls{RTOS}, with the \gls{GUI} framework also being provided by the \gls{RTOS} developer.
+
+In the upcoming generation the manufacturer wants to expand the device's functionality by adding Bluetooth support and a more flexible \gls{GUI} . Furthermore, the manufacturer wants to be able to extend both the safety-critical and non-safety-critical functionality without having to release a new hardware revision. The core gas measurement code is hardware independent and already verified. Therefore, it could be included in the next generation with minimal effort, if the code's integrity can be guaranteed.
+% NOTE How important is unit cost?
+* Mid criticality project
+* Fairly low complexity but slick design and nice GUI are required.
+\subsubsection{Discussion}
+The current device generation uses no separation architecture because it is not very complex and any components of lower criticality were feasible to achieve within the chosen architecture. With the upcoming generation there are now stronger initial incentives to consider the separation of software components:
+\begin{enumerate}
+\item There is already verified code available that the manufacturer wants to reuse with little to no modification.
+\item \gls{GUI} libraries on Linux would be a great fit for realizing a more complex \gls{GUI} with less effort than on a typical \gls{RTOS}. But Linux can not be feasibly verified for the safety-critical use case.
+\item Both safety-critical and non-safety-critical functionality will likely be extended in the future. As established in section  \ref{safety-analysis}, granular partitions or the ability to add more can make regression testing cheaper and less error-prone.
+\end{enumerate}
+Additionally, the planned features do not directly impact the operators safety. The only component that can pose a threat is the \gls{GUI} because the display could show an incorrect concentration. To mitigate this a red \gls{LED}, controlled by the critical code, will begin blinking if the measured concentration is above the limit specified on the cartridge's \gls{NFC} tag. Any other failure in these components will either just prohibit retrieving data from the device for later analysis or render the device unusable. And while these effects are undesirable, the operator can recognize them and take actions to protect himself.
+
+% NOTE References to relevant sections?
+So now that the manufacturer has come to the conclusion that a separation architecture would be beneficial for the device, he needs to find one that supports his use case. For a battery powered, hand-held device \gls{SWaP} are all very important and this provides a big advantage for the hypervisor, as the \gls{HSS} architecture compares unfavourably in regards to these criteria. Of course using the Linux \gls{GUI} offerings would invariably lead to a stronger processor being necessary to support Linux but this would be the case for both separation architectures and for this case we will assume the manufacturer has decided that this is a worthwhile drawback for the increased graphical fidelity. 
+
+Separating the gas measurement code from other parts of the software, at least the non verified parts, is equally doable on both architectures. However, the hypervisors support for more granular partitions makes regression testing of a software revision cheaper and can generally aid the software extendibility and maintainability.
+
+One last benefit the hypervisor has in this scenario is established by its hardware abstraction. Any software components that are created for the next device generation will be more likely to be reusable in any future generations, with only slight or no modifications.
+% TODO Maybe mention advanced safety features?
+\subsubsection{Conclusion}
+This project exemplifies a case where separation is becoming increasingly attractive because of growing consumer demands and processing power but where the \gls{HSS} architecture violates the core demands of the use case. This category is likely to grow is very likely to grow in the future[source].
+
+With the criticality level of the device and the specific risks involved, the hypervisor architecture's lack of support for advanced safety features and its less provable separation are no death sentence. And finally, the hypervisors malleability lends itself well to creating a future-proof design, if unit cost is not a bigger concern. 
+% TODO Is there more I want to say?
+\subsection{Automated blood diagnostics device}
+\subsubsection{Introduction}
+\subsubsection{Discussion}
+\subsubsection{Conclusion}
+
 
 %----------------------------------------------------------------------------------------
 
-\section{How to decide on a hypervisor implementation}
+\section{How to decide on, a hypervisor implementation}
+* You are already seriously considering using a hypervisor or maybe you already know that you want to use one but are not sure which implementation. This section with will summarize all of the relevant aspects and what to look for. 
+* This analysis may reveal that there is no third-party hypervisor that can satisfy your cost targets and the architecture may not be right for that project
+* This section applies to choosing a third-party hypervisor as a first-party one can provide whatever you want it to and are willing to invest into it.
 \subsection{Certifiability}
 \subsection{Cost}
 \subsection{Pre-existing functionality}
