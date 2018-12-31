@@ -74,7 +74,17 @@ With this device, separation is almost mandatory because the operator station co
 
 First of all, due to the nature of the device, perfect uptime is not required, this means that redundancy is also not essential. This works in the favor of the hypervisor, since in the \gls{HSS} architecture only the safety-critical component could be made redundant but that option would not be available for a hypervisor because all partitions are part of one processor. 
 
-However, the system's need for fault tolerance means that some advanced fault tolerance techniques are necessary to mitigate the risks as much as possible. One way this could be achieved with a hypervisor architecture can be seen in figure [ref]. In this case both the safety-critical partition and the operator station partition are running on the hypervisor, with a secondary microcontroller performing the same calculations and verifying the output of the safety-critical hypervisor partition. Even though this means there are now multiple processors present, the hypervisor still provides consolidating effects. A pure \gls{HSS} architecture would still require a minimum of three partitions for the same setup.
+% TODO Make smaller
+% FIGURE Refine this figure
+\begin{figure}
+\centering
+\includegraphics[scale=0.75]{Figures/blood_diagnostics_arch}
+\decoRule
+\caption{Example hypervisor partition setup}
+\label{fig:blood_diagnostics_hv_arch}
+\end{figure}
+
+However, the system's need for fault tolerance means that some advanced fault tolerance techniques are necessary to mitigate the risks as much as possible. One way this could be achieved with a hypervisor architecture can be seen in figure \ref{fig:blood_diagnostics_hv_arch}. In this case both the safety-critical partition and the operator station partition are running on the hypervisor, with a secondary microcontroller performing the same calculations and verifying the output of the safety-critical hypervisor partition. Even though this means there are now multiple processors present, the hypervisor still provides consolidating effects. A pure \gls{HSS} architecture would still require a minimum of three partitions for the same setup.
 % FIGURE Make an architecture figure 
 
 % NOTE The proximity things seems like bullshit. Where did I even get that from?
@@ -84,42 +94,58 @@ This device can also benefit from the hypervisor's architectural improvements an
 
 First of all, the hardware cost savings are not going to make a big impact on a device this complex and big. Secondly, \gls{SWaP} are also not as crucial as for the portable gas detector. The housing of this unit is already going to be at least as big as a typical wardrobe and an extra microcontroller is not going to change that. Same goes for weight. And since the device is connected to power all the time, making it as power efficient as possible is also not a primary goal.
 
+\begin{comment}
+% NOTE Did I say it is necessary in the introduction?! If not why am I arguing about his here. Bad section
+One last thing that needs to be kept in mind is the typical hypervisor's current hardware restrictions. If a \gls{DSP} is necessary to control the device, the hypervisor could be at a disadvantage, since there is currently no \gls{DSP} that can host a hypervisor. But this may change [source] in the near future.  
+\end{comment}
+
 \subsubsection{Conclusion}
 This example represents a high complexity, high criticality project that can already profit from the more traditional approaches of separation but where, in a reevaluation of device architecture, the hypervisor approach might come out on top. 
 
-* But consequently it is also a more competitive choice than, for example the portable gas detector example.
-* SWaP-C is not hugely important but that does not mean lower SWaP-C is not desirable. (Not really SWaP-C, see discussion)
-* Along with the other hypervisor benefits [list them in discussion] it can still be an overall better choice, granted the secondary factors like EMC, proximity and safety of separation can all be provided, as well as the hardware platform that can support a hypervisor being suitable for the hardware tasks that need to be performed.
-* As might have come apparent in the discussion section for this project, with growing device complexity, the complexity of the decision grows rapidly as well. There are factors beyond the safety of separation that can make the hypervisor architecture muss less effective. Ultimately, which factors are important and how much needs to be decided on the basis of an actual project and this examination is nothing but an exploration how things could be decided.
+Some of the hypervisor benefits are not as important as in other classes of devices but it might still be an overall better choice, if the other factors like \gls{EMC} and safety of separation can be adequately satisfied. This example has of course been significantly simplified to construct a discussion about devices that are in this range of complexity and criticality and in a real-world example a lot more analysis will be necessary to determine whether the hypervisor is a good fit. As of 2018 this may still be a risky technical decision but with the push into hypervisors by the aviation and automotive industry, industries that manufacturer exactly this class of devices, this could evaporate within the next decade.
 
 %----------------------------------------------------------------------------------------
 
 \section{How to decide on, a hypervisor implementation}
-* You are already seriously considering using a hypervisor or maybe you already know that you want to use one but are not sure which implementation. This section with will summarize all of the relevant aspects and what to look for. 
-* This analysis may reveal that there is no third-party hypervisor that can satisfy your cost targets and the architecture may not be right for that project
-* This section applies to choosing a third-party hypervisor as a first-party one can provide whatever you want it to and are willing to invest into it.
-* This section will be mostly a list of questions to ask with further explanation if deemed necessary    
+% NOTE Maybe talk about how this applies to first-party hypervisors?
+This section explores the extended analysis that needs to be carried out by the manufacturer, once he is seriously considering using a third-party hypervisor. For the most part, it consists of a list of questions that need to be asked, with further explanation, if required. The categorization of the questions closely resembles the key wants established in \ref{Chapter3}.
+
+Actually, it is conceivable that the result of this analysis reveals that no third-party hypervisors exists that can satisfy the manufacturers targets. The importance of each question is going to vary on a project by project basis and questions should be asked roughly in their order of importance. 
+
 \subsection{Certifiability}
-* What does the hypervisor developer promise?
-* What deliverables does he offer to aid with this?
-* What services does he offer?
-* Has the hypervisor been used in a device that has to comply to the same regulations?
-* Do the claims of the developer and his documentation survive more intense scrutiny and project specific risk analysis?
+\paragraph{Which level of criticality does the hypervisor developer claim to be able to certify to?}
+Since, this section is concerned with the concrete real-world examples, the abstract concept of criticality levels also has to be abandoned. It only makes sense to ask this question in relation to the actual regulations that the device will be certified to.
+
+\paragraph{What deliverables and services does he offer to aid with certification?}
+Usually the developer will offer documentation and test cases for the hypervisor that can be presented as evidence of safety to the regulatory bodies. But typically there is more work to do: the specifics depend on the standard but at the very least the risk of using the hypervisor needs to be evaluated and justified. Developers will also usually offer services to help with the certification of the hypervisor. Depending on the manufacturer's prowess with the regulations and the hypervisor such a service could be worthwhile.
+\paragraph{Has the hypervisor successfully been used in a device that has to comply to the same regulations?}
+Although, a "proven-in use" status is not enough to convince a regulatory body of a piece of software's safety it is at least evidence, that it can be done.
+\paragraph{Do the claims of the developer and his documentation survive more intense scrutiny and project specific risk analysis?}
+Because the hypervisor developers are clearly trying to sell a product, their claims should be met with scrutiny. This is a question that should probably be analyzed in the latter stages of the decision process.
 \subsection{Cost}
-* What license model is applicable?
-* Is there functionality or services that cost extra? Are they desirable?
-* Getting a quote from the developer for the project.
-* Negotiation
-* What costs are associated with the OS that will run on the hypervisor?
+The question of the hypervisor license cost has been mostly avoided in this thesis, since it can't be answered on a general level. Now is the time to come back to it.
+\paragraph{What license model is applicable and what will the license cost?}
+License models tend to vary based on unit cost and rate of production.
+The cost of the license is probably exclusively subject to negotiation. 
+\paragraph{Is there functionality or services that cost extra? Are they desirable?}
+One possibility for an extra service has already been listed; enlisting the developer to help with certification. But some, more specialized functionality may also be gated behind additional cost. Furthermore, the developers almost always offer general services surrounding the hypervisor: helping with configuration and developing more features being among them. Especially, developers of open-source hypervisors tend to sustain themselves this way.
+\paragraph{What costs are associated with the operating system that will run on the hypervisor?}
+This question doesn't necessarily have to do with the hypervisor developer directly, although it can. The default paravirtualized \gls{OS} is supplied by the hypervisor developer and may incur additional costs. If the manufacturer decides to customize an operating system himself or use a fully virtualized free open-source \gls{OS} these license costs can be avoided. 
 \subsection{Dependence}
-* Is the source code available?
-* Is it possible to enlist the developer to add more functionality or change existing?
-* Is it possible to modify the hypervisor alone?
-* Is it feasible to create BSP without the developer?
-* If paravirt is used, what OSes are supported and can a custom OS feasibly be adjusted for the hypervisor?
-* 
+The last question in the previous section already hints at it: using a third-party hypervisor can introduce significant dependence to said third-party, especially sine the third-party also offers the \gls{OS} running on top of the hypervisor.
+\paragraph{Is the hypervisor source code available?}
+\paragraph{Is it feasible for the manufacturer to modify the hypervisor on his own?}
+* Requires the source code to be available and legally modifiable
+* BSP and adding, changing functionality
+* alternative is enlisting the dev to do it
+\paragraph{What paravirtualized operating systems are available and can the manufacturer feasibly add new ones?}
+
+\subsection{Performance}
 \subsection{Basic functionality}
-* What basic functionality can the developer offer?
+
+
+Below is a list of some p
+
 Examples are:
 	* SMP and AMP
     * Partition communication (And how that is achieved)
@@ -131,17 +157,30 @@ Examples are:
     * Hardware support
     
 \subsection{Additional functionality}
-* Is the hypervisor bare-bones and only offers basic separation or does it have more features?
-Interesting features are:
-	* Health monitoring and automatic action (for example different scheduling policy
-    * Security 
-    * Automatic testing (Lynx BIT)
-    * Virtual high resolution timers (Kind of solves an issue the hypervisor created)
-    * 
+The core functionality the hypervisor offers has been explored in \ref{Chapter2}. This section is concerned with slightly more advanced features. Some hypervisor implementations are completely bare-bones and offer nothing beyond the features of a basic hypervisors and others offer many advanced features. This difference is likely to be reflected in the price of the respective implementations.
+\paragraph{What additional functionality can the developer offer?}
+Below is a list of some possible features that exist in current implementations.
+% NOTE Do any items require additional explanation?
+\begin{itemize}
+    \item Different possible scheduling policies
+    \item Health monitoring
+    \item Device pass-through (Requires an \gls{IOMMU} to work effectively)
+    \item Full virtualization
+    \item Virtual input device support
+    \item Security [It seems pretty half-assed to just dump security here]
+    \item Automatic tests during operation
+    \item Virtual high resolution timers
+\end{itemize}
+
 \subsection{Impact on the development process}
 \subsubsection{Tooling}
-* What tools are available for configuration?
-* What tools are available for the creation of images?
+\paragraph{What tools are available for hypervisor configuration?}
+The two possible categories of tools are \gls{CLI} and \gls{IDE} tools. A \gls{CLI} tool may take input directly or from configuration files in a specific format. An \gls{IDE} could instead offer a graphical representation with possible values, hints and even drag and drop configuration of some features. If done well this can greatly reduce the barrier of entry for new users, if done badly this can cloud the users understanding of the actual configuration and introduce errors.
+\paragraph{What compilers and debuggers are supported and do they align with the project requirements?}
+\paragraph{What tools are available for the creation of hypervisor images?}
+Ultimately, both the business code and the hypervisor code need to be compiled and combined into an image that can be deployed on the device. 
+
+
 * What compilers and debuggers are supported and do they align with the project requirements?
 * CLI or IDE?
 * How is configuration performed and is it appropriately easy?
