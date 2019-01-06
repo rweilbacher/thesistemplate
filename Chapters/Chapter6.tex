@@ -15,17 +15,72 @@
 
 %----------------------------------------------------------------------------------------
 
-\section{Discussion}
-
+\section{Further research}
+\paragraph{Analyzing the cost of hypervisor licences}
+While the true cost of a typical hypervisor license will likely continue to elude further because of the developer's secrecy, an educated estimation could likely be produced. If you look at the market of hypervisor implementation there appears to be the typical pattern of luxury solutions and basic solutions. A cost analysis of these categories based on known factors, like lines of code and list of features, while likely to be somewhat inaccurate would help immensely to quantify the difference between the \gls{HSS} and the hypervisor architecture.
+\paragraph{Quantifying the theoretical analysis proposed in this thesis}
+[...]
 %----------------------------------------------------------------------------------------
 
 \section{Technological progress} \label{tech-progress}
-* ARM Cortex-R52 and its implementations (for example NXP)
-* The hypervisors that come from it (OpenSynergy)
+\subsection{New hardware platforms}
+Probably the most notable development already on the horizon is the newest member of the ARMv8-R architecture. The ARMv8-R architecture is specifically designed for safety-critical environments with real-time requirements [source]. %https://developer.arm.com/products/architecture/cpu-architecture/r-profile
+The Cortex-R52 specification [source] has been released in 2017 and now the first silicon implementations are going into preproduction [source NXP S32S24]. It offers eight logical cores operating in dual core lock step, multiple safety features and typical \gls{DSP} functionality. Unusually for a microcontroller of this scope, it also contains an \gls{MPU} and hardware virtualization extensions. Furthermore, there is already an unreleased hypervisor that takes advantage of this new platform [source OpenSynergy]. This means that in the future the concerns with using application processors in real-time safety-critical devices will no longer apply.
+
+\subsection{Sophistication of technology}
+Relatively speaking, embedded virtualization and safety-critical hypervisors are a very new technology. Once these technologies are used in more products and mature with their challenges a lot of the problems, established in this thesis will hopefully be proven obsolete, while the benefits will be even more pronounced. 
+
+The same is probably true for the alternative architectures that were introduced in chapter \ref{Chapter1} but not further analyzed.
+\subsection{Advances in formal verification}
+As seL4 and some of the associated research show [sources], formal verification is becoming increasingly viable for actual products. Especially, with the advent of tools that can automatically create the required proofs, formal verification is becoming feasible for developers with no research background in the field of formal verification. This development may not only have implications for safety hypervisors but for safety-critical engineering as a whole.
 
 %----------------------------------------------------------------------------------------
 
 \section{Conclusion}
+Certifying components to the lowest possible criticality level instead of the highest criticality present in the device is very desirable for an efficient development process. To be able to do this it is necessary to provide evidence of an appropriate separation of components. A device architecture that solves this problem of mixed criticality has been introduced as a separation architecture.
+
+Historically speaking the only architecture that was capable of this separation, was the hardware separated subsystems architecture. In this architecture additional processors, along with other necessary resources, are added to the system to separate the components from each other. If a safety-critical device manufacturer is able to solve the mixed criticality problem cheaper and make it feasible in smaller devices, it could be a significant edge over competitors.
+
+The primary contender for this better separation architecture is the embedded safety hypervisor. It typically consists of a microkernel which can host both native C runtimes and, to give the hypervisor its name, virtualized operating systems. Because it has already been gaining traction in the automotive industry and some outliers in other sectors, this architecture is also what this thesis set out to analyze.
+
+% TODO Make what I write here clear in the respective introduction.
+As a way to abstract the business goals of safety-critical device manufacturers, their \keyword{key wants} were introduced. These later served as categorization for the comparative analysis of the two architectures. And although the importance of each category was not explored fully, they should allow an eventual safety-critical device engineer to understand which are most important for his device. Consequently, it can be used to judge the importance of certain architecture benefits and drawbacks.
+
+% NOTE In the current structure they did not emerge from it, crucial differences come first.
+Through the theoretical analysis in \ref{Chapter4}, some crucial differences between the architectures emerged:
+\begin{itemize}
+    \item The hypervisor's separation can not surpass that of the \gls{HSS} architecture.
+    \item Hypervisor is more modifiable and can provide smaller utility features.
+    \item Hypervisor is a reusable, general solution, so costs are shared between parties over a period of time.
+    \item Hypervisor's centralized view give it unique opportunities for system management and fault tolerance.
+    \item Hypervisor loses some benefits if advanced fault tolerance, like redundancy is required.
+    \item Hypervisor partitions are cheaper to add and can therefore help achieve a more modular device architecture.
+\end{itemize}
+
+The reference projects of section \ref{ref-projects} 
+
+Finally, the questions proposed in section \ref{how-to-decide} give a concrete list of criteria to evaluate before moving on to use the hypervisor architecture in a real-world project. To paraphrase the broad categories of questions:
+\begin{itemize}
+    \item Can the device, including the hypervisors, be feasibly certified for the regulations required?
+    \item How much does the hypervisor impact unit cost overall?
+    \item How dependent would the device manufacturer be on the hypervisor developer?
+    \item Can the hypervisor offer the necessary performance?
+    \item Can the hypervisor offer additional functionality that would be particularly valuable?
+    \item How does the hypervisor impact the development process?
+\end{itemize}
+Along with the noteworthy hypervisor implementations of section \ref{noteworthy-implementations} and the reference projects this should give the safety-critical device engineer, plenty of information to base his analysis on. 
+
+The hypervisor architecture for safety-critical devices is still young and connected to a lot of uncertainty but given time a place in the toolbox will be found for it. It is unlikely to be a complete replacement for hardware based separation architectures like the \gls{HSS} architecture but in a given niche it is certainly going to outperform the traditional architectures.
 
 
-
+\begin{comment} 
+* Mixed criticality has been present for a long time in very complex projects but with increased processing power and user demands it makes more and more sense in smaller devices.
+* For this reason and because of efforts in some industries to save SWaP alternate solutions to the mixed criticality problem have been seeing some adoption.
+* One of these is the hypervisor that this thesis set out to compare more in-depth.
+* From that comparison the crucial differences and their effects emerged
+* [Refer to conclusion from that section]
+* Based on this some reference project have been proposed that can be categorized into these [] categories.
+* Ultimately it can be said the hypervisor has a couple of very promising places of application.
+* So it can be said the best scenarios for the hypervisor architecture are the ones where this happens: []
+* The advent of microkernel based safety hypervisors along with the maturation in virtualization technology, especially in the embedded space provides an avenue to deal with the problems that arise from mixed criticality.
+\end{comment}

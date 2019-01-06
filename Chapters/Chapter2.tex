@@ -44,7 +44,7 @@ Some also offer hierarchical scheduling, where a so-called container task is sch
 Whatever the specific implementation is, at the very least it satisfies the temporal separation requirement from the section \ref{separation-arch}. 
 
 \paragraph{Real-time requirements}
-Additionally, the safety hypervisor's scheduling is deterministic and can therefore satisfy hard real-time requirements. To what degree can't really be generalized.
+Additionally, the basic safety hypervisor's scheduling is deterministic and overhead is suitably low. This means that a worst-case execution time analysis can be carried out and real-time requirements can conceptually be satisfied. However, to what precise degree can't really be generalized.
 \begin{comment}
 \subsection{Static configuration}
 Any mechanism to increase a guests rights at runtime poses the risk of exploitation, be it accidental or purposeful. That is why these systems are typically statically configured and if configuration runtime is at all possible, it is restricted to reducing privilege. For example, a guest that is allowed to spawn other guests may give them his own rights or less than his own but never more.
@@ -77,11 +77,23 @@ The applications of this are wide-ranging but one example would be to implement 
 While the hypervisor does not get around having to implement a minimal \gls{BSP} for each platform, it can offer significant hardware abstraction to its guests. The \keyword{Native \gls{API}} mentioned in the previous section is not just available to bare-metal guests but also to virtualized ones. Some examples of this are: Getting information about the system, communication with other guests and centralized logging.
 
 %----------------------------------------------------------------------------------------
+\section{Initial considerations}
+Although the considerations for choosing a hypervisor implementation will be outlined later in the thesis, in section \ref{how-to-decide}, some crucial factors need to be elaborated here to avoid confusion.
+\subsection{First- or third-party hypervisor}
+A manufacturer has the option to either license a third-party hypervisor or develop his own solution. The development costs of a third-party hypervisor are effectively shared with many parties over the course of many projects, whereas the development costs of a first-party hypervisor are typically only shared over the course of many projects in a single company. However, developing one's own hypervisor provides the maximum amount of control over functionality and development cycle.
+
+Additionally, it means that the best possible subject matter experts on the hypervisor are always available to the manufacturer. But here also lies another big problem: Developing a custom hypervisor not only requires the initial development costs but also the costs of hiring or developing the talent required. A third-party already has these capacities and can therefore also typically go beyond the absolute necessity in terms of functionality.
+
+Ultimately, the more prudent approach is probably licensing a third-party hypervisor but in some cases it may be beneficial to have full control over the environment.
+
+\subsection{Security}
+Security will not be a consideration in this thesis, only a word of warning will be issued. It may seem logical to assume that a hypervisor can provide security as well as safety and while it may not initially be a bad idea to have separation between security-critical and non-security-critical software it is not that simple. A hypervisor offers a much greater attack incentive, as a compromisation of the platform could be used to attack a lot of different devices. It is also questionable whether or not the goals of security and safety align. A manufacturer doesn't want to modify a certified device or at least do it in bulk to minimize the cost of recertification. Building a secure device on the other hand often requires frequent updates to fix newly found attack vectors. So the security of any given hypervisor implementation should not be taken for granted and analyzed with scrutiny.
+%----------------------------------------------------------------------------------------
 
 \section{Limitations}
 Before getting into the full-fledged analysis it is best to expose some limitations of the current safety hypervisor landscape. 
 \subsection{Current hardware restrictions}
-Hypervisors are overall still limited to the more powerful \keyword{application processors} and have not really penetrated the \keyword{microcontroller} market. There are several reasons for this hardware restriction. 
+Hypervisors are overall still limited to the more powerful \keyword{application processors} and have not really penetrated the \keyword{microcontroller} market. Using a hypervisor is also not possible if a specialized processor, like a \gls{DSP}, will be the only processor in the system. Although, this restriction may be lifted in the future.  There are several reasons for the hypervisor's hardware restrictions. 
 
 % PHRASING 
 First of all, microcontrollers typically have no \gls{MMU} only an \gls{MPU} or no memory protection at all. Hypervisors need at least some hardware memory protection, as the corresponding software isolation is far too slow. \gls{MPU}s have a limited number of partitions they can isolate and therefore impose uncomfortable restrictions on hypervisor developers and users.

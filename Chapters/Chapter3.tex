@@ -17,7 +17,9 @@
 
 % REVIEW This section has two goals for each want: Explain what the want means and explain why it is important (if it is not self-evident) and maybe explain how it relates to other wants
 % NOTE I specifically avoid talking about architecture in this section, maybe I'm actually sabotaging myself with that
-% TODO Move intro from chapter 4 here
+The two separation architectures that will be analyzed in \ref{Chapter4} are the hardware separated subsystems architecture (from now on referred to as \gls{HSS} architecture) and the embedded safety hypervisor architecture. It has been established that both can conceptually solve the mixed criticality problem and now it is time to compare the non-functional criteria of the architectures in question. 
+
+To achieve this a list of criteria will be proposed that will serve as a categorization tool for the analysis.
 This list comprises the key wants that manufactures of safety-critical devices want to achieve, when engineering a device. A want can be understood as a business driver for device manufacturers. Fulfilling all wants to the best degree possible, would result in a perfect device. These idealized wants will be used to compare the hypervisor architecture to other device architectures and recommend the features to look for, when choosing a real-world hypervisor implementation.
 
 In an ideal world each want could be satisfied individually but in reality they have complex interactions and need to be carefully balanced. The specifics of these interactions will be explored in more detail later.
@@ -25,21 +27,21 @@ In an ideal world each want could be satisfied individually but in reality they 
 Additionally they are not equally desirable for every device. Some devices, for example, might have less potential for causing damage and therefore need to adhere to less strict safety regulations. Therefore choosing the absolute safest architecture is not paramount for the devices success.
 
 \section{Safety}
-[This section is kind of a duplicate of a section in Chapter 1]
+%[This section is kind of a duplicate of a section in Chapter 1]
 It is self-evident that safety is going to be a key want in the engineering process of safety-critical devices. A device that is considered safer is often going to have an edge over that of a competitor. Furthermore, a perfectly safe device protects the manufacturer from expensive lawsuits.
 
 Because of this, it is often beneficial for the manufacturer to ensure higher safety than required. However, in terms of economic viability, there are even more critical wants, as will become clear in the next section.
 
 \subsection{Regulatory compliance}
-[This section is kind of a duplicate of a section in Chapter 1]
+%[This section is kind of a duplicate of a section in Chapter 1]
 To protect the end-customer of safety-critical devices, most regulatory bodies implement rules that govern how safety-critical devices have to be engineered and what quality level they have to fulfill.
 Failing to achieve this is even more costly than lawsuits, since it will disallow the manufacturer from selling the device in the first place. All regulatory bodies then allow the manufacturer to make adjustments to his compliance documentation but for most regulations it’s not just enough to prove that the end result has a high level of quality, the engineering process itself needs to be of high quality as well. This means that it is normally completely infeasible to make a device safe in the eyes of the law, if it has not been developed with this goal from the start. 
 
 And while regulatory bodies almost always find some problems in the compliance, fixing them will cost additional money and time and getting it right the first time is therefore desirable.
 
 \subsection{Real-time requirements}
-% NOTE I am only looking at it from a safety perspective but there can also be usability implications, specifically in the usability area.
-As a special safety requirement, some devices have to guarantee that an event can be completed in a certain amount of time. This has a significant impact on the entire device architecture, from the hardware, through the operating system to the actual application. Which is why it deserves special consideration.
+% NOTE I am only looking at it from a safety perspective but there can also be usability implications.
+As a special safety requirement, some devices have to guarantee that an event can be completed in a certain amount of time \cite{shin1994real}. This has a significant impact on the entire device architecture, from the hardware, through the operating system to the actual application. Which is why it deserves special consideration.
 
 The actual time frame that has to be guaranteed can vary wildly and whether it is 500ms or 50ns does have an impact on how the device needs to be implemented. However, the analysis in the later parts of the thesis will focus more on the core architectural differences that make satisfying this requirement possible in the first place. 
 
@@ -73,7 +75,7 @@ than proportional satisfaction. If they are not met, however, there is no feelin
 This analysis is only based on the theoretical concepts and does not mean a Kano model analysis needs to be carried out. Furthermore, one-dimensional requirements will not be further considered as they can be simplified to be must-be requirements below zero satisfaction and attractive above zero satisfaction. 
 
 % TODO Maybe elaborate on TTM benefits
-Projects typically have an ideal time to market [source] that maximizes potential revenue and units sold. If functionally takes less time to implement, more can be achieved within this ideal timeline. Especially, attractive requirements can be more easily considered and give the manufacturer and edge over his competitors. One way to reduce the time it takes to include functionality is to use third-party software, either free open-source or paid for. 
+Projects typically have an ideal time to market \cite{clark1989project}\cite{stalk1988time} that maximizes potential revenue and units sold. If some functionally takes less time to implement, more can be achieved within this ideal timeline. Especially, attractive requirements can be more easily considered and give the manufacturer an edge over his competitors. If the optimal time is missed and less overall units are sold the manufacturer can not take proper advantage of the economies of scale. More overall produced units means more components can be bought, which drives down the price. One way to reduce the time it takes to include functionality is to use third-party software, either free open-source or paid for. 
 
 \section{As few faults as possible}
 % TODO Also talk about fault severity. If an architecture doesn't reduce the total amount of faults but reduces the amount of faults that lead to defects or severe defects, it is still a win
@@ -144,3 +146,6 @@ Another scenario for this is the \textit{device platform}, where there is a core
 
 The next device generation and another device on the same platform have the advantage that they presumably share most of the business logic with the original device. That makes reusing a lot of the software plausible. However, if the software is reusable, suitably generic software could conceivably even be used in entirely different devices.
 %----------------------------------------------------------------------------------------
+
+\section{Conclusion}
+In this chapter it has been proposed what criteria are most important for safety-critical device manufacturers and why. Using these wants as categories it will now be analyzed how the hypervisor architecture stacks up against the well established \gls{HSS} architecture.

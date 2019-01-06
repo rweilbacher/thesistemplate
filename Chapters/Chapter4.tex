@@ -52,10 +52,18 @@ The \gls{HSS} architecture ultimately achieves its separation through being a di
 \end{enumerate}
 This does not mean debugging problems in hypervisor implementations are impossible, just that they can be feasibly addressed in a centralized system. The hypervisor as an entity can have a complete view of the system and therefore the developer can provide appropriate tooling to debug hypervisor partitions or even the hypervisor itself.
 
-\section{Advanced fault-tolerance} \label{advanced-fault-tolerance}
+\subsection{Advanced fault-tolerance} \label{advanced-fault-tolerance}
 % NOTE Name?
 % TODO Mention that DSP can not be used with a HV at the moment
+Advanced fault-tolerance is referring to the three practices of replication.
+\paragraph{Replication} Providing an identical replica of a system component or the entire system that computes the output in parallel. The replicated systems may only act as a supervisor to the primary system or have an influence on the final output via a quorum.
+\paragraph{Diversity} Virtually the same as replication except that the additional systems are not identical to the primary system. They can differ in both hard- and software or just one of the two. This approach requires more effort but can reduce the probability that both systems have the same fault. 
+\paragraph{Redundancy} In this approach the identical replica, instead acts as a backup in case of a failure in the primary component.
 
+While this does share the key characteristics with the hardware separated subsystems architecture the intention is a different one. 
+Replication has the sole purpose of increasing the fault-tolerance and subsequently the safety of the system, while the \gls{HSS} architecture is focused on separating components of differing criticality to reduce effort and cost among other things.
+
+The hypervisor on the other hand can only provide software diversity on its own and can impede efficient and effective replication. Typically only the most safety-critical parts of the device would be made redundant but on the hypervisor architecture they are all consolidated onto one hardware platform. This means that either the entire hypervisor with all partitions is replicated, forcing the manufacturer to also copy the non-critical partition. Or only parts of the software are replicated and run in an additional partition. While this is a lot cheaper it is also not nearly as effective as hardware replication.
 \subsection{Cost of adding a partition}
 The core of the \gls{HSS} architecture is that every partition is its own computation domain with separate resources. In the hypervisor architecture the most expensive partition to add is the second one, as it involves accommodating for the hypervisor in the first place. Any partition that is added beyond the second just requires the appropriate amount of memory and computational resources to be available. Naturally, there are limits to this as each partition also introduces some overhead in terms of kernel memory and process switching times.  Furthermore, a partition requires a certain amount of resources to even do useful work in the first place.
 
@@ -63,11 +71,6 @@ The core of the \gls{HSS} architecture is that every partition is its own comput
 
 % NOTE This sounds like it is overall more expensive
 So only looking at the final unit cost, adding a partition to a hypervisor is cheaper than adding a partition to a hardware separated subsystem. The more far reaching effects of this will be analyzed later.
-
-\subsection{Proven in use status}
-% NOTE Actually now that I think about it more, I'm not sure this is has any ramifications for quality
-While hypervisors have already been deployed in safety-critical devices, the ind
-* HSS is a very established method and HV is still new
 
 \section{Safety and regulatory compliance \label{safety-analysis}}
  Let's move on to the first and most important want, safety and regulatory compliance. 
@@ -240,23 +243,23 @@ A point that applies to both extending the device as well as resolving bugs is o
 %----------------------------------------------------------------------------------------
 
 \section{Conclusion}
-* The hypervisor can not provide the absolute highest level of safety.
-* But it is probably sufficient for a lot of devices.
+Probably the most important takeaway from this analysis is that it is inconclusive. There are two reasons why this is the case: Firstly, because there are unknown variables, like the typical cost of a hypervisor license. Without any basis in cost no general assessment can made of the worthiness of the hypervisor benefits. Therefore this analysis needs to be completed either by further research, or more likely, by a safety-critical device engineer using this thesis as a guideline. This also ties into the second reason: the key wants are a useful tool for categorization of the benefits, but with safety-critical devices being as diverse as they are, no general claims can be made on their relative importance for a real-world project. Ultimately, this means the benefits and drawbacks that crystallized in this analysis need to be viewed as likely outcomes and possibilities that require a concrete analysis, should the thesis be used as a decision making aid. The future section \ref{ref-projects} will attempt to lift at least some of the uncertainty.
 
-* The final hypervisor cost is unclear but it is fairly possible that all the benefits of SWaP, license costs etc. will impact unit cost less than the HSS arch. This would lower the barrier of entry for the separation architecture and enable its benefits for more projects.
-* Beyond being a potentially cheaper sep-arch it can also have some more benefits. Cheaper partitions can enable a stronger architecture that can strengthen the devices safety and development efficiency.Hypervisor scales better and can therefore support more granular partitions. This can aid modifiability and regression analysis.
-* The centralized nature can furthermore enable it to work as an effective system monitor
-* List the wants it negatively and positively impacted and how.
+% KEEP IT SHORT AND SIMPLE! DO NOT REPEAT YOURSELF!
+With that out of the way, let's summarize the hypervisor benefits 
+and drawbacks theorized in this section.
 
--> This theoretical analysis presented the broad differences between the architectures and how they may influence safety-critical device design. To equip the reader with a stronger toolset for making the final decision the next chapter will go into more detail on the hypervisor architecture and what it may look like.
+The \gls{HSS} architectures separation is implicitly achieved through not having shared components. This and the fact that it is a custom hardware solution should make achieving \keywregulatory{regulatory compliance} easier than in the hypervisor architecture. But the hypervisor certification artifacts can be reused in future projects with project specific risk analysis and modification. The same applies to faults contained in the architecture. Over many projects there is more time to fix bugs in the hypervisor. However, because the hypervisor architecture is more difficult to reconcile with redundancy it may prove inadequate in projects with extremely high criticality.
 
--> After this free form analysis of the two separation architectures it is now time
+A new implementation of the \gls{HSS} architecture is created for every device or device family. A hypervisor on the other hand, is a software solution capable of running on any typical hardware with minor modification. This means the cost of the hypervisor development can be spread across multiple projects. Furthermore, because it is software, it is much more modifiable and additional features can be added both before and after release. Another theorized cost benefit is associated with its positive impact on \gls{SWaP} (Size, Weight and Power). The one slightly stronger processor that can host the hypervisor and all its partitions is likely to be cheaper than two separate processors with duplicate peripherals and memory. But this ultimately depends on the exact hardware and circumstances. It can be said however, that the advantage in \gls{SWaP} is a tremendous benefit for the hypervisor in smaller, battery powered devices.
 
+Development time and cost are intrinsically linked and a case can be made that the hypervisor has an advantage here, even if the quantities are uncertain. Because it is general and reusable, less development time needs to be spent on the architecture and its hardware abstraction may decrease the effort of the business software as well, if used correctly. In any case the abstraction will make significantly more likely that the software can be reused, reducing the development time of a future device.
+Additionally, while using unverified third-party or open-source software is possible on both separation architectures if at all, it is more likely to pay off with the cheaper hypervisor partitions because it can be isolated to the most granular level.
 
-* Not quit the same level of safety probably but as far as we know sufficient in most cases. Has to be analyzed for each individual project
-* License cost is unclear and depends on the project but if it is cheaper than HSS mixed criticality could be cheaper to integrate
--> Definitely a win in SWaP
-* 
+% Single point of failure?
+A strong modular architecture requires that additional modules can be added at a low cost. In this manner a hypervisor can help improve the software architecture of the device and consequently help with all aspects of fault reduction. Furthermore, its centralized view on the system allow the hypervisor to provide unique information to the manufacturer during development and runtime, further improving the devices fault tolerance.
+But it is still ultimately on the device manufacturer to make use of this property.
 
-* Now the general qualitative differences that can be expected between HSS and HV have been established it has become evident that a hypervisor can add value through more scalable separation and features beyond. As a software solution it can incoroporate many smaller features that would not be possible in HSS.
-* Now let's get into some specific examples to highlight when it should best be used and what should be considered when choosing an implementation.
+One last big potential benefit of the hypervisor is that the combination of it being a software solution and the cheap partitions, lead to a more extendable device. Software updates can be deployed to the device to add new partitions and modify existing ones, while also enabling efficient regression testing through separation.
+
+To conclude: Even though the hypervisor does not have perfect separation its scalability and features beyond the separation can add a lot of value to the project. In the next chapter it will become clearer when each benefit and downside may be at its most pronounced.

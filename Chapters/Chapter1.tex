@@ -133,6 +133,7 @@ Second, two units of a device are only allowed to be implemented according to di
 % NOTE There is a weird jump from the last section to this one
 This constellation of heterogeneous criticality levels within the device is very common and usually referred to as mixed criticality. Its motivations and problems will be explored in the next section.
 \subsection{Mixed criticality} \label{mixed-criticality}
+% IMPORTANT introudcue this a bit better. Distinguish between the criticality that a component logically has and the criticality it will be certified to
 \subsubsection{Motivations}
 % NOTE Unhappy with the word assigning
 The core motivation for assigning different criticality levels within a device has already been mentioned; it is cheaper to implement and verify a low criticality part \cite{perez2013safety}. But this is not the only motivation, as it only applies to functionality that is implemented by the \mfg{} and not by a third-party.
@@ -147,7 +148,7 @@ The uncomfortable reality is that mixed criticality is most beneficial in the ca
 Now it is clear why mixed criticality is actually a desirable property in a lot of devices. It can save cost and time, as well as provide functionality indirectly that would have been infeasible to realize without.
 \subsubsection{Problems}
 % NOTE Make sure the point I reiterate here is clearly made in the previous section
-As alluded to earlier, mixed criticality does not come without problems. Regulatory standards require sufficient evidence for independence between functions of different criticality be shown to them \cite{IEC.2010-1}\cite{IEC.2010-2}. If \mfg{} can not provide this evidence all functions need to comply to the highest criticality level.
+As alluded to earlier, mixed criticality does not come without problems. Regulatory standards require sufficient evidence for independence between functions of different criticality be shown to them \cite{IEC.2010-1}\cite{IEC.2010-2}. If \mfg{} can not provide this evidence all functions need to comply to the highest criticality level. 
 
 Sufficient independence is given, if it can be shown that a dependent failure between the higher and lower criticality function is sufficiently low in the context of the highest level.
 To achieve this, a system architecture is required that can reliably separate components. The precise requirements this separation architecture needs to fulfill will be tackled in the next section.
