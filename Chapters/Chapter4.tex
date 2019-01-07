@@ -26,12 +26,11 @@ Even though the hypervisor can be supported by hardware the separation is still 
 
 % TODO Try to find sources for these claims and explain them more deeply
 % NOTE Have I ever explained the difference between random and systematic faults
-There are a number of differences between hardware and software developments that are relevant to this analysis.
+% IMPORTANT This is missing something
+There are a number of differences between hardware and software developments that are relevant to this analysis. 
 \begin{itemize}
-\item Software is cheaper to change than hardware. 
+\item Software is easier to change than hardware. 
 \item Hardware complexity is restricted by physical laws. Software complexity is only really limited by our ability to manage it.
-\item Software is more likely to contain unfound systematic faults.
-\item Software is more expensive to verify as a result.
 \end{itemize}
 \subsection{Specialized or general}
 A hypervisor is a general software solution that is meant to be usable in a lot of cases with minor modification. It is often procured from an external company and not developed in-house specifically for a project.
@@ -89,7 +88,7 @@ However, this use case is different from the pure mixed criticality problem. If 
 % NOTE This makes more sense here but kind of violates the want structure  because there is already a cost want
 \paragraph{Certification cost}
 % TODO Figure out the hardware software difference and finish this section.
-Statistically speaking it is usually cheaper to verify a device's hardware than its software. Software  [Unfinished, because this claim is unclear]
+% IMPORTANT include a part about hardware vs. software! And differentiate between certifying hypervisor and business software
 
 % Is this a mute point?
 Since the lowest level of the hypervisor needs to be reimplemented for every platform, the hypervisor also needs to be reverified for every platform. However, this does not need mean the previous efforts are irrelevant. A case on regression analysis can be built.
@@ -117,7 +116,7 @@ The \gls{HSS} architecture provides the best possible safety and separation, eve
 
 %----------------------------------------------------------------------------------------
 
-\section{Lowest possible cost and keeping the schedule}
+\section{Lowest possible cost}
 \paragraph{Development costs}
 Unfortunately, there is no general quantitative analysis of the development costs associated with the two architectures. Hypervisor developers do not make their license costs, or even their license models, public, as they are subject to negotiation and dependent on other factors like amount of produced units among other things. Since the \gls{HSS} architecture is usually a custom solution its price is equally difficult to predict. Nevertheless, there are some arguments that can be made on the relative price differences. 
 
@@ -126,16 +125,10 @@ Hypervisors, whether written in-house or by a third-party, are meant to be gener
 But there is a problem with general solutions: It is possible that the manufacturer is forced to pay for functionality he would not have included in the device, had he used a specialized architecture. 
 
 In the hypervisor architecture the manufacturer also needs to pay the potential license costs for the operating systems, running on the device, on top of the original hypervisor license costs.
- 
-
-% TODO Think about this point and incorporate it
-* Mention how the cost not being known impacts the analysis. HV is really only interesting if it can be done cheaper than HSS and enable mixed criticality in different scenarios and projects. 
 
 \paragraph{Hardware costs}
 % TODO Read this again.
 Each additional subsystem in the \gls{HSS} architecture will add another processor, memory and peripherals and consequently increase the device's hardware cost significantly. A hypervisor would usually require a more advanced processor with slightly more memory and computational power but this is less expensive in most cases [source Roy Master thesis?]. Additionally, most peripherals can be shared between hypervisor partitions with some exceptions.
-* Higher Size, weight and power means higher material cost per unit
-	* I kind of need to quantify the cost difference between two smaller CPUs 		+ duplicate peripherals and one slightly bigger CPU with potentially 		shared peripherals
 
 \subsection{Optimal time to market}
 In section \ref{optimal-ttm} the concepts of \keyword{attractive and must-be functional requirements}, as well as the\keyword{ideal time to market} have been introduced. Now it will be analyzed how each architecture can impact the time to market and therefore not only the unit cost of the device but also what features are feasible to integrate.
@@ -151,7 +144,7 @@ One last type of time saving factor is the impact on the development process its
 
 %----------------------------------------------------------------------------------------
 
-\section{As few faults as possible [feasible?] in the end product}
+\section{As few faults as feasible in the end product}
 There are two ways for an architecture to influence the faults in a device. First, the architecture itself may be faulty. Second, the architecture may impact the faults in the business software on top of the architecture positively or negatively.
 
 % https://docs.microsoft.com/en-us/previous-versions/msp-n-p/ee658124(v=pandp.10)
@@ -171,8 +164,6 @@ General solutions, like the hypervisor, are reused over a long period of time an
 But hypervisors have a significant disadvantage, they represent a single point of failure in the system. This probably has the biggest implications for security but is also very important for safety. For some systems a single point of failure might not be tolerable at all for others the hypervisor's unerring functionality just needs to be sufficiently evidenced. Perhaps even going as far as \keyword{formal verification} [source seL4].
 
 % TODO Include hardware vs software points
-[* Hardware vs. software]
-* Complexity breeds faults
 
 % NOTE Is "reducing" the best term?
 \paragraph{Reducing the frequency of fault implementation}
@@ -217,13 +208,7 @@ The effects of the decentralized nature of the \gls{HSS} architecture, laid out 
 
 Finally a slightly different point: Environmental protection is becoming increasingly more important for consumers and companies as a method of differentiation from competitors. The \gls{HSS} architecture not only increases the size of the device, relative to the hypervisor architecture but also the material used. This increases the ecological footprint of the device and can compromise an otherwise sleek design.
 
-%----------------------------------------------------------------------------------------
-
-\section{Low risk / Low variance}
-% TODO These points are mentioned elsewhere. I think I had something elsewhere in my notes that I wanted to put in this section. Otherwise delete this.
-* In the conservative realm of safety-critical device manufacturing, the hypervisor is still a new technology and as such regarded with skepticism. "Proven in use" is still an important argument for a technologies safety
-* Software solutions ultimately involve more risk than hardware solutions.
-* 
+%--------------------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------------------
 

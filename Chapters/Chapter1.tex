@@ -16,11 +16,25 @@
 \newcommand{\mfg}{manufacturer}
 \newcommand{\gls}{}
 
-\section{Goals}
+Conservatism is very prominent in the safety-critical device industry and rightfully so. Using the latest, barely tested technology in a device on which many lives may depend on is probably not a good idea. That is why any new technology that does actually get serious attention is all the more exciting. The safety hypervisor is one of such technologies. Specifically the aviation and automotive industry have made advances in this territory \cite{reinhardt2014embedded} \cite{vanderleest2015mpsoc}. Their drive for hardware consolidation and accommodating multicore architectures in strict regulatory environments has made innovation necessary.
 
-%----------------------------------------------------------------------------------------
+% TODO More sources?
+Some prior research and real-world deployments have shown that hypervisors can be used in safety-critical devices from a regulatory standpoint \cite{larrucea2015modular}.
+This thesis will now examine the broader reasons for using hypervisors, not just in the context of extremely complex endeavours like aviation and automotive, but also in industries that typically deal with smaller devices. After the introduction of some basic concepts, the hypervisor will be compared to the status quo of comparable architectures and from this theoretical analysis, essential device categories will be extracted. These serve as a connection between the abstract analysis and the concrete world and will be presented as "example projects".
+This approach should enable the safety-critical device engineers reading this thesis, to construct powerful arguments for or against the hypervisor architecture in the context of their real-world project.
 
-\section{Methods}
+\begin{comment}
+* This thesis about using embedded hypervisors in safety-critical devices.
+* They have already been deployed in some instances but research is still rare (list some)
+    -> It has been shown that they can be used though 
+    -> And their overall benefits
+* They are still mostly confined to one or two  industries
+* The goal of this thesis is to actually provide some theoretical basis for when and why this architecture should be used. Especially, beyond the scope of the somewhat established industries.
+
+* Methodology
+* Outline order of information
+* Terms and scope (!)
+\end{comment}
 
 %----------------------------------------------------------------------------------------
 
@@ -43,16 +57,18 @@ The legal entity responsible for designing and manufacturing the device will be 
 The main goal of safety-critical device manufacturers is to create a safe device. This protects them from expensive lawsuits and can give them a competitive advantage.
 
 % TODO Think about more commonalities and maybe refactor this
-However, in most markets, a favourable real-world safety alone is not enough to gain permission to sell the device.  Each market (medical, nuclear, aviation etc.) and regulatory body (EU, US etc.) has their own standard for normative safety that needs to be met. This thesis will lean mostly on IEC 61508 \cite{IEC.2010-1}\cite{IEC.2010-2}\cite{IEC.2010-3} because it represents a general standard from which many others derive. And although there are important differences that need to be kept in mind, for the purpose of this thesis the standards are similar enough to be interchangeable. [source or further justification?]
+However, in most markets, a favourable real-world safety alone is not enough to gain permission to sell the device.  Each market (medical, nuclear, aviation etc.) and regulatory body (EU, US etc.) has their own standard for normative safety that needs to be met. This thesis will lean mostly on IEC 61508 \cite{IEC.2010-1}\cite{IEC.2010-2}\cite{IEC.2010-3} because it represents a general standard from which many others derive. And although there are important differences that need to be kept in mind, for the purpose of this thesis the standards are similar
+enough to be interchangeable. 
+% NOTE [source or further justification?]
 
 The specific instructions and required level of rigour differ between the standards but they usually share the following requirements:
 
 \begin{itemize}
-\item A compliant quality management system needs to be used
-\item Device requirements need to be analyzed
-\item Requirements need to be verified
-\item Unreasonable risk needs to be reduced
-\item Extensive documentation on all aspects of design and manufacturing needs to be created
+\item A compliant quality management system needs to be used.
+\item Device requirements need to be analyzed.
+\item Requirements need to be verified and compliance tested.
+\item Unreasonable risk needs to be reduced.
+\item Extensive documentation on all aspects of design and manufacturing needs to be created.
 \end{itemize}
 
 The \mfg{} also has to present the documents that he generated along the way to the authorities. There are exceptions to this rule, if third-party or legacy parts are used but these need to be justified as well. Therefore, it is usually infeasible to certify a device after the development process, if it was not designed with certification in mind. 
@@ -63,14 +79,15 @@ The rigour that is demanded by regulatory bodies is dependent on the risk catego
 
 \subsubsection{Criticality levels}
 % TODO Verify that this is actually all true
-% REWRITE 
-[Unhappy with how this section is written]
+% REWRITE !
 IEC 61508 calls criticality levels \keyword{Safety integrity levels} or  \gls{SIL} for short. The standard defines \keyword{safety integrity} as \textquote{the likelihood of a safety-related system satisfactorily performing the required safety functions under all the stated conditions, within a stated period of time}\cite{IEC.2010-1}. The SIL of a safety function is the target probability of a dangerous failure occurring within a certain time [Table of probabilities is not yet added]. In IEC 61508 there are safety integrity levels from 1 to 4, where SIL 1 is the lowest and SIL 4 the highest. The level basically defines the rigor that is required during the development process.
+% TODO Add probability table
 
 % TODO Maybe explain the basics of the risk assessment in IEC 61508
 Risk assessment is the process that drives the categorization of a system into the safety integrity levels and if the SIL of a system is too high it can be reduced by introducing risk mitigation mechanisms. For example, if the software of a device would be SIL 4 initially, it might be reduced by adding a second processor that runs distinct software, that can verify the validity of the initial software's output.  In fact SIL 4 is considered too high to be feasible and is practically always reduced \cite{MTLInstrumentsGroup.March2002}.
 
-[I will also give an outline of the medical software classes, how they are different, and why the differences aren't really that important for this thesis]
+% TODO Consider explaining additional regulations
+
 
 \begin{comment}
 \begin{table}[H]
@@ -205,9 +222,10 @@ Temporal separation is usually not possible and may even be counter-productive t
 [I might have confused temporal separation with being able to satisfy real-time requirements in the preceding section]
 
 % REWRITE This section is a bit strange
-Undoubtedly these efforts have been at least somewhat successful as Linux has been successfully deployed in some safety-critical systems with hard real-time requirements. One big issue remains however, Linux is massive with several millions lines of code and safety can only be reasoned about on the basis of its "proven in use" status [Maybe mention Roche Linux as a counter example]. This is not enough for most regulatory bodies, especially in devices with high criticality, where the benefits of mixed criticality are the most pronounced.
+Undoubtedly these efforts have been at least somewhat successful as Linux has been successfully deployed in some safety-critical systems with hard real-time requirements. One big issue remains however, Linux is massive with several millions lines of code and safety can only be reasoned about on the basis of its "proven in use" status. This is not enough for most regulatory bodies, especially in devices with high criticality, where the benefits of mixed criticality are the most pronounced.
 
-Another big problem is damage limitation. While more and more Linux drivers are implemented in user space, a considerable amount still has to be in kernel space [Point could be stronger]. Failures in these drivers can potentially cause a kernel panic, prompting the device to shut down. 
+% TODO Fix strange example
+Another big problem is damage limitation. While more and more Linux drivers are implemented in user space, a considerable amount still has to be in kernel space . Failures in these drivers can potentially cause a kernel panic, prompting the device to shut down. 
 
 Perhaps Linux, or another, yet unknown GPOS, will be able to solve the mixed criticality problem directly but for now it will be excluded from further analysis, on the grounds that it can not satisfy the separation architecture requirements well enough for a large set of safety-critical devices.
 \subsubsection{Real-time operating system}
@@ -223,7 +241,7 @@ Although the RTOS architecture remains quite a dominant one, it quickly loses it
 \subsection{AMP / Multicore system}
 More and more silicon vendors are offering multicore systems with a dedicated safety and a support core. These are usually heterogeneous processors with one application core, like an ARM Cortex A7, and one microcontroller core, like an ARM Cortex M4. Proving temporal separation on these systems is typically not difficult, as the cores are physically separated \cite{Wittenstein.temporal.2017}.
 
-But the cores in these systems share hardware resources like peripherals and memory. Consequently, it can be challenging to show sufficient evidence for spatial separation. An \gls{MMU} or \gls{MPU} can be useful to enforce spatial separation but it is not a perfect solution, especially for peripherals [Why?]. 
+But the cores in these systems share hardware resources like peripherals and memory. Consequently, it can be challenging to show sufficient evidence for spatial separation. An \gls{MMU} or \gls{MPU} can be useful to enforce spatial separation but it is not a perfect solution, especially for peripherals.
 \subsection{Hardware supervised AMP / Hardware supervised Multicore system}
 These systems are identical to the ones described in the previous section, except they contain additional hardware to control and arbitrate peripheral access, as well as providing inter-core communication.
 Because there is no standard for this, the implementation is entirely up to the silicon vendor. 

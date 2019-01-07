@@ -77,16 +77,16 @@ This analysis is only based on the theoretical concepts and does not mean a Kano
 % TODO Maybe elaborate on TTM benefits
 Projects typically have an ideal time to market \cite{clark1989project}\cite{stalk1988time} that maximizes potential revenue and units sold. If some functionally takes less time to implement, more can be achieved within this ideal timeline. Especially, attractive requirements can be more easily considered and give the manufacturer an edge over his competitors. If the optimal time is missed and less overall units are sold the manufacturer can not take proper advantage of the economies of scale. More overall produced units means more components can be bought, which drives down the price. One way to reduce the time it takes to include functionality is to use third-party software, either free open-source or paid for. 
 
-\section{As few faults as possible}
+\section{As few faults as feasible}
 % TODO Also talk about fault severity. If an architecture doesn't reduce the total amount of faults but reduces the amount of faults that lead to defects or severe defects, it is still a win
 % NOTE what is "possible"
 % NOTE I exclusively mention software faults here!
 % NOTE I think I accidentally took away some content from "Maintainability"
 Faults are undesirable in any engineering environment but they are especially undesirable in safety-critical devices. They are inherently unpredictable and can incur significant costs, both directly through the cost it takes to find and fix them and indirectly through customer dissatisfaction among other things.
 
-Reducing the amount of faults to a minimum has multiple dimensions. 
-[I mention mostly how software architecture addresses these problems. I plan to bridge the gap between software architecture and general architecture in a previous sections. However, any hardware perspective would be very much appreciated!]
+Reducing the amount of faults to a minimum has multiple dimensions:
 \paragraph{Reducing the frequency of fault implementation}
+% TODO Intro & glue
 It is still the common understanding that all non-trivial software that isn't formally verified will contain faults \cite{Klein.2009}. But in the decades since the software crisis it has become evident that development processes and architectures can have a positive impact on how many bugs are built into the software \cite{Randell.1996}.  
 \paragraph{Finding faults effectively}
 But not just frequency of fault implementation can be improved by a strong architecture. After a significant period of sophisticated testing, almost all "hard" bugs will be found. That is bugs that can be found easily and reliably
@@ -109,14 +109,24 @@ If a fault never manifests in a defect in the first place it also can't cause an
 Ideally,  a fault only affects the parts it absolutely has to. An unrecoverable defect in the USB driver, for example, would ideally only cause the USB port to stop working and nothing else. A negative example of this would be if the fault instead caused a kernel panic that prompted the entire system to go down immediately.
 \paragraph{Fault tolerance}
 % TODO Maybe at least explore some examples
-This is typically referred to as fault tolerance. There are many ways to achieve this relating to both hardware and software [Link some sources]. [Some more examples will be explored in the analysis of the architectures]
+Even in the event of a fault, a lot of safety-critical systems have to continue functioning. This often involves recognizing the fault and reacting to it or even complete redundancy of the system.
 
-\section{Engaged and satisfied employees}
+\section{Human factors}
+Even human factors can not be left unconsidered in such an important architectural decision. First and foremost there is the importance of the manufacturers employees. If they are unhappy with their work, they are more prone to errors.
+
+One example of this could be a difficult to work with piece of software that requires performing many repetitive tasks. Repetitive tasks are shown to decrease efficiency and increase the chance for mistakes \cite{Wyatt.1937}. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. In this instance the employee dissatisfaction is only an indicator for a hidden root cause.
+
+% first version
+\begin{comment}
 This \textit{want} may seem odd at first [Is saying this unprofessional?] but employees are the ones that are ultimately responsible for the success and failure of the project.
 
 If we take software tools as an example: The software could be difficult to work with or include many repetitive tasks. Repetitive tasks are shown to decrease efficiency and increase the chance for mistakes \cite{Wyatt.1937}. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. For example a software tool that is overly complicated. In this instance the employee dissatisfaction is only an indicator for a hidden root cause.
 
 An employee that is unsatisfied with his job, for whatever reason, is also more likely to leave the company. If the person was critical to the project this can have hugely detrimental effects. Furthermore, if enough key people leave, the entire project can be endangered. 
+\end{comment}
+
+% ---- OLD RISK ----
+\begin{comment}
 \section{Worthwhile risk / Low negative variance}
 % Beginning of rewrite
 Understandably, the world of safety-critical device manufacturers is a conservative one indeed. [...]
@@ -131,14 +141,12 @@ Which risks are considered "worthwhile" is very dependent on other circumstances
 Whenever there is an associated hardware , future-proof design is especially important. Software can be reproduced and shipped with practically no cost but devices can not. Any features that have been forgotten can only be added once the next major hardware revision is released.
 
 Safety-critical devices are particularly notable in this respect, since they are often very complex and have an expensive engineering process. Airplanes are typically used for 3 decades and hospitals have notoriously tight budgets and have to squeeze as much lifetime out of their devices as possible. 
-\subsection{Extendibility}
-Nowadays it is becoming increasingly more plausible that it is possible to deliver software updates to an embedded device \cite{OndrejKachman.2016}. Along with the previously mentioned long life cycle it is a beneficial strategy [what do I mean by that], if not an expected service, to provide updates for the device.
+\end{comment}
+\subsection{Extendibility and maintainability}
+Nowadays it is becoming increasingly more plausible that it is possible to deliver software updates to an embedded device \cite{OndrejKachman.2016}. Along with the previously mentioned long life cycle it is a beneficial strategy, if not an expected service, to provide updates for the device.
 If the device's hardware supports it, new features could be implemented but the currently more typical scenario are updates of a more basic kind. Meaning, bug fixes and security updates.
 
 In any case an easily extendable device can have significant benefits.
-\subsection{Maintainability}
-% Relates to faults as described above but also changing functionality
-[I ended up explaining a lot of this in the "faults" section, I am currently thinking about how to best reconcile that]
 \subsection{Reusability}
 This \textit{want} relates to another aspect of future oriented design. Towards the end of a device's life cycle, manufacturers are starting to plan the next generation with upgraded hardware and new features. If the software from the previous generation is reusable and suitably portable, a lot of time and money can be saved on this new generation.
 

@@ -59,10 +59,12 @@ The typical hypervisor supports several different guest environments.
 A key distinction between virtualized guest environments is their virtualization type \ref{hw-virt}. Expect paravirtualization to always be available in a hypervisor, full virtualization support on the other hand is more rare. One reason could be that virtualization extensions are still relatively new, especially on ARM processors. In any case, full virtualization can only be offered if the platform supports hardware virtualization extensions.
 
 % NOTE Meh...
-There also appears to be some contention on whether or not full virtualization can be as performant, and more importantly as deterministic, as paravirtualization [are there sources?]. A lack of determinism could endanger certification, if the device has hard real-time requirements. This thesis does not try to offer evidence for either claim, whether or not full virtualization can be justified in front of the regulatory body depends on the specific scenario. 
+% TODO Source?
+There also appears to be some contention on whether or not full virtualization can be as performant, and more importantly as deterministic, as paravirtualization. A lack of determinism could endanger certification, if the device has hard real-time requirements. This thesis does not try to offer evidence for either claim, whether or not full virtualization can be justified in front of the regulatory body depends on the specific scenario. 
 
 % TODO Move this section
-[This section goes into too much qualitative analysis and will probably be moved] Nevertheless, the importance of the outcome is likely not trivial, since full virtualization has a number of advantages: First, it means the cost and time of modifying the guest operating system can be saved. Alternatively, it could be reduced by using an already modified \gls{OS}, provided by the hypervisor developer but this is bound to be a very restricted choice that further increase the dependence on the developer.
+% IMPORTANT Move it!
+Nevertheless, the importance of the outcome is likely not trivial, since full virtualization has a number of advantages: First, it means the cost and time of modifying the guest operating system can be saved. Alternatively, it could be reduced by using an already modified \gls{OS}, provided by the hypervisor developer but this is bound to be a very restricted choice that further increase the dependence on the developer.
 
 Second, the amount of viable operating systems is higher. The modification efforts to an \gls{OS} can only be made if the source code is available, but for many commercial products this is not the case. 
 
