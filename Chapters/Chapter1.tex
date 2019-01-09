@@ -234,22 +234,23 @@ Providing temporal separation is practically the main purpose of an RTOS, so the
 
 One thing to keep in mind though is that a lot of RTOS developers offer no multicore support, which can severely limit the complexity of an application. But perhaps the biggest limitation of application complexity on the RTOS architecture is its narrow target audience.
 
-As a result of this, there is a distinct lack of sophisticated middleware [source?]. Especially cutting edge usability technology, like touch gesture recognition [Pretty strange example...], is likely not available on these platforms. At the same time consumers are becoming increasingly adept at recognizing good design and are demanding strong user interfaces \cite{HBR.September2015}.
+% TODO Fix example
+As a result of this, there is a distinct lack of sophisticated middleware [source?]. Especially cutting edge usability technology, like touch gesture recognition, is likely not available on these platforms. At the same time consumers are becoming increasingly adept at recognizing good design and are demanding strong user interfaces \cite{HBR.September2015}.
 Additionally, a problem outlined in the section \ref{mixed-criticality} applies to RTOS middleware as well: These libraries have a similarly narrow target audience and can therefore be quite expensive for the functionality they offer.
 
 Although the RTOS architecture remains quite a dominant one, it quickly loses its appeal with growing application complexity. Therefore it will be excluded from further analysis in this thesis.
-\subsection{AMP / Multicore system}
+\subsection{Multicore system}
 More and more silicon vendors are offering multicore systems with a dedicated safety and a support core. These are usually heterogeneous processors with one application core, like an ARM Cortex A7, and one microcontroller core, like an ARM Cortex M4. Proving temporal separation on these systems is typically not difficult, as the cores are physically separated \cite{Wittenstein.temporal.2017}.
 
 But the cores in these systems share hardware resources like peripherals and memory. Consequently, it can be challenging to show sufficient evidence for spatial separation. An \gls{MMU} or \gls{MPU} can be useful to enforce spatial separation but it is not a perfect solution, especially for peripherals.
-\subsection{Hardware supervised AMP / Hardware supervised Multicore system}
+\subsection{Hardware supervised multicore system}
 These systems are identical to the ones described in the previous section, except they contain additional hardware to control and arbitrate peripheral access, as well as providing inter-core communication.
 Because there is no standard for this, the implementation is entirely up to the silicon vendor. 
 
 Although this hardware supervision has limited functionality, it has a clear advantage over comparable software solutions, like a hypervisor: Hardware is less error prone than software and this is recognized by regulatory bodies. Software typically has to adhere to a more rigorous development and verification process \cite{IEC.2010-3}. It is therefore possible that these systems are cheaper than hypervisors overall. 
 
 This architecture should be considered when designing a safety-critical device but it is still fairly new and a full analysis of it is not in the scope of this thesis.
-\subsection{Hardware separated subsystems / Multiprocessor system \label{HSS}}
+\subsection{Hardware separated subsystems \label{HSS}}
 % NOTE review http://www.ia.pw.edu.pl/~tkruk/edu/eopsya/lecture/eopsy08.pdf and http://www-5.unipv.it/mferretti/cdol/aca/Charts/07-multiprocessors-MF.pdf and if these are viable
 % TODO https://witekio.com/blog/introduction-heterogeneous-multicore-processing-architecture/ Read about the need for software support on this architecture
 % TODO actually explain what they are

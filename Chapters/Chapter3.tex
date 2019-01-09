@@ -22,8 +22,7 @@ The two separation architectures that will be analyzed in \ref{Chapter4} are the
 To achieve this a list of criteria will be proposed that will serve as a categorization tool for the analysis.
 This list comprises the key wants that manufactures of safety-critical devices want to achieve, when engineering a device. A want can be understood as a business driver for device manufacturers. Fulfilling all wants to the best degree possible, would result in a perfect device. These idealized wants will be used to compare the hypervisor architecture to other device architectures and recommend the features to look for, when choosing a real-world hypervisor implementation.
 
-In an ideal world each want could be satisfied individually but in reality they have complex interactions and need to be carefully balanced. The specifics of these interactions will be explored in more detail later.
-
+In an ideal world each want could be satisfied individually but in reality they have complex interactions and need to be carefully balanced. 
 Additionally they are not equally desirable for every device. Some devices, for example, might have less potential for causing damage and therefore need to adhere to less strict safety regulations. Therefore choosing the absolute safest architecture is not paramount for the devices success.
 
 \section{Safety}
@@ -35,7 +34,7 @@ Because of this, it is often beneficial for the manufacturer to ensure higher sa
 \subsection{Regulatory compliance}
 %[This section is kind of a duplicate of a section in Chapter 1]
 To protect the end-customer of safety-critical devices, most regulatory bodies implement rules that govern how safety-critical devices have to be engineered and what quality level they have to fulfill.
-Failing to achieve this is even more costly than lawsuits, since it will disallow the manufacturer from selling the device in the first place. All regulatory bodies then allow the manufacturer to make adjustments to his compliance documentation but for most regulations it’s not just enough to prove that the end result has a high level of quality, the engineering process itself needs to be of high quality as well. This means that it is normally completely infeasible to make a device safe in the eyes of the law, if it has not been developed with this goal from the start. 
+Failing to achieve this is even more costly than lawsuits, since it will disallow the manufacturer from selling the device in the first place. The regulatory bodies then allow the manufacturer to make adjustments to his compliance documentation and resubmit the device. For most regulations it’s not just enough to prove that the end result has a high level of quality, the engineering process itself needs to be of high quality as well. This means that it is normally completely infeasible to make a device safe in the eyes of the law, if it has not been developed with this goal from the start. 
 
 And while regulatory bodies almost always find some problems in the compliance, fixing them will cost additional money and time and getting it right the first time is therefore desirable.
 
@@ -43,7 +42,7 @@ And while regulatory bodies almost always find some problems in the compliance, 
 % NOTE I am only looking at it from a safety perspective but there can also be usability implications.
 As a special safety requirement, some devices have to guarantee that an event can be completed in a certain amount of time \cite{shin1994real}. This has a significant impact on the entire device architecture, from the hardware, through the operating system to the actual application. Which is why it deserves special consideration.
 
-The actual time frame that has to be guaranteed can vary wildly and whether it is 500ms or 50ns does have an impact on how the device needs to be implemented. However, the analysis in the later parts of the thesis will focus more on the core architectural differences that make satisfying this requirement possible in the first place. 
+The actual time frame that has to be guaranteed can vary wildly and whether it is 500ms or 50ns does have an impact on how the device needs to be implemented. However, the analysis in the latter parts of the thesis will focus more on the core architectural differences that make satisfying this requirement possible in the first place. 
 
 \section{Lowest possible cost}
 % TODO Remember to include the distinction between initial and life-cycle costs
@@ -53,9 +52,7 @@ There are conceivable edge cases where a company might decide to go through with
 
 With this assumption in mind, every other want needs to be realized with the pressure of cost in mind. To analyze the architecture effects, cost will be split into multiple subcategories:
 \paragraph{Development costs}
-The biggest part of the development cost is based on how many developers work on the project, how  much they are paid and for how long they are working on the project. This is true for both hardware and software but the specific numbers may differ. 
-
-If third-party software is used, the corresponding license costs are another factor. 
+The biggest part of the development cost is based on how many developers work on the project, how  much they are paid and for how long they are working on the project. This is true for both hardware and software but the specific numbers may differ. If third-party software is used, the corresponding license costs are another factor. 
 \paragraph{Hardware costs}
 How much the hardware in the device costs can be very important in some projects. Most costs associated with development are one-time costs, while hardware costs have to be paid for each produced unit. Therefore, this is an especially important factor in devices that are produced in high volume.
 
@@ -69,8 +66,7 @@ the must-be requirements will only lead to a state of "not dissatisfied"} \autoc
 proportional to the level of fulfillment.}\autocite{ElmarSauerwein.1996}
 
 \paragraph{Attractive requirements} \textquote{Attractive requirements are
-neither explicitly expressed nor expected by the customer. Fulfilling these requirements leads to more
-than proportional satisfaction. If they are not met, however, there is no feeling of dissatisfaction.}\autocite{ElmarSauerwein.1996}
+neither explicitly expressed nor expected by the customer. Fulfilling these requirements leads to more than proportional satisfaction. If they are not met, however, there is no feeling of dissatisfaction.}\autocite{ElmarSauerwein.1996}
 
 This analysis is only based on the theoretical concepts and does not mean a Kano model analysis needs to be carried out. Furthermore, one-dimensional requirements will not be further considered as they can be simplified to be must-be requirements below zero satisfaction and attractive above zero satisfaction. 
 
@@ -82,29 +78,29 @@ Projects typically have an ideal time to market \cite{clark1989project}\cite{sta
 % NOTE what is "possible"
 % NOTE I exclusively mention software faults here!
 % NOTE I think I accidentally took away some content from "Maintainability"
-Faults are undesirable in any engineering environment but they are especially undesirable in safety-critical devices. They are inherently unpredictable and can incur significant costs, both directly through the cost it takes to find and fix them and indirectly through customer dissatisfaction among other things.
+Faults are undesirable in any engineering environment but they are especially undesirable in safety-critical devices. They are inherently unpredictable and can incur significant costs, both directly through the cost it takes to find and fix them and indirectly through customer dissatisfaction and damage caused.
 
 Reducing the amount of faults to a minimum has multiple dimensions:
 \paragraph{Reducing the frequency of fault implementation}
-% TODO Intro & glue
-It is still the common understanding that all non-trivial software that isn't formally verified will contain faults \cite{Klein.2009}. But in the decades since the software crisis it has become evident that development processes and architectures can have a positive impact on how many bugs are built into the software \cite{Randell.1996}.  
+% TODO Go into modular architecture benefits once that section exists 
+It is still the common understanding that all non-trivial software that isn't formally verified will contain faults \cite{Klein.2009}. But in the decades since the software crisis it has become evident that development processes and architectures can have a positive impact on how many bugs are built into the software \cite{Randell.1996}.  Measures that reduce the likelihood of fault implementation can avoid all costs associated with the faults entirely and can therefore bring the biggest improvements. 
 \paragraph{Finding faults effectively}
-But not just frequency of fault implementation can be improved by a strong architecture. After a significant period of sophisticated testing, almost all "hard" bugs will be found. That is bugs that can be found easily and reliably
-with standard techniques. Most of the remaining bugs will be "soft" bugs, often called "Heisenbugs" \cite{Gray.1986}. Named after the Heisenberg uncertainty principal because they often disappear when you look for them. 
+% TODO Go into modular architecture benefits once that section exists 
+But not just frequency of fault implementation can be improved by a strong architecture. After a significant period of sophisticated testing, almost all "hard" bugs will be found. That is bugs that can be found easily and reliably with standard techniques. Most of the remaining bugs will be "soft" bugs, often called "Heisenbugs" \cite{Gray.1986}. Named after the Heisenberg uncertainty principal because they often disappear when you look for them. Typically this is because the bugs are caused by complex interactions and race conditions that don't necessarily appear in the software debug environment.
 
-A system that can aid the discovery of these bugs, maybe through clever compartmentalization or logging, can save time and money.
+A system that can aid the discovery of these bugs, maybe through clever compartmentalization or logging, can save time and money for the manufacturer.
 \paragraph{Fixing faults effectively}
-% TODO Find some sources that detail how software architectures positively affect this. Concepts like "information hiding" "interfaces" etc. apply. The book clean code might be a good source
-% IMPORTANT Move thing from chapter 4 here
-Once a fault has been found it also has to be fixed. Software that is easy to modify usually utilizes the virtues of information hiding and similar  concepts [WIP]. Changing any line of code only has the readily apparent effect and no other part of the software is invisibly dependent on it.
+% NOTE Should this part be in the analysis instead? Maybe I should just say why its important. -> At the very least make sure that this point gets picked up in the analysis.
+% REWRITE Once the software architecture bridge has been moved to chapter 3
+% NOTE There is also more to this than just modularization making changes easier
+Once a fault has been found it also has to be corrected. Software that is easy to modify usually utilizes the virtues of information hiding and modularization. Changing any line of code only has the readily apparent effect and no other part of the software is invisibly dependent on it. If this property is not present in the device, there is a greater risk that new faults get introduced while trying to resolve the original fault. 
 
-How many work hours ultimately need to be invested into fixing the fault, really depends on the fault but a perfectly modifiable software will make it as easy as possible.
+How many work hours ultimately need to be invested into fixing the fault, depends on the fault but a perfectly modifiable device will reduce the associated risks.
 \subsection{The lowest possible fault severity}
 % TODO Agree on a definition for fault, error, defect etc. and then come back to this
-Having the smallest amount of faults possible is great but ideally these faults also cause the least amount of damage possible. 
+% UFF Laboured...
+Having the smallest amount of faults possible is great but ideally these faults also cause the least amount of damage possible. Actually, a part of fault severity is already included in the definition of criticality, as criticality is the function of possible damage and likelihood. Apart from the damage a fault may cause, its severity can be further broken down into the two categories below. In fact, improving fault isolation and fault tolerance can reduce the criticality of a safety function by reducing the maximum possible damage a fault may cause.
 
-% NOTE Does the explanation of why an informal definition is enough have a place here. Should I not mention it at all, should I explain it somewhere else?
-If a fault never manifests in a defect in the first place it also can't cause any damage. If it does however result in a defect its severity can be informally specified by a couple of factors. Using a formal definition is of little use here, as a comprehensive quantitative analysis of fault severity for the hypervisor architecture is out of the scope of this thesis. An informal definition will be enough as a basis for analytic reasoning on a theoretical level.
 \paragraph{Fault isolation}
 % PHRASING first sentence 
 Ideally,  a fault only affects the parts it absolutely has to. An unrecoverable defect in the USB driver, for example, would ideally only cause the USB port to stop working and nothing else. A negative example of this would be if the fault instead caused a kernel panic that prompted the entire system to go down immediately.
@@ -116,6 +112,11 @@ Even in the event of a fault, a lot of safety-critical systems have to continue 
 Even human factors can not be left unconsidered in such an important architectural decision. First and foremost there is the importance of the manufacturers employees. If they are unhappy with their work, they are more prone to errors.
 
 One example of this could be a difficult to work with piece of software that requires performing many repetitive tasks. Repetitive tasks are shown to decrease efficiency and increase the chance for mistakes \cite{Wyatt.1937}. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. In this instance the employee dissatisfaction is only an indicator for a hidden root cause.
+
+% TODO Incorporate both of these points into the analysis, if they are not there already
+Another aspect of this are the end customers of the safety-critical device manufacturer. Their desire for a high quality device is already encapsulated in the other key wants, this want is about more indirect customer demands. Two relevant representations of this are device design and ecological footprint. Customers are becoming increasingly aware of good design \cite{HBR.September2015} and this affects both the \gls{GUI} design as well as the physical design. 
+
+Ecological footprint is also becoming increasingly important for a companies public image. A development process that can reduce waste and used resources can help realize this want.
 
 % first version
 \begin{comment}
