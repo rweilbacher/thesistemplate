@@ -17,7 +17,7 @@
 
 \section{Further research}
 \paragraph{Analyzing the cost of hypervisor licences}
-While the true cost of a typical hypervisor license will likely continue to elude further because of the developer's secrecy, an educated estimation could likely be produced. If you look at the market of hypervisor implementation there appears to be the typical pattern of luxury solutions and basic solutions. A cost analysis of these categories based on known factors, like lines of code and list of features, while likely to be somewhat inaccurate would help immensely to quantify the difference between the \gls{HSS} and the hypervisor architecture.
+While the true cost of a typical hypervisor license will likely continue to elude further because of the developer's secrecy, an educated estimation could likely be produced. If you look at the market of hypervisor implementation there appears to be the typical pattern of luxury solutions and basic solutions. A cost analysis of these categories based on known factors, like lines of code and list of features, while likely to be somewhat inaccurate would help immensely to quantify the difference between the \arcshort{hss} and the hypervisor architecture.
 \paragraph{Quantifying the theoretical analysis proposed in this thesis}
 [...]
 %----------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ While the true cost of a typical hypervisor license will likely continue to elud
 \section{Technological progress} \label{tech-progress}
 \subsection{New hardware platforms}
 Probably the most notable development already on the horizon is the newest member of the ARMv8-R architecture. The ARMv8-R architecture is specifically designed for safety-critical environments with real-time requirements [source]. %https://developer.arm.com/products/architecture/cpu-architecture/r-profile
-The Cortex-R52 specification [source] has been released in 2017 and now the first silicon implementations are going into preproduction [source NXP S32S24]. It offers eight logical cores operating in dual core lock step, multiple safety features and typical \gls{DSP} functionality. Unusually for a microcontroller of this scope, it also contains an \gls{MPU} and hardware virtualization extensions. Furthermore, there is already an unreleased hypervisor that takes advantage of this new platform [source OpenSynergy]. This means that in the future the concerns with using application processors in real-time safety-critical devices will no longer apply.
+The Cortex-R52 specification [source] has been released in 2017 and now the first silicon implementations are going into preproduction [source NXP S32S24]. It offers eight logical cores operating in dual core lock step, multiple safety features and typical \arcshort{dsp} functionality. Unusually for a microcontroller of this scope, it also contains an \arcshort{mpu} and hardware virtualization extensions. Furthermore, there is already an unreleased hypervisor that takes advantage of this new platform [source OpenSynergy]. This means that in the future the concerns with using application processors in real-time safety-critical devices will no longer apply.
 
 \subsection{Sophistication of technology}
 Relatively speaking, embedded virtualization and safety-critical hypervisors are a very new technology. Once these technologies are used in more products and mature with their challenges a lot of the problems, established in this thesis will hopefully be proven obsolete, while the benefits will be even more pronounced. 
@@ -49,7 +49,7 @@ As a way to abstract the business goals of safety-critical device manufacturers,
 % NOTE In the current structure they did not emerge from it, crucial differences come first.
 Through the theoretical analysis in \ref{Chapter4}, some crucial differences between the architectures emerged:
 \begin{itemize}
-    \item The hypervisor's separation can not surpass that of the \gls{HSS} architecture.
+    \item The hypervisor's separation can not surpass that of the \arcshort{hss} architecture.
     \item Hypervisor is more modifiable and can provide smaller utility features.
     \item Hypervisor is a reusable, general solution, so costs are shared between parties over a period of time.
     \item Hypervisor's centralized view give it unique opportunities for system management and fault tolerance.
@@ -58,10 +58,10 @@ Through the theoretical analysis in \ref{Chapter4}, some crucial differences bet
 \end{itemize}
 
 % IMPORTANT Update this if I decide to add another reference project.
-The reference projects of section \ref{ref-projects} introduced two broad categories of safety-critical devices that could benefit from the hypervisor architecture. In the first device category, separation is becoming increasingly important because of growing user demands but the traditional \gls{HSS} architecture can not fulfill the requirements of the manufacturer. These devices are often hand-held and battery powered and are consequently very sensitive to negative changes in size, weight and power. All of which are negatively impacted by the \gls{HSS} architecture.
+The reference projects of section \ref{ref-projects} introduced two broad categories of safety-critical devices that could benefit from the hypervisor architecture. In the first device category, separation is becoming increasingly important because of growing user demands but the traditional \arcshort{hss} architecture can not fulfill the requirements of the manufacturer. These devices are often hand-held and battery powered and are consequently very sensitive to negative changes in size, weight and power. All of which are negatively impacted by the \arcshort{hss} architecture.
 Devices of this scope are also more likely to be produced in larger quantities, so the added hardware cost of a second processor would be quite undesirable.
 
-The second device category was one of much higher complexity, where a separation architecture would even be used if the hypervisor was not available. Devices in this category will often have more stringent regulations to follow, so the manufacturer will have a harder time deploying a hypervisor compared to the \gls{HSS} architecture. But if these challenges can be overcome, the hypervisor architecture can provide hardware consolidation and a more future-proof device.
+The second device category was one of much higher complexity, where a separation architecture would even be used if the hypervisor was not available. Devices in this category will often have more stringent regulations to follow, so the manufacturer will have a harder time deploying a hypervisor compared to the \arcshort{hss} architecture. But if these challenges can be overcome, the hypervisor architecture can provide hardware consolidation and a more future-proof device.
 
 * separation is becoming increasingly attractive because of growing consumer demands and processing power but the HSS architecture violates the core demands of the use case.
 * This example represents a high complexity, high criticality project that can already profit from the more traditional approaches of separation but where, in a reevaluation of device architecture, the hypervisor approach might come out on top.
@@ -77,7 +77,7 @@ Finally, the questions proposed in section \ref{how-to-decide} give a concrete l
 \end{itemize}
 Along with the noteworthy hypervisor implementations of section \ref{noteworthy-implementations} and the reference projects this should give the safety-critical device engineer, plenty of information to base his analysis on. 
 
-The hypervisor architecture for safety-critical devices is still young and connected to a lot of uncertainty but given time a place in the toolbox will be found for it. It is unlikely to be a complete replacement for hardware based separation architectures like the \gls{HSS} architecture but in a given niche it is certainly going to outperform the traditional architectures.
+The hypervisor architecture for safety-critical devices is still young and connected to a lot of uncertainty but given time a place in the toolbox will be found for it. It is unlikely to be a complete replacement for hardware based separation architectures like the \arcshort{hss} architecture but in a given niche it is certainly going to outperform the traditional architectures.
 
 
 \begin{comment} 

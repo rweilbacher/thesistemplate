@@ -14,7 +14,6 @@
 \newcommand{\option}[1]{\texttt{\itshape#1}}
 
 \newcommand{\mfg}{manufacturer}
-\newcommand{\gls}{}
 
 Conservatism is very prominent in the safety-critical device industry and rightfully so. Using the latest, barely tested technology in a device on which many lives may depend on is probably not a good idea. That is why any new technology that does actually get serious attention is all the more exciting. The safety hypervisor is one of such technologies. Specifically the aviation and automotive industry have made advances in this territory \cite{reinhardt2014embedded} \cite{vanderleest2015mpsoc}. Their drive for hardware consolidation and accommodating multicore architectures in strict regulatory environments has made innovation necessary.
 
@@ -80,7 +79,7 @@ The rigour that is demanded by regulatory bodies is dependent on the risk catego
 \subsubsection{Criticality levels}
 % TODO Verify that this is actually all true
 % REWRITE !
-IEC 61508 calls criticality levels \keyword{Safety integrity levels} or  \gls{SIL} for short. The standard defines \keyword{safety integrity} as \textquote{the likelihood of a safety-related system satisfactorily performing the required safety functions under all the stated conditions, within a stated period of time}\cite{IEC.2010-1}. The SIL of a safety function is the target probability of a dangerous failure occurring within a certain time [Table of probabilities is not yet added]. In IEC 61508 there are safety integrity levels from 1 to 4, where SIL 1 is the lowest and SIL 4 the highest. The level basically defines the rigor that is required during the development process.
+IEC 61508 calls criticality levels \keyword{Safety integrity levels} or  \acrshort{sil} for short. The standard defines \keyword{safety integrity} as \textquote{the likelihood of a safety-related system satisfactorily performing the required safety functions under all the stated conditions, within a stated period of time}\cite{IEC.2010-1}. The SIL of a safety function is the target probability of a dangerous failure occurring within a certain time [Table of probabilities is not yet added]. In IEC 61508 there are safety integrity levels from 1 to 4, where SIL 1 is the lowest and SIL 4 the highest. The level basically defines the rigor that is required during the development process.
 % TODO Add probability table
 
 % TODO Maybe explain the basics of the risk assessment in IEC 61508
@@ -213,9 +212,9 @@ There are some possible contenders for feasible separation architectures. This s
 Apart from bare-metal software, which is reserved for the most trivial cases,  embedded operating systems are the simplest approach to device architecture. 
 % NOTE Feels like there is also something missing here
 \subsubsection{General purpose operating system}
-Even though this section's title is \keyword{General purpose operating system} (GPOS) realistically it can be substituted with Linux, as other options are usually not considered adequate for embedded devices. But the same arguments should apply to other general purpose operating systems.
+Even though this section's title is \acrfull{gpos} realistically it can be substituted with Linux, as other options are usually not considered adequate for embedded devices. But the same arguments should apply to other general purpose operating systems.
 
-With the help of an \gls{MMU} or \gls{MPU}  a \gls{GPOS} can achieve the spatial separation of memory between applications. The operating system's access control may be used to limit peripheral access and drivers can arbitrate conflicts. 
+With the help of an \acrfull{mmu} or \acrfull{mpu}  a \acrshort{gpos} can achieve the spatial separation of memory between applications. The operating system's access control may be used to limit peripheral access and drivers can arbitrate conflicts. 
 
 % NOTE Am i confusing temporal separation with being able to satisfy real-time requirements?
 Temporal separation is usually not possible and may even be counter-productive to the standard processing model of general purpose operating systems, since they are designed to optimize average case performance and sacrifice determinism for it. There are however ongoing efforts to introduce temporal separation as well as the ability to reliably satisfy real-time requirements into the Linux kernel \cite{SiroArthur.2007}.
@@ -230,7 +229,7 @@ Another big problem is damage limitation. While more and more Linux drivers are 
 Perhaps Linux, or another, yet unknown GPOS, will be able to solve the mixed criticality problem directly but for now it will be excluded from further analysis, on the grounds that it can not satisfy the separation architecture requirements well enough for a large set of safety-critical devices.
 \subsubsection{Real-time operating system}
 % NOTE How do they deal with peripherals?
-Providing temporal separation is practically the main purpose of an RTOS, so there are no real problems on that front, and with the aid of an \gls{MPU} or \gls{MMU} spatial separation is also not a big issue.
+Providing temporal separation is practically the main purpose of an RTOS, so there are no real problems on that front, and with the aid of an \arcshort{mpu} or \arcshort{mmu} spatial separation is also not a big issue.
 
 One thing to keep in mind though is that a lot of RTOS developers offer no multicore support, which can severely limit the complexity of an application. But perhaps the biggest limitation of application complexity on the RTOS architecture is its narrow target audience.
 
@@ -242,7 +241,7 @@ Although the RTOS architecture remains quite a dominant one, it quickly loses it
 \subsection{Multicore system}
 More and more silicon vendors are offering multicore systems with a dedicated safety and a support core. These are usually heterogeneous processors with one application core, like an ARM Cortex A7, and one microcontroller core, like an ARM Cortex M4. Proving temporal separation on these systems is typically not difficult, as the cores are physically separated \cite{Wittenstein.temporal.2017}.
 
-But the cores in these systems share hardware resources like peripherals and memory. Consequently, it can be challenging to show sufficient evidence for spatial separation. An \gls{MMU} or \gls{MPU} can be useful to enforce spatial separation but it is not a perfect solution, especially for peripherals.
+But the cores in these systems share hardware resources like peripherals and memory. Consequently, it can be challenging to show sufficient evidence for spatial separation. An \arcshort{mmu} or \arcshort{mpu} can be useful to enforce spatial separation but it is not a perfect solution, especially for peripherals.
 \subsection{Hardware supervised multicore system}
 These systems are identical to the ones described in the previous section, except they contain additional hardware to control and arbitrate peripheral access, as well as providing inter-core communication.
 Because there is no standard for this, the implementation is entirely up to the silicon vendor. 
@@ -254,7 +253,7 @@ This architecture should be considered when designing a safety-critical device b
 % NOTE review http://www.ia.pw.edu.pl/~tkruk/edu/eopsya/lecture/eopsy08.pdf and http://www-5.unipv.it/mferretti/cdol/aca/Charts/07-multiprocessors-MF.pdf and if these are viable
 % TODO https://witekio.com/blog/introduction-heterogeneous-multicore-processing-architecture/ Read about the need for software support on this architecture
 % TODO actually explain what they are
-Multiprocessor systems or even completely separate subsystems are the current status quo for dealing with the mixed criticality problem. The multiprocessor architecture should not be confused with the multicore architecture, as it has distinct processors, usually with their own resources, on the same or even different \gls{PCB}s.
+Multiprocessor systems or even completely separate subsystems are the current status quo for dealing with the mixed criticality problem. The multiprocessor architecture should not be confused with the multicore architecture, as it has distinct processors, usually with their own resources, on the same or even different \arclong{pcb}s (\arcshort{pcb}).
 
 Such a system starts out with perfect temporal and spatial separation because the systems are fully independent. The \mfg{} can then reintroduce dependence in very deliberate and controlled ways, that don't impact the device's safety rating. For example by introducing a dedicated communication channel between the processors. 
 

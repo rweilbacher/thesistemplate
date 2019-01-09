@@ -26,11 +26,11 @@ Now that any misconceptions concerning the purpose of the safety hypervisor have
 % NOTE I think I am mixing microkernel architecture with hypervisor architecture
 \subsection{Minimal trusted computing base}
 Minimality is the most essential principal of microkernel design. It proves particularly useful for hypervisors with a focus on certification because a strong rule of thumb is: Less code means less verification effort as well as faults \cite{Lipow.1982}.  
-Where the original microkernels were just thin wrapper around the hardware, a \gls{CPU} driver so to speak, the microkernel based hypervisor adds a bit more code for the virtualization \cite{Heiser.2010}. These systems have around ten thousand lines of code.
+Where the original microkernels were just thin wrapper around the hardware, a \arcshort{cpu} driver so to speak, the microkernel based hypervisor adds a bit more code for the virtualization \cite{Heiser.2010}. These systems have around ten thousand lines of code.
 
 \subsection{Capability-based access control}
 Capabilities are unforgeable tokens that grant access rights to an object. They contain the identification of the object and associated rights, for example read and write.
-They can be given to other entities which in turn grants them access according to the capability \cite{Levy.1984}. A capability could be for a specific memory region, a communication endpoint or to a hypervisor \gls{API} call.
+They can be given to other entities which in turn grants them access according to the capability \cite{Levy.1984}. A capability could be for a specific memory region, a communication endpoint or to a hypervisor \arcshort{API} call.
 
 This mechanism for access control has dominated in microkernels because of its flexibility and because it doesn't require extensive kernel involvement. Since, the typical safety hypervisor sits on top of a microkernel, this mechanism has propagated to them as well.
 
@@ -64,19 +64,19 @@ There also appears to be some contention on whether or not full virtualization c
 
 % TODO Move this section
 % IMPORTANT Move it!
-Nevertheless, the importance of the outcome is likely not trivial, since full virtualization has a number of advantages: First, it means the cost and time of modifying the guest operating system can be saved. Alternatively, it could be reduced by using an already modified \gls{OS}, provided by the hypervisor developer but this is bound to be a very restricted choice that further increase the dependence on the developer.
+Nevertheless, the importance of the outcome is likely not trivial, since full virtualization has a number of advantages: First, it means the cost and time of modifying the guest operating system can be saved. Alternatively, it could be reduced by using an already modified \arcfull{os}, provided by the hypervisor developer but this is bound to be a very restricted choice that further increase the dependence on the developer.
 
-Second, the amount of viable operating systems is higher. The modification efforts to an \gls{OS} can only be made if the source code is available, but for many commercial products this is not the case. 
+Second, the amount of viable operating systems is higher. The modification efforts to an \arcshort{os} can only be made if the source code is available, but for many commercial products this is not the case. 
 
 Ultimately, it is important to verify that full virtualization is plausible for your device and analyze what the consequences of a lack thereof are.
-\paragraph{\gls{RTOS} and \gls{GPOS}}
-The basic hypervisor offers both \gls{RTOS} and \gls{GPOS} guests. What kinds and how much variety depends on the points raised in the previous section about virtualization types. 
-\paragraph{Native \gls{API}}
-Typically there is also the option to have guests that are not a fully fledged operating system but a virtualized bare-metal environment with access to the hypervisor \gls{API} instead. 
+\paragraph{\arcshort{rtos} and \arcshort{gpos}}
+The basic hypervisor offers both \arcfull{rtos} and \arcfull{gpos} guests. What kinds and how much variety depends on the points raised in the previous section about virtualization types. 
+\paragraph{Native \arcshort{api}}
+Typically there is also the option to have guests that are not a fully fledged operating system but a virtualized bare-metal environment with access to the hypervisor \arcshort{api} instead. 
 
-The applications of this are wide-ranging but one example would be to implement a driver that is required by both an \gls{RTOS} and \gls{GPOS} running on the system. Both partitions could then use the hypervisor's messaging mechanism to communicate with the driver. This would be especially useful for peripherals that are difficult to share normally.
+The applications of this are wide-ranging but one example would be to implement a driver that is required by both an \arcshort{rtos} and \arcshort{gpos} running on the system. Both partitions could then use the hypervisor's messaging mechanism to communicate with the driver. This would be especially useful for peripherals that are difficult to share normally.
 \subsection{Hardware abstraction}
-While the hypervisor does not get around having to implement a minimal \gls{BSP} for each platform, it can offer significant hardware abstraction to its guests. The \keyword{Native \gls{API}} mentioned in the previous section is not just available to bare-metal guests but also to virtualized ones. Some examples of this are: Getting information about the system, communication with other guests and centralized logging.
+While the hypervisor does not get around having to implement a minimal \arcfull{bsp} for each platform, it can offer significant hardware abstraction to its guests. The \keyword{Native \arcshort{api}} mentioned in the previous section is not just available to bare-metal guests but also to virtualized ones. Some examples of this are: Getting information about the system, communication with other guests and centralized logging.
 
 %----------------------------------------------------------------------------------------
 \section{Initial considerations}
@@ -95,10 +95,10 @@ Security will not be a consideration in this thesis, only a word of warning will
 \section{Limitations}
 Before getting into the full-fledged analysis it is best to expose some limitations of the current safety hypervisor landscape. 
 \subsection{Current hardware restrictions}
-Hypervisors are overall still limited to the more powerful \keyword{application processors} and have not really penetrated the \keyword{microcontroller} market. Using a hypervisor is also not possible if a specialized processor, like a \gls{DSP}, will be the only processor in the system. Although, this restriction may be lifted in the future.  There are several reasons for the hypervisor's hardware restrictions. 
+Hypervisors are overall still limited to the more powerful \keyword{application processors} and have not really penetrated the \keyword{microcontroller} market. Using a hypervisor is also not possible if a specialized processor, like a \arcfull{dsp}, will be the only processor in the system. Although, this restriction may be lifted in the future.  There are several reasons for the hypervisor's hardware restrictions. 
 
 % PHRASING 
-First of all, microcontrollers typically have no \gls{MMU} only an \gls{MPU} or no memory protection at all. Hypervisors need at least some hardware memory protection, as the corresponding software isolation is far too slow. \gls{MPU}s have a limited number of partitions they can isolate and therefore impose uncomfortable restrictions on hypervisor developers and users.
+First of all, microcontrollers typically have no \arcshort{mmu} only an \arcshort{mpu} or no memory protection at all. Hypervisors need at least some hardware memory protection, as the corresponding software isolation is far too slow. \arcshort{mpu}s have a limited number of partitions they can isolate and therefore impose uncomfortable restrictions on hypervisor developers and users.
 
 Second, the hardware virtualization extensions are not yet available on microcontrollers. And even though the typical safety hypervisor prefers paravirtualized guests, virtualization extensions are still beneficial for preventing the guest from doing things it is not supposed to. ARM, for example, offers a trap mechanism that allows the hypervisor to disable certain instructions and special registers for the guest \cite{ARM.v8.2018}. 
 
@@ -108,9 +108,9 @@ However, with all of these restrictions laid out, there are developments that ai
 
 \subsection{Effective multicore isolation}
 % NOTE Maybe add a graphic
-Imagine a system with two partitions, one safety-critical one not safety-critical, that runs on a two-core \gls{CPU} with a shared cache between the two cores. During its allocated time the safety-critical partition may fill up the cache with relevant values. Once the non-safety-critical software runs it can evict all of the cache values by populating it with its own values. This can lead to large and potentially unpredictable interference across domains \cite{AlessandroBiondi.2018}.
+Imagine a system with two partitions, one safety-critical one not safety-critical, that runs on a two-core \arcshort{cpu} with a shared cache between the two cores. During its allocated time the safety-critical partition may fill up the cache with relevant values. Once the non-safety-critical software runs it can evict all of the cache values by populating it with its own values. This can lead to large and potentially unpredictable interference across domains \cite{AlessandroBiondi.2018}.
 
-In the best case this scenario just leads to an excessively pessimistic \gls{WCET} analysis and to compensate this the safety-critical partition would get a lot more allocated time than it actually needed, leading to a worse average case performance. There are efforts to solve this issue reliably \cite{PaoloModica.2018}.
+In the best case this scenario just leads to an excessively pessimistic \arcfull{wcet} analysis and to compensate this the safety-critical partition would get a lot more allocated time than it actually needed, leading to a worse average case performance. There are efforts to solve this issue reliably \cite{PaoloModica.2018}.
 
 %----------------------------------------------------------------------------------------
 

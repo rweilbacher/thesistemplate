@@ -17,7 +17,7 @@
 
 % REVIEW This section has two goals for each want: Explain what the want means and explain why it is important (if it is not self-evident) and maybe explain how it relates to other wants
 % NOTE I specifically avoid talking about architecture in this section, maybe I'm actually sabotaging myself with that
-The two separation architectures that will be analyzed in \ref{Chapter4} are the hardware separated subsystems architecture (from now on referred to as \gls{HSS} architecture) and the embedded safety hypervisor architecture. It has been established that both can conceptually solve the mixed criticality problem and now it is time to compare the non-functional criteria of the architectures in question. 
+The two separation architectures that will be analyzed in \ref{Chapter4} are the hardware separated subsystems architecture (from now on referred to as \arcshort{hss} architecture) and the embedded safety hypervisor architecture. It has been established that both can conceptually solve the mixed criticality problem and now it is time to compare the non-functional criteria of the architectures in question. 
 
 To achieve this a list of criteria will be proposed that will serve as a categorization tool for the analysis.
 This list comprises the key wants that manufactures of safety-critical devices want to achieve, when engineering a device. A want can be understood as a business driver for device manufacturers. Fulfilling all wants to the best degree possible, would result in a perfect device. These idealized wants will be used to compare the hypervisor architecture to other device architectures and recommend the features to look for, when choosing a real-world hypervisor implementation.
@@ -114,7 +114,7 @@ Even human factors can not be left unconsidered in such an important architectur
 One example of this could be a difficult to work with piece of software that requires performing many repetitive tasks. Repetitive tasks are shown to decrease efficiency and increase the chance for mistakes \cite{Wyatt.1937}. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. In this instance the employee dissatisfaction is only an indicator for a hidden root cause.
 
 % TODO Incorporate both of these points into the analysis, if they are not there already
-Another aspect of this are the end customers of the safety-critical device manufacturer. Their desire for a high quality device is already encapsulated in the other key wants, this want is about more indirect customer demands. Two relevant representations of this are device design and ecological footprint. Customers are becoming increasingly aware of good design \cite{HBR.September2015} and this affects both the \gls{GUI} design as well as the physical design. 
+Another aspect of this are the end customers of the safety-critical device manufacturer. Their desire for a high quality device is already encapsulated in the other key wants, this want is about more indirect customer demands. Two relevant representations of this are device design and ecological footprint. Customers are becoming increasingly aware of good design \cite{HBR.September2015} and this affects both the \arcfull{gui} design as well as the physical design. 
 
 Ecological footprint is also becoming increasingly important for a companies public image. A development process that can reduce waste and used resources can help realize this want.
 
@@ -157,4 +157,4 @@ The next device generation and another device on the same platform have the adva
 %----------------------------------------------------------------------------------------
 
 \section{Conclusion}
-In this chapter it has been proposed what criteria are most important for safety-critical device manufacturers and why. Using these wants as categories it will now be analyzed how the hypervisor architecture stacks up against the well established \gls{HSS} architecture.
+In this chapter it has been proposed what criteria are most important for safety-critical device manufacturers and why. Using these wants as categories it will now be analyzed how the hypervisor architecture stacks up against the well established \arcshort{hss} architecture.
