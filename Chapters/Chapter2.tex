@@ -7,11 +7,11 @@
 %----------------------------------------------------------------------------------------
 
 % Define some commands to keep the formatting separated from the content 
-\newcommand{\keyword}[1]{\textbf{#1}}
-\newcommand{\tabhead}[1]{\textbf{#1}}
-\newcommand{\code}[1]{\texttt{#1}}
-\newcommand{\file}[1]{\texttt{\bfseries#1}}
-\newcommand{\option}[1]{\texttt{\itshape#1}}
+%\newcommand{\keyword}[1]{\textbf{#1}}
+%\newcommand{\tabhead}[1]{\textbf{#1}}
+%\newcommand{\code}[1]{\texttt{#1}}
+%\newcommand{\file}[1]{\texttt{\bfseries#1}}
+%\newcommand{\option}[1]{\texttt{\itshape#1}}
 
 %----------------------------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ Where the original microkernels were just thin wrapper around the hardware, a \a
 
 \subsection{Capability-based access control}
 Capabilities are unforgeable tokens that grant access rights to an object. They contain the identification of the object and associated rights, for example read and write.
-They can be given to other entities which in turn grants them access according to the capability \cite{Levy.1984}. A capability could be for a specific memory region, a communication endpoint or to a hypervisor \acrshort{API} call.
+They can be given to other entities which in turn grants them access according to the capability \cite{Levy.1984}. A capability could be for a specific memory region, a communication endpoint or to a hypervisor \acrshort{api} call.
 
 This mechanism for access control has dominated in microkernels because of its flexibility and because it doesn't require extensive kernel involvement. Since, the typical safety hypervisor sits on top of a microkernel, this mechanism has propagated to them as well.
 

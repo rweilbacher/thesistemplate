@@ -7,11 +7,12 @@
 %----------------------------------------------------------------------------------------
 
 % Define some commands to keep the formatting separated from the content 
-\newcommand{\keyword}[1]{\textbf{#1}}
-\newcommand{\tabhead}[1]{\textbf{#1}}
-\newcommand{\code}[1]{\texttt{#1}}
-\newcommand{\file}[1]{\texttt{\bfseries#1}}
-\newcommand{\option}[1]{\texttt{\itshape#1}}
+% Define some commands to keep the formatting separated from the content 
+%\newcommand{\keyword}[1]{\textbf{#1}}
+%\newcommand{\tabhead}[1]{\textbf{#1}}
+%\newcommand{\code}[1]{\texttt{#1}}
+%\newcommand{\file}[1]{\texttt{\bfseries#1}}
+%\newcommand{\option}[1]{\texttt{\itshape#1}}
 
 %----------------------------------------------------------------------------------------
 % REWRITE Feels a bit lacking and doesn't really get to the point (Probably because I haven't entirely found the point yet)
@@ -195,7 +196,7 @@ At this point it is important to reiterate that the hypervisor represents a sing
 \paragraph{Fault tolerance}
 The hypervisors centralized view of the system present the opportunity for detecting faults and other events of interest in each partition. It can recognize when a partition has shut down unexpectedly and either take action itself or delegate a manufacturer created partition to deal with the problem.
 
-But as stated in section \ref{no-redundancy} the hypervisor can potentially fail to safeguard or even recognize hardware errors. Furthermore, it can only provide software diversity on its own.
+But as stated in section \ref{advanced-fault-tolerance} the hypervisor can potentially fail to safeguard or even recognize hardware errors. Furthermore, it can only provide software diversity on its own.
 
 %----------------------------------------------------------------------------------------
 
@@ -234,7 +235,7 @@ Probably the most important takeaway from this analysis is that it is inconclusi
 With that out of the way, let's summarize the hypervisor benefits 
 and drawbacks theorized in this section.
 
-The \acrshort{hss} architectures separation is implicitly achieved through not having shared components. This and the fact that it is a custom hardware solution should make achieving \keywregulatory{regulatory compliance} easier than in the hypervisor architecture. But the hypervisor certification artifacts can be reused in future projects with project specific risk analysis and modification. The same applies to faults contained in the architecture. Over many projects there is more time to fix bugs in the hypervisor. However, because the hypervisor architecture is more difficult to reconcile with redundancy it may prove inadequate in projects with extremely high criticality.
+The \acrshort{hss} architectures separation is implicitly achieved through not having shared components. This and the fact that it is a custom hardware solution should make achieving \keyword{regulatory compliance} easier than in the hypervisor architecture. But the hypervisor certification artifacts can be reused in future projects with project specific risk analysis and modification. The same applies to faults contained in the architecture. Over many projects there is more time to fix bugs in the hypervisor. However, because the hypervisor architecture is more difficult to reconcile with redundancy it may prove inadequate in projects with extremely high criticality.
 
 A new implementation of the \acrshort{hss} architecture is created for every device or device family. A hypervisor on the other hand, is a software solution capable of running on any typical hardware with minor modification. This means the cost of the hypervisor development can be spread across multiple projects. Furthermore, because it is software, it is much more modifiable and additional features can be added both before and after release. Another theorized cost benefit is associated with its positive impact on \acrshort{swap} (Size, Weight and Power). The one slightly stronger processor that can host the hypervisor and all its partitions is likely to be cheaper than two separate processors with duplicate peripherals and memory. But this ultimately depends on the exact hardware and circumstances. It can be said however, that the advantage in \acrshort{swap} is a tremendous benefit for the hypervisor in smaller, battery powered devices.
 

@@ -7,11 +7,11 @@
 %----------------------------------------------------------------------------------------
 
 % Define some commands to keep the formatting separated from the content 
-\newcommand{\keyword}[1]{\textbf{#1}}
-\newcommand{\tabhead}[1]{\textbf{#1}}
-\newcommand{\code}[1]{\texttt{#1}}
-\newcommand{\file}[1]{\texttt{\bfseries#1}}
-\newcommand{\option}[1]{\texttt{\itshape#1}}
+%\newcommand{\keyword}[1]{\textbf{#1}}
+%\newcommand{\tabhead}[1]{\textbf{#1}}
+%\newcommand{\code}[1]{\texttt{#1}}
+%\newcommand{\file}[1]{\texttt{\bfseries#1}}
+%\newcommand{\option}[1]{\texttt{\itshape#1}}
 
 %----------------------------------------------------------------------------------------
 After the free form analysis of chapter \ref{Chapter4} it is now time to give more concrete examples on when and why the hypervisor architecture should be chosen. For this purpose several \keyword{reference projects} will be laid out and it will be discussed what makes them good or bad examples for the architecture. Afterwards some basic guidance will be given on how a specific third-party hypervisor implementation should be chosen and what metrics need to be gathered.
@@ -23,7 +23,7 @@ The proposed projects are simplified and only attributes relevant to the archite
 \subsection{Portable gas detector}
 % https://www.elektroniknet.de/markt-technik/elektronikfertigung/perfekte-symbiose-von-oem-und-ems-151254.html
 \subsubsection{Introduction}
-This example project is a general, portable gas detector that measures the concentration of different gases by detecting the color change of a chemical, sensitive to the gas in question. Cartridges with clear, sealed tubes can be inserted into the device and once a measurement begins, one of the tubes is punctured and air is pumped through at a specific rate. Then the color change is observed by a \acrshort{CMOS} sensor. Because the color change, pump speed and other metrics are different for every gas, information can be extracted from the cartridge via an \acrshort{nfc} tag. This tag also contains general information about the cartridge in question.
+This example project is a general, portable gas detector that measures the concentration of different gases by detecting the color change of a chemical, sensitive to the gas in question. Cartridges with clear, sealed tubes can be inserted into the device and once a measurement begins, one of the tubes is punctured and air is pumped through at a specific rate. Then the color change is observed by a \acrshort{cmos} sensor. Because the color change, pump speed and other metrics are different for every gas, information can be extracted from the cartridge via an \acrshort{nfc} tag. This tag also contains general information about the cartridge in question.
 % TODO Mention device use environment
 
 In this thought experiment the first version of this device has already been on the market for some time and now the manufacturer is looking to create the next generation. The current generation is equipped with an ARM Cortex-M4, a USB port for transmitting measurement data and an LCD display with a simplistic \acrshort{gui}. All of the software sits on top of a small \acrshort{rtos}, with the \acrshort{gui} framework also being provided by the \acrshort{rtos} developer.
@@ -162,7 +162,7 @@ Compilers and potentially even debuggers need to be verified as well. This means
 \subsubsection{Debugging and tracing}
 Since the hypervisor acts as a layer of abstraction between the hardware and software it has the potential to be a great aid in debugging the system. But simultaneously it could also act as a great hindrance, obfuscating issues in the business code and not providing access to partition data that would have been available without the hypervisor.
 \paragraph{Does the hypervisor provide standard debugging functionality?}
-There are multiple ways to achieve this and they will not be explored in detail here but the two most prominent examples are: a debugging server running on the device and a hypervisor aware \acrshort{JTAG} environment. Ideally, it is possible to debug both the hypervisor and the guest operating systems independently. [source to hypervisors that do this and lauterbach ad]
+There are multiple ways to achieve this and they will not be explored in detail here but the two most prominent examples are: a debugging server running on the device and a hypervisor aware \acrshort{jtag} environment. Ideally, it is possible to debug both the hypervisor and the guest operating systems independently. [source to hypervisors that do this and lauterbach ad]
 \paragraph{Does the hypervisor provide special debugging or tracing functionality?}
 As established in section \ref{distributed-or-centralized}, the hypervisor has a unique centralized view of the system. It can therefore expose its internal events to a developer and provide high level insight into what exactly is happening inside the hypervisor.
 
