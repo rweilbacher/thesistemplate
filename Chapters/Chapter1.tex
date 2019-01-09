@@ -229,7 +229,7 @@ Another big problem is damage limitation. While more and more Linux drivers are 
 Perhaps Linux, or another, yet unknown GPOS, will be able to solve the mixed criticality problem directly but for now it will be excluded from further analysis, on the grounds that it can not satisfy the separation architecture requirements well enough for a large set of safety-critical devices.
 \subsubsection{Real-time operating system}
 % NOTE How do they deal with peripherals?
-Providing temporal separation is practically the main purpose of an RTOS, so there are no real problems on that front, and with the aid of an \arcshort{mpu} or \arcshort{mmu} spatial separation is also not a big issue.
+Providing temporal separation is practically the main purpose of an RTOS, so there are no real problems on that front, and with the aid of an \acrshort{mpu} or \acrshort{mmu} spatial separation is also not a big issue.
 
 One thing to keep in mind though is that a lot of RTOS developers offer no multicore support, which can severely limit the complexity of an application. But perhaps the biggest limitation of application complexity on the RTOS architecture is its narrow target audience.
 
@@ -241,7 +241,7 @@ Although the RTOS architecture remains quite a dominant one, it quickly loses it
 \subsection{Multicore system}
 More and more silicon vendors are offering multicore systems with a dedicated safety and a support core. These are usually heterogeneous processors with one application core, like an ARM Cortex A7, and one microcontroller core, like an ARM Cortex M4. Proving temporal separation on these systems is typically not difficult, as the cores are physically separated \cite{Wittenstein.temporal.2017}.
 
-But the cores in these systems share hardware resources like peripherals and memory. Consequently, it can be challenging to show sufficient evidence for spatial separation. An \arcshort{mmu} or \arcshort{mpu} can be useful to enforce spatial separation but it is not a perfect solution, especially for peripherals.
+But the cores in these systems share hardware resources like peripherals and memory. Consequently, it can be challenging to show sufficient evidence for spatial separation. An \acrshort{mmu} or \acrshort{mpu} can be useful to enforce spatial separation but it is not a perfect solution, especially for peripherals.
 \subsection{Hardware supervised multicore system}
 These systems are identical to the ones described in the previous section, except they contain additional hardware to control and arbitrate peripheral access, as well as providing inter-core communication.
 Because there is no standard for this, the implementation is entirely up to the silicon vendor. 
@@ -253,7 +253,7 @@ This architecture should be considered when designing a safety-critical device b
 % NOTE review http://www.ia.pw.edu.pl/~tkruk/edu/eopsya/lecture/eopsy08.pdf and http://www-5.unipv.it/mferretti/cdol/aca/Charts/07-multiprocessors-MF.pdf and if these are viable
 % TODO https://witekio.com/blog/introduction-heterogeneous-multicore-processing-architecture/ Read about the need for software support on this architecture
 % TODO actually explain what they are
-Multiprocessor systems or even completely separate subsystems are the current status quo for dealing with the mixed criticality problem. The multiprocessor architecture should not be confused with the multicore architecture, as it has distinct processors, usually with their own resources, on the same or even different \arclong{pcb}s (\arcshort{pcb}).
+Multiprocessor systems or even completely separate subsystems are the current status quo for dealing with the mixed criticality problem. The multiprocessor architecture should not be confused with the multicore architecture, as it has distinct processors, usually with their own resources, on the same or even different \acrlong{pcb}s (\acrshort{pcb}).
 
 Such a system starts out with perfect temporal and spatial separation because the systems are fully independent. The \mfg{} can then reintroduce dependence in very deliberate and controlled ways, that don't impact the device's safety rating. For example by introducing a dedicated communication channel between the processors. 
 

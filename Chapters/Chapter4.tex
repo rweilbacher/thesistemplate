@@ -22,7 +22,7 @@ First of, the most crucial differences between the two architecture will be elab
 
 \section{Crucial differences}
 \subsection{Hardware or software}
-Even though the hypervisor can be supported by hardware the separation is still fundamentally implemented in software. In the\arcshort{hss} architecture on the other hand, separation is entirely realized through hardware, or rather lack of shared hardware. This does not mean that a device with the \arcshort{hss} architecture does not contain software, only that the software is limited to the business components of the device.
+Even though the hypervisor can be supported by hardware the separation is still fundamentally implemented in software. In the\acrshort{hss} architecture on the other hand, separation is entirely realized through hardware, or rather lack of shared hardware. This does not mean that a device with the \acrshort{hss} architecture does not contain software, only that the software is limited to the business components of the device.
 
 % TODO Try to find sources for these claims and explain them more deeply
 % NOTE Have I ever explained the difference between random and systematic faults
@@ -35,13 +35,13 @@ There are a number of differences between hardware and software developments tha
 \subsection{Specialized or general}
 A hypervisor is a general software solution that is meant to be usable in a lot of cases with minor modification. It is often procured from an external company and not developed in-house specifically for a project.
 
-The \arcshort{hss} architecture is technically a very general methodology but each implementation is a specialized solution for one project or project line. This does not mean there is no overlap between different projects using hardware separated subsystems but that there is little room for reuse of the architecture implementation.
+The \acrshort{hss} architecture is technically a very general methodology but each implementation is a specialized solution for one project or project line. This does not mean there is no overlap between different projects using hardware separated subsystems but that there is little room for reuse of the architecture implementation.
 
 % TODO Is there more to add?
 An advantage of a more general solution is that the one-time development costs can be spread across multiple projects, or in the case of third-party solutions, across multiple customers.   
 
 \subsection{Distributed or centralized system} \label{distributed-or-centralized}
-The \arcshort{hss} architecture ultimately achieves its separation through being a distributed system. In contrast, a hypervisor is a centralized system with added separation between the partitions. In the special case of hardware separated subsystems the subsystems are typically also heterogeneous, which leads to a number of potential disadvantages.
+The \acrshort{hss} architecture ultimately achieves its separation through being a distributed system. In contrast, a hypervisor is a centralized system with added separation between the partitions. In the special case of hardware separated subsystems the subsystems are typically also heterogeneous, which leads to a number of potential disadvantages.
 % NOTE Verify these claims
 \begin{enumerate}
 \item Partition binaries need to be compiled differently.
@@ -60,11 +60,11 @@ Advanced fault-tolerance is referring to the three practices of replication.
 \paragraph{Redundancy} In this approach the identical replica, instead acts as a backup in case of a failure in the primary component.
 
 While this does share the key characteristics with the hardware separated subsystems architecture the intention is a different one. 
-Replication has the sole purpose of increasing the fault-tolerance and subsequently the safety of the system, while the \arcshort{hss} architecture is focused on separating components of differing criticality to reduce effort and cost among other things.
+Replication has the sole purpose of increasing the fault-tolerance and subsequently the safety of the system, while the \acrshort{hss} architecture is focused on separating components of differing criticality to reduce effort and cost among other things.
 
 The hypervisor on the other hand can only provide software diversity on its own and can impede efficient and effective replication. Typically only the most safety-critical parts of the device would be made redundant but on the hypervisor architecture they are all consolidated onto one hardware platform. This means that either the entire hypervisor with all partitions is replicated, forcing the manufacturer to also copy the non-critical partition. Or only parts of the software are replicated and run in an additional partition. While this is a lot cheaper it is also not nearly as effective as hardware replication.
 \subsection{Cost of adding a partition}
-The core of the \arcshort{hss} architecture is that every partition is its own computation domain with separate resources. In the hypervisor architecture the most expensive partition to add is the second one, as it involves accommodating for the hypervisor in the first place. Any partition that is added beyond the second just requires the appropriate amount of memory and computational resources to be available. Naturally, there are limits to this as each partition also introduces some overhead in terms of kernel memory and process switching times.  Furthermore, a partition requires a certain amount of resources to even do useful work in the first place.
+The core of the \acrshort{hss} architecture is that every partition is its own computation domain with separate resources. In the hypervisor architecture the most expensive partition to add is the second one, as it involves accommodating for the hypervisor in the first place. Any partition that is added beyond the second just requires the appropriate amount of memory and computational resources to be available. Naturally, there are limits to this as each partition also introduces some overhead in terms of kernel memory and process switching times.  Furthermore, a partition requires a certain amount of resources to even do useful work in the first place.
 
 % TODO Consider the fact that if the hypervisor only supports operating systems there is also overhead associated with that
 
@@ -83,7 +83,7 @@ So only looking at the final unit cost, adding a partition to a hypervisor is ch
  % TODO Make an architecture diagram highlighting my point
  A hypervisor can at most offer software redundancy with two partitions running distinct software that achieve the same functionality. These partitions can then act as a fallback, supervise the other partition or operate in tandem and vote on each output. Hardware separated subsystems are much more confident in achieving this safety as they can offer both hardware and software redundancy. 
  
-However, this use case is different from the pure mixed criticality problem. If there is any type of redundancy, both partitions are still at least somewhat responsible for the safety functions of the device. But with mixed criticality we often talk about being able to integrate basically unverified convenience functionality, like a complex GUI running under Linux, into the device. That would not be plausible in this use case unless another partition is added and as has been stated earlier, adding another partition is more expensive in the \arcshort{hss} architecture.
+However, this use case is different from the pure mixed criticality problem. If there is any type of redundancy, both partitions are still at least somewhat responsible for the safety functions of the device. But with mixed criticality we often talk about being able to integrate basically unverified convenience functionality, like a complex GUI running under Linux, into the device. That would not be plausible in this use case unless another partition is added and as has been stated earlier, adding another partition is more expensive in the \acrshort{hss} architecture.
 
 % NOTE This makes more sense here but kind of violates the want structure  because there is already a cost want
 \paragraph{Certification cost}
@@ -94,33 +94,33 @@ However, this use case is different from the pure mixed criticality problem. If 
 Since the lowest level of the hypervisor needs to be reimplemented for every platform, the hypervisor also needs to be reverified for every platform. However, this does not need mean the previous efforts are irrelevant. A case on regression analysis can be built.
 Furthermore, a project specific risk analysis also needs to be carried out regardless of the hypervisors certification status.
 
-Each \arcshort{hss} implementation needs to be verified from scratch but as stated in section \ref{HSS} providing sufficient evidence for separation should be much easier. The entire point of the architectures separation is that there is almost no avenue for influence to occur. Only through specifically implemented and controlled communication paths.
+Each \acrshort{hss} implementation needs to be verified from scratch but as stated in section \ref{HSS} providing sufficient evidence for separation should be much easier. The entire point of the architectures separation is that there is almost no avenue for influence to occur. Only through specifically implemented and controlled communication paths.
 % NOTE Think about that last point
 
-Ultimately the amount of control a system designer can exert on a device with the \arcshort{hss} architecture, the fact that is hardware and not software and it separation mechanism should make a \arcshort{hss} architecture cheaper to get approval for in most cases.
+Ultimately the amount of control a system designer can exert on a device with the \acrshort{hss} architecture, the fact that is hardware and not software and it separation mechanism should make a \acrshort{hss} architecture cheaper to get approval for in most cases.
 
 % TODO Add recertification costs here?
 
 \paragraph{Impact of scalability on safety}
-The scalability problems of the \arcshort{hss} architecture have already been discussed but not their implications on safety. \arclong{emc} or \arcshort{emc} for short is quite important for safety-critical devices, especially for ones operating in explosive atmospheres. Additional processors require more power and more cables that can act as antennas. This introduces more \arcshort{emc} challenges that need to be tackled by electromagnetic shielding and other methods. If they are not properly addresses they can cause high redesign costs at the end of the development cycle.
+The scalability problems of the \acrshort{hss} architecture have already been discussed but not their implications on safety. \acrlong{emc} or \acrshort{emc} for short is quite important for safety-critical devices, especially for ones operating in explosive atmospheres. Additional processors require more power and more cables that can act as antennas. This introduces more \acrshort{emc} challenges that need to be tackled by electromagnetic shielding and other methods. If they are not properly addresses they can cause high redesign costs at the end of the development cycle.
 
-Additional hardware components also introduce more points for random failure and degradation, which may further reduce a \arcshort{hss} device's safety with a growing amount of partitions.
+Additional hardware components also introduce more points for random failure and degradation, which may further reduce a \acrshort{hss} device's safety with a growing amount of partitions.
 % NOTE Maybe mention HVs multicore support
 
 \paragraph{Additional safety features}
 A hypervisor is a general software solution that can afford to have additional safety features along with its separation. By design it has a full view of the system and its events, a lot of implementations offer features like \keyword{Health monitoring} or \keyword{logging}. This can enable the device to detect and react to faults as they occur and positively impact its safety rating.
 
 \paragraph{Conclusion}
-The \arcshort{hss} architecture provides the best possible safety and separation, even though this performance may degrade, if more subsystems are added. But ultimately a hypervisor only needs to be safe enough, not safer than \arcshort{hss}. It is possible that hypervisor technology is not yet mature enough to compete in the most critical environments where absolute certainty is required. Therefore, if the hypervisor architecture is being considered for a future project it should be clarified, whether or not it can pass the certification. If it turns out to be sufficient however, the manufacturer can take advantage of its other benefits detailed in the following sections.
+The \acrshort{hss} architecture provides the best possible safety and separation, even though this performance may degrade, if more subsystems are added. But ultimately a hypervisor only needs to be safe enough, not safer than \acrshort{hss}. It is possible that hypervisor technology is not yet mature enough to compete in the most critical environments where absolute certainty is required. Therefore, if the hypervisor architecture is being considered for a future project it should be clarified, whether or not it can pass the certification. If it turns out to be sufficient however, the manufacturer can take advantage of its other benefits detailed in the following sections.
 
 
 %----------------------------------------------------------------------------------------
 
 \section{Lowest possible cost}
 \paragraph{Development costs}
-Unfortunately, there is no general quantitative analysis of the development costs associated with the two architectures. Hypervisor developers do not make their license costs, or even their license models, public, as they are subject to negotiation and dependent on other factors like amount of produced units among other things. Since the \arcshort{hss} architecture is usually a custom solution its price is equally difficult to predict. Nevertheless, there are some arguments that can be made on the relative price differences. 
+Unfortunately, there is no general quantitative analysis of the development costs associated with the two architectures. Hypervisor developers do not make their license costs, or even their license models, public, as they are subject to negotiation and dependent on other factors like amount of produced units among other things. Since the \acrshort{hss} architecture is usually a custom solution its price is equally difficult to predict. Nevertheless, there are some arguments that can be made on the relative price differences. 
 
-Hypervisors, whether written in-house or by a third-party, are meant to be general solutions, applicable in many projects. In contrast, the \arcshort{hss} architecture is reimplemented for each device or device family. This gives the developers more control but general solutions have a significant benefit: The cost of the hypervisor will be spread across multiple projects, or in the case of a third-party hypervisor even across multiple customers. Another benefit of using a third-party hypervisor is that in a long-term relationship with the developer, prices may be favourable for the manufacturer.
+Hypervisors, whether written in-house or by a third-party, are meant to be general solutions, applicable in many projects. In contrast, the \acrshort{hss} architecture is reimplemented for each device or device family. This gives the developers more control but general solutions have a significant benefit: The cost of the hypervisor will be spread across multiple projects, or in the case of a third-party hypervisor even across multiple customers. Another benefit of using a third-party hypervisor is that in a long-term relationship with the developer, prices may be favourable for the manufacturer.
 
 But there is a problem with general solutions: It is possible that the manufacturer is forced to pay for functionality he would not have included in the device, had he used a specialized architecture. 
 
@@ -128,19 +128,19 @@ In the hypervisor architecture the manufacturer also needs to pay the potential 
 
 \paragraph{Hardware costs}
 % TODO Read this again.
-Each additional subsystem in the \arcshort{hss} architecture will add another processor, memory and peripherals and consequently increase the device's hardware cost significantly. A hypervisor would usually require a more advanced processor with slightly more memory and computational power but this is less expensive in most cases [source Roy Master thesis?]. Additionally, most peripherals can be shared between hypervisor partitions with some exceptions.
+Each additional subsystem in the \acrshort{hss} architecture will add another processor, memory and peripherals and consequently increase the device's hardware cost significantly. A hypervisor would usually require a more advanced processor with slightly more memory and computational power but this is less expensive in most cases [source Roy Master thesis?]. Additionally, most peripherals can be shared between hypervisor partitions with some exceptions.
 
 \subsection{Optimal time to market}
 In section \ref{optimal-ttm} the concepts of \keyword{attractive and must-be functional requirements}, as well as the\keyword{ideal time to market} have been introduced. Now it will be analyzed how each architecture can impact the time to market and therefore not only the unit cost of the device but also what features are feasible to integrate.
 
 Both architectures have in common, that they can enable the use of unverified third-party or even open-source software for the less critical  components of the device. However, the hypervisor has the advantage that partitions are cheaper to add. This means it is more likely that the cost of adding a partition is outweighed by the benefits of satisfying more attractive functional requirements. Assuming that the license cost of the hypervisor does not negate this benefit for a specific project.
 
-Another way for the architectures to impact the development time is the implementation time of the architecture itself. Not only is the \arcshort{hss} architecture typically implemented individually for each project, but some development efforts even have to be duplicated. If the subsystems are heterogeneous the \arcfull{hal} will also need to be implemented multiple times. 
+Another way for the architectures to impact the development time is the implementation time of the architecture itself. Not only is the \acrshort{hss} architecture typically implemented individually for each project, but some development efforts even have to be duplicated. If the subsystems are heterogeneous the \acrfull{hal} will also need to be implemented multiple times. 
 
 Assuming that the hypervisor is developed by a third-party the development efforts of the device manufacturer are reduced. They still need to potentially modify the hypervisor to run on the target platform and configure it but the separation itself is taken care of.
 
 % TODO Find a better way to phrase this
-One last type of time saving factor is the impact on the development process itself. These are, however highly dependent on the actual situation and the differences listed here are to be understood as criteria too look out for and not guaranteed benefits of a hypervisor: Oftentimes the software team can't begin work until the hardware team has assembled a first prototype of the device. The hypervisor architecture has both a less complex hardware and significant hardware abstraction. Consequently, software development could begin sooner both in a simulated environment and on the first prototype. Additionally, a hypervisor developer is able to provide a fully fledged \arcshort{ide} to make configuration of the architecture easier.
+One last type of time saving factor is the impact on the development process itself. These are, however highly dependent on the actual situation and the differences listed here are to be understood as criteria too look out for and not guaranteed benefits of a hypervisor: Oftentimes the software team can't begin work until the hardware team has assembled a first prototype of the device. The hypervisor architecture has both a less complex hardware and significant hardware abstraction. Consequently, software development could begin sooner both in a simulated environment and on the first prototype. Additionally, a hypervisor developer is able to provide a fully fledged \acrshort{ide} to make configuration of the architecture easier.
 
 %----------------------------------------------------------------------------------------
 
@@ -155,7 +155,7 @@ There is a key principle of how a separation architecture might influence faults
 \item Single responsibility principle
 \item Principle of least knowledge
 \end{enumerate}
-The hypervisor architecture can have an advantage in fulfilling these principles because of the lower cost of adding a partition. Especially, if partitions do not have to operate an OS and can rely on the native hypervisor \arcshort{api} instead, more granular separation becomes feasible. However, this ultimately depends on the configuration of the hypervisor and is not a necessary benefit.
+The hypervisor architecture can have an advantage in fulfilling these principles because of the lower cost of adding a partition. Especially, if partitions do not have to operate an OS and can rely on the native hypervisor \acrshort{api} instead, more granular separation becomes feasible. However, this ultimately depends on the configuration of the hypervisor and is not a necessary benefit.
 What concrete benefits can come from this will be discussed in the following sections.
 \paragraph{Faults in the architectures themselves}
 General solutions, like the hypervisor, are reused over a long period of time and consequently there are more chances to fix faults in the original implementation. For example, faults found by static analyzers in the Linux driver code have decreased significantly over the past 10 years \cite{palix2011faults}. Granted, hypervisors do not enjoy the same popularity as Linux but they also contain much less code and safety hypervisors are used by very scrutinous  parties that are perhaps more likely to find faults.
@@ -178,7 +178,7 @@ Because faults are isolated to the partition they occur in more partitions means
 
 One big potential problem with third-party hypervisors though is that the source code might not be available. This can complicate the debugging process, if there are faults in the hypervisors or there are conditions that trigger faults in the business software. 
 
-When it comes to the decentralized nature of the \arcshort{hss} architecture, its effects on effective fault discovery have already been described in section \ref{distributed-or-centralized}. Similarly, the hypervisor developer has an opportunity to provide tooling that aids the debugging process, trough tracing internal hypervisor and partition events.
+When it comes to the decentralized nature of the \acrshort{hss} architecture, its effects on effective fault discovery have already been described in section \ref{distributed-or-centralized}. Similarly, the hypervisor developer has an opportunity to provide tooling that aids the debugging process, trough tracing internal hypervisor and partition events.
 
 \paragraph{Fixing faults effectively} \label{effective-fault-fixing}
 While the architectures might not directly influence how easy it is to fix faults, apart from the benefits of a modular architecture outlined earlier, they can ease the cost of recertification. Once an update for the device has been created, regression testing needs to be performed to make sure the fix did not corrupt any other software components. Typically not all tests are rerun, instead the manufacturer can provide evidence for why certain tests can be excluded. A separation architecture can provide free evidence for this analysis and reduce the costs associated with releasing device updates.
@@ -190,7 +190,7 @@ On another note, if a third-party hypervisor is used, faults in the architecture
 \paragraph{Fault isolation}
 Fault isolation is one of the key pillars of separation architectures, as it reduces the chance for catastrophic failure and enables graceful degradation. More partitions means that a more graceful degradation is possible, potentially smoothing the user experience. If in a system with a critical and a less critical partition, the less critical partition catastrophically fails, all associated functionality will no longer be available as well. The subjects of the device might not be in immediate danger but usability would be greatly reduced.
 
-At this point it is important to reiterate that the hypervisor represents a single point of failure and compromisation could lead to a compromisation of the entire system. The \arcshort{hss} architecture can not only offer features like redundancy but also offers much more control with any single points of failure being avoidable. Therefore, extremely high risk devices are most likely better off with its separation.
+At this point it is important to reiterate that the hypervisor represents a single point of failure and compromisation could lead to a compromisation of the entire system. The \acrshort{hss} architecture can not only offer features like redundancy but also offers much more control with any single points of failure being avoidable. Therefore, extremely high risk devices are most likely better off with its separation.
 
 \paragraph{Fault tolerance}
 The hypervisors centralized view of the system present the opportunity for detecting faults and other events of interest in each partition. It can recognize when a partition has shut down unexpectedly and either take action itself or delegate a manufacturer created partition to deal with the problem.
@@ -200,28 +200,28 @@ But as stated in section \ref{no-redundancy} the hypervisor can potentially fail
 %----------------------------------------------------------------------------------------
 
 \section{Human factors}
-Ease of use for a hypervisor is mostly dependent on the development tools provided, and therefore hard to generalize. The most sophisticated examples might have a fully fledged \arcshort{ide} that aids the configuration of the hypervisor and perhaps even fully integrated debugging and tracing for devices currently running a hypervisor. % TODO add a counter example
+Ease of use for a hypervisor is mostly dependent on the development tools provided, and therefore hard to generalize. The most sophisticated examples might have a fully fledged \acrshort{ide} that aids the configuration of the hypervisor and perhaps even fully integrated debugging and tracing for devices currently running a hypervisor. % TODO add a counter example
 
 However, hypervisors are still a new technology and especially in such a conservative industry as safety-critical device manufacturing there is bound to be skepticism. This could increase the technological risk on a project using the architecture significantly and irritate engineers on the project.
 
-The effects of the decentralized nature of the \arcshort{hss} architecture, laid out in section \ref{distributed-or-centralized} not only complicate debugging but can also decrease employee satisfaction and increase the chance for human errors.
+The effects of the decentralized nature of the \acrshort{hss} architecture, laid out in section \ref{distributed-or-centralized} not only complicate debugging but can also decrease employee satisfaction and increase the chance for human errors.
 
-Finally a slightly different point: Environmental protection is becoming increasingly more important for consumers and companies as a method of differentiation from competitors. The \arcshort{hss} architecture not only increases the size of the device, relative to the hypervisor architecture but also the material used. This increases the ecological footprint of the device and can compromise an otherwise sleek design.
+Finally a slightly different point: Environmental protection is becoming increasingly more important for consumers and companies as a method of differentiation from competitors. The \acrshort{hss} architecture not only increases the size of the device, relative to the hypervisor architecture but also the material used. This increases the ecological footprint of the device and can compromise an otherwise sleek design.
 
 %--------------------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------------------
 
 \section{Reusability}
-The hardware abstraction provided by the hypervisor can increase the amount of software that can be reused for the next generation or even other projects. Not only can the business applications be programmed for one of the guest environments but the \arcshort{api} can provide further abstraction from the hardware and the communication with other partitions.
+The hardware abstraction provided by the hypervisor can increase the amount of software that can be reused for the next generation or even other projects. Not only can the business applications be programmed for one of the guest environments but the \acrshort{api} can provide further abstraction from the hardware and the communication with other partitions.
 
-Since the \arcshort{hss} architecture itself is typically implemented by the device manufacturer reusing it is also of interest. This can pose considerable problems however, because the entire hardware platform is typically created specifically for one project only limited reuse is likely.
+Since the \acrshort{hss} architecture itself is typically implemented by the device manufacturer reusing it is also of interest. This can pose considerable problems however, because the entire hardware platform is typically created specifically for one project only limited reuse is likely.
 
 %----------------------------------------------------------------------------------------
 
 \section{Extendibility and Maintainability}
 % NOTE I have written this a million times by now
-Not only is software more easy to modify than hardware but adding partitions is also cheaper in the hypervisor than in the \arcshort{hss} architecture. Therefore, it is conceivable that another partition may be added in a future software update, assuming that the necessary computational resources are still available on the platform. 
+Not only is software more easy to modify than hardware but adding partitions is also cheaper in the hypervisor than in the \acrshort{hss} architecture. Therefore, it is conceivable that another partition may be added in a future software update, assuming that the necessary computational resources are still available on the platform. 
 
 A point that applies to both extending the device as well as resolving bugs is one introduced in section \ref{effective-fault-fixing}. Any separation architecture can make regression testing significantly cheaper and consequently also the deployment of any update. 
 
@@ -234,9 +234,9 @@ Probably the most important takeaway from this analysis is that it is inconclusi
 With that out of the way, let's summarize the hypervisor benefits 
 and drawbacks theorized in this section.
 
-The \arcshort{hss} architectures separation is implicitly achieved through not having shared components. This and the fact that it is a custom hardware solution should make achieving \keywregulatory{regulatory compliance} easier than in the hypervisor architecture. But the hypervisor certification artifacts can be reused in future projects with project specific risk analysis and modification. The same applies to faults contained in the architecture. Over many projects there is more time to fix bugs in the hypervisor. However, because the hypervisor architecture is more difficult to reconcile with redundancy it may prove inadequate in projects with extremely high criticality.
+The \acrshort{hss} architectures separation is implicitly achieved through not having shared components. This and the fact that it is a custom hardware solution should make achieving \keywregulatory{regulatory compliance} easier than in the hypervisor architecture. But the hypervisor certification artifacts can be reused in future projects with project specific risk analysis and modification. The same applies to faults contained in the architecture. Over many projects there is more time to fix bugs in the hypervisor. However, because the hypervisor architecture is more difficult to reconcile with redundancy it may prove inadequate in projects with extremely high criticality.
 
-A new implementation of the \arcshort{hss} architecture is created for every device or device family. A hypervisor on the other hand, is a software solution capable of running on any typical hardware with minor modification. This means the cost of the hypervisor development can be spread across multiple projects. Furthermore, because it is software, it is much more modifiable and additional features can be added both before and after release. Another theorized cost benefit is associated with its positive impact on \arcshort{swap} (Size, Weight and Power). The one slightly stronger processor that can host the hypervisor and all its partitions is likely to be cheaper than two separate processors with duplicate peripherals and memory. But this ultimately depends on the exact hardware and circumstances. It can be said however, that the advantage in \arcshort{swap} is a tremendous benefit for the hypervisor in smaller, battery powered devices.
+A new implementation of the \acrshort{hss} architecture is created for every device or device family. A hypervisor on the other hand, is a software solution capable of running on any typical hardware with minor modification. This means the cost of the hypervisor development can be spread across multiple projects. Furthermore, because it is software, it is much more modifiable and additional features can be added both before and after release. Another theorized cost benefit is associated with its positive impact on \acrshort{swap} (Size, Weight and Power). The one slightly stronger processor that can host the hypervisor and all its partitions is likely to be cheaper than two separate processors with duplicate peripherals and memory. But this ultimately depends on the exact hardware and circumstances. It can be said however, that the advantage in \acrshort{swap} is a tremendous benefit for the hypervisor in smaller, battery powered devices.
 
 Development time and cost are intrinsically linked and a case can be made that the hypervisor has an advantage here, even if the quantities are uncertain. Because it is general and reusable, less development time needs to be spent on the architecture and its hardware abstraction may decrease the effort of the business software as well, if used correctly. In any case the abstraction will make significantly more likely that the software can be reused, reducing the development time of a future device.
 Additionally, while using unverified third-party or open-source software is possible on both separation architectures if at all, it is more likely to pay off with the cheaper hypervisor partitions because it can be isolated to the most granular level.
