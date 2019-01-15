@@ -48,7 +48,7 @@ Separating the gas measurement code from other parts of the software, at least t
 One last benefit the hypervisor has in this scenario is established by its hardware abstraction. Any software components that are created for the next device generation will be more likely to be reusable in any future generations, with only slight or no modifications.
 % TODO Maybe mention advanced safety features?
 \subsubsection{Conclusion}
-This project exemplifies a case where separation is becoming increasingly attractive because of growing consumer demands and processing power but where the \acrshort{hss} architecture violates the core demands of the use case. This category is likely to grow is very likely to grow in the future[source].
+This project exemplifies a case where separation is becoming increasingly attractive because of growing consumer demands and processing power but where the \acrshort{hss} architecture violates the core demands of the use case. This category is likely to grow is very likely to grow in the future\cite{ITA.May2016}.
 
 With the criticality level of the device and the specific risks involved, the hypervisor architecture's lack of support for advanced safety features and its less provable separation are no death sentence. And finally, the hypervisors malleability lends itself well to creating a future-proof design, if unit cost is not a bigger concern. 
 % TODO Is there more I want to say?
@@ -90,7 +90,7 @@ First of all, the hardware cost savings are not going to make a big impact on a 
 
 \begin{comment}
 % NOTE Did I say it is necessary in the introduction?! If not why am I arguing about his here. Bad section
-One last thing that needs to be kept in mind is the typical hypervisor's current hardware restrictions. If a \acrshort{dsp} is necessary to control the device, the hypervisor could be at a disadvantage, since there is currently no \acrshort{dsp} that can host a hypervisor. But this may change [source] in the near future.  
+One last thing that needs to be kept in mind is the typical hypervisor's current hardware restrictions. If a \acrshort{dsp} is necessary to control the device, the hypervisor could be at a disadvantage, since there is currently no \acrshort{dsp} that can host a hypervisor. But this may change in the near future (see section \ref{cortex-r52-hypervisor}).  
 \end{comment}
 
 \subsubsection{Conclusion}
@@ -162,7 +162,7 @@ Compilers and potentially even debuggers need to be verified as well. This means
 \subsubsection{Debugging and tracing}
 Since the hypervisor acts as a layer of abstraction between the hardware and software it has the potential to be a great aid in debugging the system. But simultaneously it could also act as a great hindrance, obfuscating issues in the business code and not providing access to partition data that would have been available without the hypervisor.
 \paragraph{Does the hypervisor provide standard debugging functionality?}
-There are multiple ways to achieve this and they will not be explored in detail here but the two most prominent examples are: a debugging server running on the device and a hypervisor aware \acrshort{jtag} environment. Ideally, it is possible to debug both the hypervisor and the guest operating systems independently. [source to hypervisors that do this and lauterbach ad]
+There are multiple ways to achieve this and they will not be explored in detail here but the two most prominent examples are: a debugging server running on the device and a hypervisor aware \acrshort{jtag} environment. Ideally, it is possible to debug both the hypervisor and the guest operating systems independently \cite{Lauterbach.2018}. 
 \paragraph{Does the hypervisor provide special debugging or tracing functionality?}
 As established in section \ref{distributed-or-centralized}, the hypervisor has a unique centralized view of the system. It can therefore expose its internal events to a developer and provide high level insight into what exactly is happening inside the hypervisor.
 
@@ -171,7 +171,7 @@ As established in section \ref{distributed-or-centralized}, the hypervisor has a
 \section{Noteworthy implementations} \label{noteworthy-implementations}
 As a contrast to the "basic safety-hypervisor" established early in the thesis, now will be given some notable 2018 implementations. Keep in mind that no claim is being made about their respective quality, it is just being pointed out what interesting and unique features or characteristics they have.
 \subsection{seL4 and CAmkES} \label{seL4}
-seL4 is a formally verified microkernel with a focus on security, so far it has been mostly confined to academia but some advances into real products have been made since [source]. \textquote{CAmkES (component architecture for microkernel-based embedded systems) is a software development and runtime framework for quickly and reliably building microkernel-based multiserver (operating) systems.}[source]. A system that is built with these two can also host virtual machines on some platforms. This implementation provides much more flexibility than a basic hypervisor, as it can be used to design general modular software systems. The formal verification of seL4 and CAmkES, as well as the additional verification output that can be generated automatically, can go a long way in certifying a safety-critical device.
+seL4 is a formally verified microkernel with a focus on security, so far it has been mostly confined to academia but some advances into realistic products have been made since \cite{fisher2012hacms}. \textquote{CAmkES (component architecture for microkernel-based embedded systems) is a software development and runtime framework for quickly and reliably building microkernel-based multiserver (operating) systems.}[source]. A system that is built with these two can also host virtual machines on some platforms. This implementation provides much more flexibility than a basic hypervisor, as it can be used to design general modular software systems. The formal verification of seL4 and CAmkES, as well as the additional verification output that can be generated automatically, can go a long way in certifying a safety-critical device.
 % Link CAmkES source: https://docs.sel4.systems/CAmkES/
 \subsection{SYSGO's PikeOS}
 PikeOS is unique because it is a real-time operating system first and foremost with hypervisor functionality added on top. Similar to seL4 with CAmkES it can provide much more flexibility in designing the system than a hypervisor that offers only virtualized guest environments. Partitions can host \acrshort{rtos} task trees or a virtualized operating system respectively. This also eliminates the need to virtualize an \acrshort{rtos} in the first place.

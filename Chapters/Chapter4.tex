@@ -149,7 +149,8 @@ One last type of time saving factor is the impact on the development process its
 There are two ways for an architecture to influence the faults in a device. First, the architecture itself may be faulty. Second, the architecture may impact the faults in the business software on top of the architecture positively or negatively.
 
 % https://docs.microsoft.com/en-us/previous-versions/msp-n-p/ee658124(v=pandp.10)
-There is a key principle of how a separation architecture might influence faults in the business software running on top: The basic attributes of a separation architecture are similar to the principles of good software architecture design below. Those have been successfully used to reduce faults and manage complexity in software projects over the past decades [source]. Even the smallest possible separation architecture, is ultimately about information hiding and enforcing the separation of concerns.
+% TODO This section sounds weird, also it needs to be moved to a more general place
+There is a key principle of how a separation architecture might influence faults in the business software running on top: The basic attributes of a separation architecture are similar to the principles of good software architecture design below. Those have been successfully used to reduce faults and manage complexity in software projects over the past decades \cite{Randell.1996}\cite{martin2009clean}. Even the smallest possible separation architecture, is ultimately about information hiding and enforcing the separation of concerns.
 % TODO Explain the ones I rely on and cut the ones that don't apply
 \begin{enumerate}
 \item Separation of concerns
@@ -162,7 +163,7 @@ What concrete benefits can come from this will be discussed in the following sec
 General solutions, like the hypervisor, are reused over a long period of time and consequently there are more chances to fix faults in the original implementation. For example, faults found by static analyzers in the Linux driver code have decreased significantly over the past 10 years \cite{palix2011faults}. Granted, hypervisors do not enjoy the same popularity as Linux but they also contain much less code and safety hypervisors are used by very scrutinous  parties that are perhaps more likely to find faults.
 
 % NOTE This feels a bit out of place. Maybe a crucial difference or go to safety section (or there is some overlap and I need to decide)
-But hypervisors have a significant disadvantage, they represent a single point of failure in the system. This probably has the biggest implications for security but is also very important for safety. For some systems a single point of failure might not be tolerable at all for others the hypervisor's unerring functionality just needs to be sufficiently evidenced. Perhaps even going as far as \keyword{formal verification} [source seL4].
+But hypervisors have a significant disadvantage, they represent a single point of failure in the system. This probably has the biggest implications for security but is also very important for safety. For some systems a single point of failure might not be tolerable at all for others the hypervisor's unerring functionality just needs to be sufficiently evidenced. Perhaps even going as far as \keyword{formal verification} \cite{fernandez2013camkes}\cite{klein2009sel4}.
 
 % TODO Include hardware vs software points
 

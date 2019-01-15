@@ -23,7 +23,7 @@ While the true cost of a typical hypervisor license will likely continue to elud
 %----------------------------------------------------------------------------------------
 
 \section{Technological progress} \label{tech-progress}
-\subsection{New hardware platforms}
+\subsection{New hardware platforms} \label{cortex-r52-hypervisor}
 Probably the most notable development already on the horizon is the newest member of the ARMv8-R architecture. The ARMv8-R architecture is specifically designed for safety-critical environments with real-time requirements [source]. %https://developer.arm.com/products/architecture/cpu-architecture/r-profile
 The Cortex-R52 specification [source] has been released in 2017 and now the first silicon implementations are going into preproduction [source NXP S32S24]. It offers eight logical cores operating in dual core lock step, multiple safety features and typical \acrshort{dsp} functionality. Unusually for a microcontroller of this scope, it also contains an \acrshort{mpu} and hardware virtualization extensions. Furthermore, there is already an unreleased hypervisor that takes advantage of this new platform [source OpenSynergy]. This means that in the future the concerns with using application processors in real-time safety-critical devices will no longer apply.
 
