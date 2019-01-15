@@ -19,14 +19,21 @@
 % IMPORTANT Do I talk enough about whether or not developers offer para or full or both?
 % IMPORTANT Talk about supported hardware, v7 vs v8 and breadth of platforms
 
+Now that the differences between traditional hypervisors and embedded safety hypervisors have been laid out, it is time to take a closer look at the embedded safety hypervisor.
+For this, a "basic safety hypervisor" will be proposed, that embodies the typical characteristics of a microkernel based safety hypervisor. Where there is no discernible consensus, differences will be highlighted. Both the typical hypervisor architecture and its simplified functionality will be examined.
+
 \section{Architecture}
 % NOTE Where to talk about static configuration?
+
 Now that any misconceptions concerning the purpose of the safety hypervisor have been cleared up, it is time to examine its architecture and features. For this, a "basic safety hypervisor" will be proposed, that embodies the typical characteristics of a microkernel based safety hypervisor. Where there is no discernible consensus, differences will be highlighted.
 
 % NOTE I think I am mixing microkernel architecture with hypervisor architecture
 \subsection{Minimal trusted computing base}
 Minimality is the most essential principal of microkernel design. It proves particularly useful for hypervisors with a focus on certification because a strong rule of thumb is: Less code means less verification effort as well as faults \cite{Lipow.1982}.  
 Where the original microkernels were just thin wrapper around the hardware, a \acrshort{cpu} driver so to speak, the microkernel based hypervisor adds a bit more code for the virtualization \cite{Heiser.2010}. These systems have around ten thousand lines of code.
+
+\subsection{Static configuration}
+Any mechanism to increase a guests rights at runtime poses the risk of exploitation, be it accidental or purposeful. That is why these systems are typically statically configured and if configuration runtime is at all possible, it is restricted to reducing privilege. For example, a guest that is allowed to spawn other guests may give them his own rights or less than his own but never more.
 
 \subsection{Capability-based access control}
 Capabilities are unforgeable tokens that grant access rights to an object. They contain the identification of the object and associated rights, for example read and write.
@@ -43,19 +50,14 @@ Some also offer hierarchical scheduling, where a so-called container task is sch
 
 Whatever the specific implementation is, at the very least it satisfies the temporal separation requirement from the section \ref{separation-arch}. 
 
-\paragraph{Real-time requirements}
+\paragraph{Real-time capabilities}
 Additionally, the basic safety hypervisor's scheduling is deterministic and overhead is suitably low. This means that a worst-case execution time analysis can be carried out and real-time requirements can conceptually be satisfied. However, to what precise degree can't really be generalized.
-\begin{comment}
-\subsection{Static configuration}
-Any mechanism to increase a guests rights at runtime poses the risk of exploitation, be it accidental or purposeful. That is why these systems are typically statically configured and if configuration runtime is at all possible, it is restricted to reducing privilege. For example, a guest that is allowed to spawn other guests may give them his own rights or less than his own but never more.
-\end{comment}
 
-\subsection{Explicit access}
-Any configuration that grants rights, be it communication with another guest or resource access, has to be explicitly enabled by the system integrator. This makes sure that no unintended access is granted to guests that could potentially compromise the system.
+
 \subsection{Available guest environments}
 % TODO Explain what a guest environment is
 The typical hypervisor supports several different guest environments.
-\paragraph{Paravirtualized versus fully virtualized}
+\subsubsection{Paravirtualized versus fully virtualized}
 A key distinction between virtualized guest environments is their virtualization type \ref{hw-virt}. Expect paravirtualization to always be available in a hypervisor, full virtualization support on the other hand is more rare. One reason could be that virtualization extensions are still relatively new, especially on ARM processors. In any case, full virtualization can only be offered if the platform supports hardware virtualization extensions.
 
 % NOTE Meh...
@@ -69,24 +71,68 @@ Nevertheless, the importance of the outcome is likely not trivial, since full vi
 Second, the amount of viable operating systems is higher. The modification efforts to an \acrshort{os} can only be made if the source code is available, but for many commercial products this is not the case. 
 
 Ultimately, it is important to verify that full virtualization is plausible for your device and analyze what the consequences of a lack thereof are.
-\paragraph{\acrshort{rtos} and \acrshort{gpos}}
+\subsubsection{Operating systems}
 The basic hypervisor offers both \acrfull{rtos} and \acrfull{gpos} guests. What kinds and how much variety depends on the points raised in the previous section about virtualization types. 
-\paragraph{Native \acrshort{api}}
+\subsubsection{Native runtime environment}
 Typically there is also the option to have guests that are not a fully fledged operating system but a virtualized bare-metal environment with access to the hypervisor \acrshort{api} instead. 
 
 The applications of this are wide-ranging but one example would be to implement a driver that is required by both an \acrshort{rtos} and \acrshort{gpos} running on the system. Both partitions could then use the hypervisor's messaging mechanism to communicate with the driver. This would be especially useful for peripherals that are difficult to share normally.
-\subsection{Hardware abstraction}
-While the hypervisor does not get around having to implement a minimal \acrfull{bsp} for each platform, it can offer significant hardware abstraction to its guests. The \keyword{Native \acrshort{api}} mentioned in the previous section is not just available to bare-metal guests but also to virtualized ones. Some examples of this are: Getting information about the system, communication with other guests and centralized logging.
+
+%----------------------------------------------------------------------------------------
+
+\section{Functionality}
+* What the hv can do and a simplified how
+\subsection{Separation}
+* Introduced in separation architecture section 
+* This will explain how the hypervisor actually does this
+\subsubsection{Temporal separation}
+* The ways of scheduling have already been detailed
+* The hypervisor can achieve temporal separation because it has full control over the system and can force partitions to stop or start
+* Maybe go into more detail
+* How are secondary timing problems solved (like interrupts etc.)
+\subsubsection{Spatial separation}
+* It achieves this through utilizing the MMU or more rarely the MPU
+* Some objects related to partitions need to be saved in kernel memory
+* Either, partitions have a kernel memory quota or they can only instantiate objects that were defined at configuration time. This stops them from starving other processes of kernel memory
+\subsection{Inter-partition communication}
+* There are two ways to communicate with another partition: message passing and shared memory.
+* In the shared memory case the hypervisor simply maps the same physical memory region into the virtual memory region of both partitions. The partitions then need to take care of everything else themselves. That means the partitions need to make sure they are not overwriting each others data and so on...
+* Message passing is done through so called ports. Ports are defined at configuration time and have one source and one or more destinations. There are two types of ports: Queuing ports maintain a FIFO queue of messages that the consumer can take. In sampling ports a new message overwrites the existing one. 
+* In the port scenario the hypervisor does have some control over the communication. [Explain what this means and what comes from it]
+\subsubsection{User space synchronization}
+* Some hypervisors may offer built-in synchronization mechanisms like semaphores to user space partitions
+* This is especially useful if two partitions share memory and need to synchronize who is allowed to access it. 
+\subsection{Partition privileges}
+* At the very least there is two privilege levels. That of a system partition and a normal partition. A system partition is allowed to monitor and change the state of other partitions or the system as a whole. For example, it is allowed to execute the hypercall for shutting down another partition.
+* There may also be more granular control where individual hypercalls can be allowed or disallowed
+\subsection{Health monitoring}
+* First events get detected. There are three types of events:
+    -> Events caused by abnormal hardware behavior. The hypervisor is notified of this by processor traps
+    -> Events detected and triggered by partition code. These are usually related to assertions or checks.
+    -> Events triggered by the hypervisor itself. Usually because of a violation of a sanity check performed by the hypervisor. Either on the hypervisors internal state or that of a partition. This may also include a partition attempting to perform actions it is not allowed to
+* A developer can then assign some basic actions that should follow a certain event, like restarting the partition or even the entire system. There doesn't have to be a defined action for everything.
+* Simultaneously all events also get reported to the global log stream. Any partition with access to this stream can read it and may take more intricate steps to resolve the problem. This can be performed either as a replacement to the basic action described previously or on top of it.
+* Add an image!
+\subsection{Device access}
+* To control a device, the partition needs control over the corresponding interrupt lines and device registers (typically handled by memory mapped IO on ARM and that or IO ports on x86)
+* If only one partition needs access to a device it can be assigned directly.
+* If devices are shared an IO Server partition needs to be implemented. It controls the device and gives access to the device over the inter-partition communication mechanism of the hypervisor. 
+* Hardware interrupts can be assigned during configuration. 
+* The hypervisor also often extends the interrupts there are with his own events. This can be used to notify partitions of hypervisor events like new messages at a queuing port for which they are a destination.
+\subsection{Timers}
+* Because the hypervisor can obfuscate a partitions view of time compared to if it was running on bare-metal (elaborate what this means), it offers virtual timers.
+* The partition may either request the current time or activate a timer and receive an interrupt when the timer expires [...]
 
 %----------------------------------------------------------------------------------------
 \section{Initial considerations}
+% TODO Rename this section
 Although the considerations for choosing a hypervisor implementation will be outlined later in the thesis, in section \ref{how-to-decide}, some crucial factors need to be elaborated here to avoid confusion.
 \subsection{First- or third-party hypervisor}
 A manufacturer has the option to either license a third-party hypervisor or develop his own solution. The development costs of a third-party hypervisor are effectively shared with many parties over the course of many projects, whereas the development costs of a first-party hypervisor are typically only shared over the course of many projects in a single company. However, developing one's own hypervisor provides the maximum amount of control over functionality and development cycle.
 
 Additionally, it means that the best possible subject matter experts on the hypervisor are always available to the manufacturer. But here also lies another big problem: Developing a custom hypervisor not only requires the initial development costs but also the costs of hiring or developing the talent required. A third-party already has these capacities and can therefore also typically go beyond the absolute necessity in terms of functionality.
 
-Ultimately, the more prudent approach is probably licensing a third-party hypervisor but in some cases it may be beneficial to have full control over the environment.
+Ultimately, the more prudent approach is probably licensing a third-party hypervisor but in some cases it may be beneficial to have full control over the environment. 
 
 \subsection{Security}
 Security will not be a consideration in this thesis, only a word of warning will be issued. It may seem logical to assume that a hypervisor can provide security as well as safety and while it may not initially be a bad idea to have separation between security-critical and non-security-critical software it is not that simple. A hypervisor offers a much greater attack incentive, as a compromisation of the platform could be used to attack a lot of different devices. It is also questionable whether or not the goals of security and safety align. A manufacturer doesn't want to modify a certified device or at least do it in bulk to minimize the cost of recertification. Building a secure device on the other hand often requires frequent updates to fix newly found attack vectors. So the security of any given hypervisor implementation should not be taken for granted and analyzed with scrutiny.

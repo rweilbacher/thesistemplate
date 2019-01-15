@@ -71,6 +71,32 @@ headsepline, % Uncomment to get a line under the header
 \usepackage{comment}
 \usepackage{float}
 \usepackage[acronym]{glossaries}
+\usepackage{listings}
+\begin{comment}
+    
+
+<pre style='color:#000000;background:#ffffff;'><span style='color:#000084; '>#</span><span style='color:#000084; '>include</span><span style='color:#0000ff; '>&lt;</span><span style='color:#3f3fbf; '>stdio.h</span><span style='color:#0000ff; '>></span>
+<span style='color:#000084; '>#</span><span style='color:#000084; '>include</span><span style='color:#0000ff; '>&lt;</span><span style='color:#3f3fbf; '>iostream</span><span style='color:#0000ff; '>></span>
+<span style='color:#808080; '>// A comment</span>
+<span style='color:#000084; font-weight:bold; '>int</span> <span style='color:#000084; font-weight:bold; '>main</span>(<span style='color:#000084; font-weight:bold; '>void</span>) {
+    <span style='color:#000084; font-weight:bold; '>printf</span>(<span style='color:#0000ff; '>"</span><span style='color:#0000ff; '>Hello World</span><span style='color:#0000ff; '>\n</span><span style='color:#0000ff; '>"</span>);
+    <span style='color:#000084; font-weight:bold; '>return</span> 0;
+}
+</pre>
+<!--Created using ToHtml.com on 2019-01-15 10:13:57 UTC -->
+\end{comment}
+
+\definecolor{dark_blue}{HTML}{200090}
+\definecolor{gray}{HTML}{808080}
+\definecolor{blue}{HTML}{0000ff}
+\definecolor{light_blue}{HTML}{3f3fbf}
+\lstset{language=C++,
+                basicstyle=\ttfamily,
+                keywordstyle=\color{dark_blue}\ttfamily,
+                stringstyle=\color{blue}\ttfamily,
+                commentstyle=\color{gray}\ttfamily,
+                morecomment=[l][\color{light_blue}]{\#}
+}
 %\makeglossaries
 
 %----------------------------------------------------------------------------------------
