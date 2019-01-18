@@ -238,6 +238,7 @@ Additionally, a problem outlined in the section \ref{mixed-criticality} applies 
 
 Although the RTOS architecture remains quite a dominant one, it quickly loses its appeal with growing application complexity. Therefore it will be excluded from further analysis in this thesis.
 \subsection{Multicore system}
+% TODO Intro: An entirely different approach to separation is separating the components in hardware instead of software
 More and more silicon vendors are offering multicore systems with a dedicated safety and a support core. These are usually heterogeneous processors with one application core, like an ARM Cortex A7, and one microcontroller core, like an ARM Cortex M4. Proving temporal separation on these systems is typically not difficult, as the cores are physically separated \cite{Wittenstein.temporal.2017}.
 
 But the cores in these systems share hardware resources like peripherals and memory. Consequently, it can be challenging to show sufficient evidence for spatial separation. An \acrshort{mmu} or \acrshort{mpu} can be useful to enforce spatial separation but it is not a perfect solution, especially for peripherals.
