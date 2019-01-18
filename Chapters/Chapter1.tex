@@ -8,6 +8,7 @@
 
 % Define some commands to keep the formatting separated from the content 
 \newcommand{\keyword}[1]{\textbf{#1}}
+\newcommand{\bold}[1]{\textbf{#1}}
 \newcommand{\tabhead}[1]{\textbf{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\file}[1]{\texttt{\bfseries#1}}
@@ -204,14 +205,10 @@ How this may be achieved differs based on architecture and standard but it needs
 
 %----------------------------------------------------------------------------------------
 
-\section{Existing architectures}
+\section{Existing separation architectures}
 % TODO Refrain from comparing architectures (or even making qualitative judgments) unless I am building the argument for not analyzing them later. Or I guess only talk about quality of separation (more sources!)
 There are some possible contenders for feasible separation architectures. This section will give an overview and narrow down the options for the more detailed analysis in the latter parts of this thesis.
-\subsection{Embedded operating systems}
-% NOTE There is a gap between this section and the previous
-Apart from bare-metal software, which is reserved for the most trivial cases,  embedded operating systems are the simplest approach to device architecture. 
-% NOTE Feels like there is also something missing here
-\subsubsection{General purpose operating system}
+\subsection{General purpose operating system}
 Even though this section's title is \acrfull{gpos} realistically it can be substituted with Linux, as other options are usually not considered adequate for embedded devices. But the same arguments should apply to other general purpose operating systems.
 
 With the help of an \acrfull{mmu} or \acrfull{mpu}  a \acrshort{gpos} can achieve the spatial separation of memory between applications. The operating system's access control may be used to limit peripheral access and drivers can arbitrate conflicts. 
@@ -226,7 +223,9 @@ Undoubtedly these efforts have been at least somewhat successful as Linux has be
 Another big problem is damage limitation. While more and more Linux drivers are implemented in user space, a considerable amount still has to be in kernel space . Failures in these drivers can potentially cause a kernel panic, prompting the device to shut down. 
 
 Perhaps Linux, or another, yet unknown GPOS, will be able to solve the mixed criticality problem directly but for now it will be excluded from further analysis, on the grounds that it can not satisfy the separation architecture requirements well enough for a large set of safety-critical devices.
-\subsubsection{Real-time operating system}
+\subsection{Microkernel}
+
+\subsection{Real-time operating system}
 % NOTE How do they deal with peripherals?
 Providing temporal separation is practically the main purpose of an RTOS, so there are no real problems on that front, and with the aid of an \acrshort{mpu} or \acrshort{mmu} spatial separation is also not a big issue.
 
@@ -266,8 +265,39 @@ So what exactly does this architecture look like? Because this is more so a desi
 More specific advantages and disadvantages of this architecture will be analyzed in more detail later in the thesis.
 
 %----------------------------------------------------------------------------------------
+\section{Hypervisor}
+Now let’s examine the main subject of this thesis, the hypervisor. Hypervisors originated in networking to optimize server usage and as such there are some misconceptions about their usefulness in embedded programming. These misconceptions will be addressed here but first, we need to take a look at the core functionality of a hypervisor.
 
-\section{Embedded safety hypervisor origins}
+\subsection{Hardware virtualization}
+The act of hardware virtualization refers to the creation of a virtual machine that
+acts like a real machine. A virtual machine is often referred to as a guest and the system it is virtualized on is called the host. The host can either assign hardware to the guests directly or provide them with virtualized hardware components. Virtualized hardware components also behave like their real counterparts from the view of the guest but in reality the host is translating any hardware operations that the guest performs to corresponding operations on the actual hardware. This means the guest can be unaware that it is only a virtual machine and does not have full control over the system.
+
+There are two types of hardware virtualization. Full virtualization and paravirtualization
+\subsusbsection{Full virtualization}
+In full virtualization the virtualized guest is completely unaware that is not a real machine. That means any software that could run on an actual machine can also run on this machine, without any modification.
+In theory this can be completely achieved in software but this is very computationally expensive. That is why \acrshort{cpu} designers like Intel and ARM offer hardware virtualization extensions that can accelerate these processes \cite{uhlig2005intel}. However, this also means that if these virtualization extensions are not an option, other ways need to be found to efficiently virtualize a system. Which brings us to Paravirtualization.
+\subsusbsection{Paravirtualization}
+In paravirtualization the software running on the virtual machine is modified, so that it can communicate efficiently with the host platform. To elaborate: A process running atop an operating system can use the available system calls to interact with the hardware below. In a fully virtualized operating system the host system recognizes that an interaction with the hardware has been initiated by the guest, interrupts the communication and takes over. In a paravirtualized operating system on the other hand, the implementation of the system calls has been modified to talk directly to the host system instead of the hardware. This leads to overall more efficient virtualization process because.
+
+In reality there are often hybrid version that take advantage of both paravirtualization and the hardware virtualization extensions of the \acrshort{cpu}. The virtualization extensions are very good at stopping the virtual machines from doing things they are not allowed to and the combination of paravirtualization and hardware extensions increase the efficiency and performance of the virtualization.
+\subsection{Hypervisor}
+The virtual machine monitor, more commonly referred to as hypervisor, is the software that actually facilitates the communication between the virtualized guest machine and the hardware on the host platform.
+* Also VMM
+* Takes care of virtualizaing hardware
+* Provides everything the guests need. 
+* There are Type I and Type II hypervisors (image)
+* But the actual goal of a hypervisor can vary drastically as can be seen in the following sections
+\subsection{Traditional server hypervisor}
+\subsection{Embedded safety hypervisor}
+
+
+
+
+
+
+
+\begin{comment}
+\XsecXtion{Embedded safety hypervisor origins}
 % TODO Add dat sauce
 Now let's examine the main subject of analysis, the embedded safety hypervisor. In this section it will be established where it comes from and some associated concepts. This should get rid of some common misconceptions about hypervisors and their applicability in the embedded sector.
 \subsection{Hardware virtualization} \label{hw-virt}
@@ -295,5 +325,7 @@ In 2005 an academic debate broke out about the legitimacy of microkernels versus
 The argument was that, despite their architectural similarities, hypervisors are a special case of microkernels \textquote{microkernels done right} \cite{StevenHand.2005}\cite{Heiser.2006}. Without examining the back and forth that ensued, the result was the addition of hypervisor functionality to existing microkernels \cite{Heiser.2010}. And these hypervisors with a minimal trusted computing base were focused on the safety-critical market, providing safe separation instead of maximum resource utilization.
 
 This does not necessarily mean that microkernel based hypervisors are the definitive embedded safety hypervisor but it is their origin and still by far the most prevalent architecture.
+
+\end{comment}
 
 
