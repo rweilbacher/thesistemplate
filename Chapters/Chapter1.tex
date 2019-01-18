@@ -224,6 +224,20 @@ Another big problem is damage limitation. While more and more Linux drivers are 
 
 Perhaps Linux, or another, yet unknown GPOS, will be able to solve the mixed criticality problem directly but for now it will be excluded from further analysis, on the grounds that it can not satisfy the separation architecture requirements well enough for a large set of safety-critical devices.
 \subsection{Microkernel}
+Microkernels are not typically directly deployed on devices but they are very closely related to real time operating systems and hypervisors, architectures that will be introduced later in this chapter. For that reason it is important to review the guiding principles of  microkernel design at this point.
+
+\paragraph{Minimality}
+\paragraph{Fast IPC}
+\paragraph{User-level device drivers}
+% IMPORTANT Sources
+
+\begin{itemize}
+    \item Minimality
+\end{itemize}
+
+At this point it is useful to make a quick excursion to the realm of microkernels. As the name implies their guiding principal is that of a minimal kernel. Basically, everything that doesn't absolutely have to be handled in kernel space for the device to work is implemented in user space.
+
+This kind of system was exclusive to academia for a long time, until it somewhat matured in the late 90s \cite{Liedtke.1995}\cite{Liedtke.1996}. With this development they had already become attractive to safety-critical device manufacturers and saw some large scale deployment.
 
 \subsection{Real-time operating system}
 % NOTE How do they deal with peripherals?
@@ -273,20 +287,26 @@ The act of hardware virtualization refers to the creation of a virtual machine t
 acts like a real machine. A virtual machine is often referred to as a guest and the system it is virtualized on is called the host. The host can either assign hardware to the guests directly or provide them with virtualized hardware components. Virtualized hardware components also behave like their real counterparts from the view of the guest but in reality the host is translating any hardware operations that the guest performs to corresponding operations on the actual hardware. This means the guest can be unaware that it is only a virtual machine and does not have full control over the system.
 
 There are two types of hardware virtualization. Full virtualization and paravirtualization
-\subsusbsection{Full virtualization}
+\subsubsection{Full virtualization}
 In full virtualization the virtualized guest is completely unaware that is not a real machine. That means any software that could run on an actual machine can also run on this machine, without any modification.
 In theory this can be completely achieved in software but this is very computationally expensive. That is why \acrshort{cpu} designers like Intel and ARM offer hardware virtualization extensions that can accelerate these processes \cite{uhlig2005intel}. However, this also means that if these virtualization extensions are not an option, other ways need to be found to efficiently virtualize a system. Which brings us to Paravirtualization.
-\subsusbsection{Paravirtualization}
+\subsubsection{Paravirtualization}
 In paravirtualization the software running on the virtual machine is modified, so that it can communicate efficiently with the host platform. To elaborate: A process running atop an operating system can use the available system calls to interact with the hardware below. In a fully virtualized operating system the host system recognizes that an interaction with the hardware has been initiated by the guest, interrupts the communication and takes over. In a paravirtualized operating system on the other hand, the implementation of the system calls has been modified to talk directly to the host system instead of the hardware. This leads to overall more efficient virtualization process because.
 
 In reality there are often hybrid version that take advantage of both paravirtualization and the hardware virtualization extensions of the \acrshort{cpu}. The virtualization extensions are very good at stopping the virtual machines from doing things they are not allowed to and the combination of paravirtualization and hardware extensions increase the efficiency and performance of the virtualization.
 \subsection{Hypervisor}
-The virtual machine monitor, more commonly referred to as hypervisor, is the software that actually facilitates the communication between the virtualized guest machine and the hardware on the host platform.
-* Also VMM
-* Takes care of virtualizaing hardware
-* Provides everything the guests need. 
-* There are Type I and Type II hypervisors (image)
-* But the actual goal of a hypervisor can vary drastically as can be seen in the following sections
+The virtual machine monitor, more commonly referred to as hypervisor, is the software that actually facilitates the communication between the virtualized guest machine and the hardware on the host platform. In a paravirtualized operating system the system calls would need to be adjusted to talk to the specific hypervisor implementation that is used. 
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.75]{Figures/hypervisor_types.png}
+\decoRule
+\caption{The two hypervisor types}
+\label{fig:hypervisor_types}
+\end{figure}
+As indicated in figure \ref{fig:hypervisor_types}, there are two types of hypervisors. Type II hypervisors don't interface with the hardware directly and instead delegate any hardware access to the operating system they are running on. This scenario adds additional overhead and necessarily requires an operating system to run on the device. Therefore, Type II hypervisors are not relevant to this thesis.
+
+But even among Type I hypervisors there can be significant differences in what they aim to achieve. Differentiating the two big use cases will be the topic of the following sections.
 \subsection{Traditional server hypervisor}
 \subsection{Embedded safety hypervisor}
 
