@@ -224,29 +224,23 @@ Another big problem is damage limitation. While more and more Linux drivers are 
 
 Perhaps Linux, or another, yet unknown GPOS, will be able to solve the mixed criticality problem directly but for now it will be excluded from further analysis, on the grounds that it can not satisfy the separation architecture requirements well enough for a large set of safety-critical devices.
 \subsection{Microkernel}
-Microkernels are not typically directly deployed on devices but they are very closely related to real time operating systems and hypervisors, architectures that will be introduced later in this chapter. For that reason it is important to review the guiding principles of  microkernel design at this point.
-
+Microkernels are not typically directly deployed on devices but they are very closely related to real time operating systems and hypervisors, architectures that will be introduced later in this chapter. For that reason it is important to review the key difference between microkernel design and traditional monolithic kernel design at this point.
+The kernel is the part of the operating system that has complete control over everything in the system. It handles all hardware access for applications running in user space.
+\paragraph{Minimality}
 \begin{figure}
 \centering
 \includegraphics[scale=0.75]{Figures/microkernel_vs_normal.png}
 \decoRule
-\caption{The two hypervisor types}
-\label{fig:hypervisor_types}
+\caption{Traditional monolithic kernel in comparison to a microkernel}
+\label{fig:microkernel_vs_normal}
 \end{figure}
+As the name suggests, the core principle of microkernel design is that of minimality. Meaning, anything that doesn't absolutely need to be in the kernel for the system to function is handled in user space instead. As can be seen in figure \ref{fig:microkernel_vs_normal}, typical monolithic kernels implement everything from the file system to device drivers in the kernel.
 
-\paragraph{Minimality}
-\paragraph{Fast IPC}
-\paragraph{User-level device drivers}
-% IMPORTANT Sources
+A microkernel on the other hand only includes the basic functions like \acrfull{ipc}, virtual memory and the scheduling of processes. This means that shared functionality is implemented in so called \keyword{server processes}. Any process that needs to access the file system for example, can do so over the \acrshort{ipc} mechanism of the microkernel. In figure \ref{fig:microkernel_vs_normal} the arrow between the "Application" process and the "File server" process indicates such a communication.
 
-\begin{itemize}
-    \item Minimality
-\end{itemize}
+Microkernels subsequently have much fewer lines of code than monolithic kernels with roughly 10.000 lines of code\cite{Heiser.2016}. Linux as an example of a monolithic kernel has over 15 million lines of code\cite{paul2012linux}. Being comprised of so a little code makes microkernels easier to maintain and refine. This property of microkernels is especially desirable for safety-critical device manufacturers, as it also makes the microkernel verification much easier.
 
-At this point it is useful to make a quick excursion to the realm of microkernels. As the name implies their guiding principal is that of a minimal kernel. Basically, everything that doesn't absolutely have to be handled in kernel space for the device to work is implemented in user space.
-
-This kind of system was exclusive to academia for a long time, until it somewhat matured in the late 90s \cite{Liedtke.1995}\cite{Liedtke.1996}. With this development they had already become attractive to safety-critical device manufacturers and saw some large scale deployment.
-
+However, with such a reliance on \acrlong{ipc}, much of the system performance is dictated by the speed of the \acrshort{ipc} mechanism. Early microkernels struggled with this but since the advent of the L4 microkernel by Jochen Liedtke \acrshort{ipc} is no longer considered a bottleneck of microkernels\cite{Liedtke.1995}\cite{Liedtke.1996}.
 \subsection{Real-time operating system}
 % NOTE How do they deal with peripherals?
 Providing temporal separation is practically the main purpose of an RTOS, so there are no real problems on that front, and with the aid of an \acrshort{mpu} or \acrshort{mmu} spatial separation is also not a big issue.
