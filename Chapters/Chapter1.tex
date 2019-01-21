@@ -179,16 +179,6 @@ There are four attributes a separation architecture needs to solve the mixed cri
 % TODO Introduce the concept of a partition
 \subsection{Spatial separation}
 
-\begin{comment}
-\begin{figure}
-\centering
-\includegraphics{Figures/Drawing1}
-\decoRule
-\caption{Test}
-\label{fig:sepArch}
-\end{figure}
-\end{comment}
-
 Spatial separation means that access of physical resources cannot lead to conflicts or corruption. This includes memory access as well as system resources such as hardware peripherals. \cite{Wittenstein.spatial.2017}\cite{perez2013safety}
 
 If shared access to any system resources is necessary, some kind of arbiter needs to be in place to give consistent access to components based on their criticality. 
@@ -292,7 +282,7 @@ There are two types of hardware virtualization. Full virtualization and paravirt
 In full virtualization the virtualized guest is completely unaware that is not a real machine. That means any software that could run on an actual machine can also run on this machine, without any modification.
 In theory this can be completely achieved in software but this is very computationally expensive. That is why \acrshort{cpu} designers like Intel and ARM offer hardware virtualization extensions that can accelerate these processes \cite{uhlig2005intel}\cite{ARM.v8.2018}. However, this also means that if these virtualization extensions are not an option, other ways need to be found to efficiently virtualize a system. Which brings us to Paravirtualization.
 \subsubsection{Paravirtualization}
-In paravirtualization the software running on the virtual machine is modified, so that it can communicate efficiently with the host platform. To elaborate: A process running atop an operating system can use the available system calls to interact with the hardware below. In a fully virtualized operating system the host system recognizes that an interaction with the hardware has been initiated by the guest, interrupts the communication and takes over. In a paravirtualized operating system on the other hand, the implementation of the system calls has been modified to talk directly to the host system instead of the hardware. This leads to overall more efficient virtualization process because.
+In paravirtualization the software running on the virtual machine is modified, so that it can communicate efficiently with the host platform. To elaborate: A process running atop an operating system can use the available system calls to interact with the hardware below. In a \keyword{fully virtualized operating system} the host system recognizes that an interaction with the hardware has been initiated by the guest, interrupts the communication and takes over. In a \keyword{paravirtualized operating system} on the other hand, the implementation of the system calls has been modified to talk directly to the hypervisor on the host system instead of the hardware. This leads to an overall more efficient virtualization process.
 
 In reality there are often hybrid version that take advantage of both paravirtualization and the hardware virtualization extensions of the \acrshort{cpu}. The virtualization extensions are very good at stopping the virtual machines from doing things they are not allowed to and the combination of paravirtualization and hardware extensions increase the efficiency and performance of the virtualization.
 \subsection{Hypervisor}

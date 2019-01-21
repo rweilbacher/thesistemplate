@@ -43,64 +43,48 @@ Capability-based access control has dominated in microkernels because of its fle
 \subsection{Scheduling}
 All hypervisors implement some form of hierarchical scheduling, where a container task is scheduled that then schedules its children according to a global scheduling algorithm. This is most evident with virtualized operating systems. The hypervisor schedules the virtualized operating system according to the system configuration but how the \acrshort{os} in turn schedules its processes is up to the \acrshort{os}. Hierarchical scheduling can have the benefit of reducing scheduling slack in mixed criticality systems \cite{MalcolmS.Mollison.2010}. 
 
-When it comes to how the container tasks are scheduled there is no single solution that is effective for every scenario. Consequently, the basic safety hypervisor offers different configurable scheduling behaviors. The two most common scheduling algorithms are preemptive priority based scheduling and time-sliced round-robin scheduling. Regardless of which algorithm is used, it needs to be deterministic to enable \acrlong{wcet} analysis.
+When it comes to how the container tasks are scheduled there is no single solution that is effective for every scenario. Consequently, the basic safety hypervisor offers different configurable scheduling behaviors. The two most common scheduling algorithms are preemptive priority based scheduling and time-sliced round-robin scheduling. Regardless of which algorithm is used, it needs to be deterministic to enable \acrlong{wcet} analysis. Without deterministic scheduling and \acrshort{wcet} analysis temporal separation can not be guaranteed and the system is unable to verifiably satisfy real-time requirements.
 
 \paragraph{Preemptive priority based scheduling}
+% FIGURE This might need one
 In preemptive priority based scheduling each process has a priority and processes that are ready to be scheduled are scheduled based on their priority.
-The preemptive means that if a process with a higher priority than the currently running process becomes ready to be executed, the currently running process gets interrupted.
+The preemptive means that if a process with a higher priority than the currently running process becomes ready to be executed, the currently running process gets interrupted. This ensures that the most critical task always gets the time it needs. If there are multiple processes with the same priority, the first to arrive gets scheduled first.
 
 \paragraph{Time-sliced round-robin scheduling}
+In time-sliced round-robin scheduling each process gets a dedicated time slice called a quantum. Figure \ref{fig:round_robin_example}  shows an example with three processes and their associated scheduling windows. If the end of the quantum is reached before the process is done, it gets interrupted and the next process is scheduled.
+\begin{figure}
+\centering
+\includegraphics[scale=0.75]{Figures/round_robin_example.png}
+\decoRule
+\caption{An example for round robin scheduling}
+\label{fig:round_robin_example}
+\end{figure}
 
+However, these were just the two most prevalent examples and in fact most hypervisors even allow the implementation of custom scheduling algorithms if the provided ones are not sufficient.
 
-* The scheduling for the microkernel processes is preemptive priority based and time-sliced round robin 
-    -> Explain them a bit and add image
-* But there is no unified scheduling behavior as that can heavily depend on the requirements of the system
-* However, they all need to be deterministic to allow for WCET analysis
-* Hypervisors allow for multiple scheduling plans to be defined that can be switched between at runtime by an authorized partition
-    -> Some possible applications for this would be special scheduling during the boot process or to put the device into a maintenance mode after an unexpected error has occurred.
-
-
-There is really no unified scheduling behavior that all hypervisors share. Global scheduling is the typical behavior with common algorithms being preemptive priority based scheduling and time-sliced round-robin scheduling. Additionally, hypervisors running on multicore platforms usually have the ability to assign complete cores to guests.
-
-Some also offer hierarchical scheduling, where a so-called container task is scheduled that then schedules its children according to a global scheduling algorithm. This can have the benefit of reducing scheduling slack \cite{MalcolmS.Mollison.2010}. 
-
-Whatever the specific implementation is, at the very least it satisfies the temporal separation requirement from the section \ref{separation-arch}. 
-
-\paragraph{Real-time capabilities}
-Additionally, the basic safety hypervisor's scheduling is deterministic and overhead is suitably low. This means that a worst-case execution time analysis can be carried out and real-time requirements can conceptually be satisfied. However, to what precise degree can't really be generalized.
-
+Another feature of the basic safety hypervisor is the possibility of multiple scheduling plans. A hypervisor partition with the correct capabilities is allowed to switch the scheduling behavior to one of the plans that was provided at configuration time. For example, if there is an unexpected error the monitoring partition can put the device into a maintenance mode, where only the most critical and recovery processes are scheduled. Another use for this feature is during the boot process where some partitions might need to run uninterrupted for a longer time.
 
 \subsection{Available guest environments}
-% TODO Explain what a guest environment is
-The typical hypervisor supports several different guest environments.
-\subsubsection{Paravirtualized versus fully virtualized}
-A key distinction between virtualized guest environments is their virtualization type \ref{hw-virt}. Expect paravirtualization to always be available in a hypervisor, full virtualization support on the other hand is more rare. One reason could be that virtualization extensions are still relatively new, especially on ARM processors. In any case, full virtualization can only be offered, if the platform supports hardware virtualization extensions.
+\subsubsection{\acrshort{rtos}}
+Any safety hypervisor can host a \acrlong{rtos} as a guest environment, as it is one of the core objectives to separate real-time, safety-critical domains from the less critical domains. However, as explained in section \ref{hw-virt} (Hardware virtualization) the full virtualization of operating systems is not always available or feasible and in fact many hypervisors don't currently offer full virtualization. That leaves paravirtualization as the only option but paravirtualization requires the modification of the operating system in question. To reduce the barrier of entry the developer of the basic safety hypervisor typically also offers an already paravirtualized \acrshort{rtos} that can be deployed on the hypervisor. 
 
-% NOTE Meh...
-% TODO Source?
-There also appears to be some contention on whether or not full virtualization can be as performant, and more importantly as deterministic, as paravirtualization. A lack of determinism could endanger certification, if the device has hard real-time requirements. This thesis does not try to offer evidence for either claim, whether or not full virtualization can be justified in front of the regulatory body depends on the specific scenario. 
+However, this significantly reduces the possible \acrshort{rtos} options the safety-critical device manufacturer can choose for his application. Since most real-time operating systems are closed source they cannot be modified to work on the hypervisor. This makes the \acrshort{rtos} provided by the hypervisor developer the potentially only viable option and therefore increases the dependence on the developer. What the potential consequences of this are needs to be evaluated based on the context of the situation but it is an important aspect to keep in mind.
 
-% TODO Move this section
-% IMPORTANT Move it!
-Nevertheless, the importance of the outcome is likely not trivial, since full virtualization has a number of advantages: First, it means the cost and time of modifying the guest operating system can be saved. Alternatively, it could be reduced by using an already modified \acrfull{os}, provided by the hypervisor developer but this is bound to be a very restricted choice that further increase the dependence on the developer.
+\subsubsection{Linux}
+An already paravirtualized version of Linux is another standard guest environment. Since, Linux is open-source the pressure of paravirtualization is not an immediate issue. Furthermore, there is less of a difference between versions of Linux than between real-time operating systems by different vendors. It is therefore unlikely that the safety-critical device manufacturer is even interested in using another version than the one provided.
 
-Second, the amount of viable operating systems is higher. The modification efforts to an \acrshort{os} can only be made if the source code is available, but for many commercial products this is not the case. 
+\subsubsection{Native C runtime environment}
+For a partition completing a very simple task, running a full-blown operating system is a waste of resources. For that reason the basic safety hypervisor includes a guest environment that is nothing more than a native C application with access to the hypervisor \acrshort{api}. The safety-critical device manufacturer can provide one or multiple C files that then get compiled into a hypervisor process. This process is then scheduled like any of the other partitions.
 
-Ultimately, it is important to verify that full virtualization is plausible for your device and analyze what the consequences of a lack thereof are.
-\subsubsection{Operating systems}
-The basic hypervisor offers both \acrfull{rtos} and \acrfull{gpos} guests. What kinds and how much variety depends on the points raised in the previous section about virtualization types. 
-\subsubsection{Native runtime environment}
-Typically there is also the option to have guests that are not a fully fledged operating system but a virtualized bare-metal environment with access to the hypervisor \acrshort{api} instead. 
-
-The applications of this are wide-ranging but one example would be to implement a driver that is required by both an \acrshort{rtos} and \acrshort{gpos} running on the system. Both partitions could then use the hypervisor's messaging mechanism to communicate with the driver. This would be especially useful for peripherals that are difficult to share normally.
+A possible application of this is a shared device driver. The driver can be implemented in the native C environment and communicate with the other partitions over the hypervisors \acrshort{ipc} mechanism. A more detailed explanation of this will be given in a future section.
 
 %----------------------------------------------------------------------------------------
 
 \section{Functionality}
-* What the hv can do and a simplified how
+This section will explore what functionality the safety hypervisor can offer and how it achieves this.
 \subsection{Separation}
-* Introduced in separation architecture section 
-* This will explain how the hypervisor actually does this
+% IMPORTANT What about the other requirements of a sep-arch?!
+The concepts of separation have been introduced in section \ref{separation-arch}. Now it will be detailed how the hypervisor in particular achieves this separation.
 \subsubsection{Temporal separation}
 * The ways of scheduling have already been detailed
 * The hypervisor can achieve temporal separation because it has full control over the system and can force partitions to stop or start
