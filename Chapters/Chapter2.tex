@@ -19,31 +19,47 @@
 % IMPORTANT Do I talk enough about whether or not developers offer para or full or both?
 % IMPORTANT Talk about supported hardware, v7 vs v8 and breadth of platforms
 
+% IMPORTANT Maybe remove the intro fluff?
 Now that the differences between traditional hypervisors and embedded safety hypervisors have been laid out, it is time to take a closer look at the embedded safety hypervisor.
 For this, a "basic safety hypervisor" will be proposed, that embodies the typical characteristics of a microkernel based safety hypervisor. Where there is no discernible consensus, differences will be highlighted. Both the typical hypervisor architecture and its simplified functionality will be examined.
 
 \section{Architecture}
-% NOTE Where to talk about static configuration?
+Since, most safety hypervisors are microkernel based, the architecture for the basic safety hypervisor is also a more in-depth look at microkernel architecture. However, there are differences and additions to the microkernel core that will be explored as well.   
 
-Now that any misconceptions concerning the purpose of the safety hypervisor have been cleared up, it is time to examine its architecture and features. For this, a "basic safety hypervisor" will be proposed, that embodies the typical characteristics of a microkernel based safety hypervisor. Where there is no discernible consensus, differences will be highlighted.
+The guiding principle of microkernel design, minimality, has already been introduced in section\ref{microkernel}. But while the academic microkernel representations try to achieve \keyword{absolute minimality}, most real safety hypervisor implementations forego this to add useful features to the kernel. The small trusted code base is still an integral part of safety hypervisors, but with some minor trade-offs. 
 
-% NOTE I think I am mixing microkernel architecture with hypervisor architecture
-\subsection{Minimal trusted computing base}
-Minimality is the most essential principal of microkernel design. It proves particularly useful for hypervisors with a focus on certification because a strong rule of thumb is: Less code means less verification effort as well as faults \cite{Lipow.1982}.  
-Where the original microkernels were just thin wrapper around the hardware, a \acrshort{cpu} driver so to speak, the microkernel based hypervisor adds a bit more code for the virtualization \cite{Heiser.2010}. These systems have around ten thousand lines of code.
-
-\subsection{Static configuration}
-Any mechanism to increase a guests rights at runtime poses the risk of exploitation, be it accidental or purposeful. That is why these systems are typically statically configured and if configuration runtime is at all possible, it is restricted to reducing privilege. For example, a guest that is allowed to spawn other guests may give them his own rights or less than his own but never more.
+% SOURCE Do I need a source for this?
+Perhaps, the biggest trade-off is the inclusion of the virtual machine monitor code in the kernel itself. Some hypervisors also relegate this virtual machine control to user-space but it is more typical to see it inside of the microkernel. In reality the virtualization aspect of the hypervisor is almost always a critical component and it therefore makes sense to include it in the kernel verification efforts. 
 
 \subsection{Capability-based access control}
+% TODO Explain concept of least privilege
 Capabilities are unforgeable tokens that grant access rights to an object. They contain the identification of the object and associated rights, for example read and write.
-They can be given to other entities which in turn grants them access according to the capability \cite{Levy.1984}. A capability could be for a specific memory region, a communication endpoint or to a hypervisor \acrshort{api} call.
+They can be given to other processes which in turn grants them access according to the capability \cite{Levy.1984}. A capability could be for a specific memory region, a communication endpoint or to a hypervisor \acrshort{api} call.
 
-This mechanism for access control has dominated in microkernels because of its flexibility and because it doesn't require extensive kernel involvement. Since, the typical safety hypervisor sits on top of a microkernel, this mechanism has propagated to them as well.
+The capabilities a process has are maintained in a part of memory that it can not write, to stop the process from attempting to forge capabilities. It is however still up to the process to use the appropriate capability for access to reduce kernel involvement.
+
+Capability-based access control has dominated in microkernels because of its flexibility and because it doesn't require extensive kernel involvement. Since, the typical safety hypervisor is an extension of a microkernel, this mechanism has propagated to them as well.
 
 \subsection{Scheduling}
-% NOTE I might have to explain or at least source what these are
-% NOTE Better name?
+All hypervisors implement some form of hierarchical scheduling, where a container task is scheduled that then schedules its children according to a global scheduling algorithm. This is most evident with virtualized operating systems. The hypervisor schedules the virtualized operating system according to the system configuration but how the \acrshort{os} in turn schedules its processes is up to the \acrshort{os}. Hierarchical scheduling can have the benefit of reducing scheduling slack in mixed criticality systems \cite{MalcolmS.Mollison.2010}. 
+
+When it comes to how the container tasks are scheduled there is no single solution that is effective for every scenario. Consequently, the basic safety hypervisor offers different configurable scheduling behaviors. The two most common scheduling algorithms are preemptive priority based scheduling and time-sliced round-robin scheduling. Regardless of which algorithm is used, it needs to be deterministic to enable \acrlong{wcet} analysis.
+
+\paragraph{Preemptive priority based scheduling}
+In preemptive priority based scheduling each process has a priority and processes that are ready to be scheduled are scheduled based on their priority.
+The preemptive means that if a process with a higher priority than the currently running process becomes ready to be executed, the currently running process gets interrupted.
+
+\paragraph{Time-sliced round-robin scheduling}
+
+
+* The scheduling for the microkernel processes is preemptive priority based and time-sliced round robin 
+    -> Explain them a bit and add image
+* But there is no unified scheduling behavior as that can heavily depend on the requirements of the system
+* However, they all need to be deterministic to allow for WCET analysis
+* Hypervisors allow for multiple scheduling plans to be defined that can be switched between at runtime by an authorized partition
+    -> Some possible applications for this would be special scheduling during the boot process or to put the device into a maintenance mode after an unexpected error has occurred.
+
+
 There is really no unified scheduling behavior that all hypervisors share. Global scheduling is the typical behavior with common algorithms being preemptive priority based scheduling and time-sliced round-robin scheduling. Additionally, hypervisors running on multicore platforms usually have the ability to assign complete cores to guests.
 
 Some also offer hierarchical scheduling, where a so-called container task is scheduled that then schedules its children according to a global scheduling algorithm. This can have the benefit of reducing scheduling slack \cite{MalcolmS.Mollison.2010}. 
@@ -58,7 +74,7 @@ Additionally, the basic safety hypervisor's scheduling is deterministic and over
 % TODO Explain what a guest environment is
 The typical hypervisor supports several different guest environments.
 \subsubsection{Paravirtualized versus fully virtualized}
-A key distinction between virtualized guest environments is their virtualization type \ref{hw-virt}. Expect paravirtualization to always be available in a hypervisor, full virtualization support on the other hand is more rare. One reason could be that virtualization extensions are still relatively new, especially on ARM processors. In any case, full virtualization can only be offered if the platform supports hardware virtualization extensions.
+A key distinction between virtualized guest environments is their virtualization type \ref{hw-virt}. Expect paravirtualization to always be available in a hypervisor, full virtualization support on the other hand is more rare. One reason could be that virtualization extensions are still relatively new, especially on ARM processors. In any case, full virtualization can only be offered, if the platform supports hardware virtualization extensions.
 
 % NOTE Meh...
 % TODO Source?
@@ -122,6 +138,19 @@ The applications of this are wide-ranging but one example would be to implement 
 \subsection{Timers}
 * Because the hypervisor can obfuscate a partitions view of time compared to if it was running on bare-metal (elaborate what this means), it offers virtual timers.
 * The partition may either request the current time or activate a timer and receive an interrupt when the timer expires [...]
+\subsection{Static configuration}
+% NOTE Maybe this should be at the end of functionality section so I can give better examples for configuration
+Configuration includes: 
+* hardware resource access
+* partition rights (ability to use restricted hypercalls)
+* scheduling (with a caveat)
+* partitions and what is running on them
+* allowed communication paths
+
+Any mechanism to modify a guest's rights at runtime, poses the risk of the system getting compromised, be it accidental or purposeful. For this reason dynamic configuration is not possible in the basic safety hypervisor. The only exception is the switching of scheduling plans by an authorized partition. But in this case all possible scheduling plans need to be defined at system design time and only these predefined scheduling plans can be activated.
+
+That is why these systems are typically statically configured and if configuration runtime is at all possible, it is restricted to reducing privilege. For example, a guest that is allowed to spawn other guests may give them his own rights or less than his own but never more.
+* Scheduling plans can usually be switched but only to predefined plans by authorized partitions. This
 
 %----------------------------------------------------------------------------------------
 \section{Initial considerations}

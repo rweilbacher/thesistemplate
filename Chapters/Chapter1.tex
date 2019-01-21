@@ -219,13 +219,12 @@ Temporal separation is usually not possible and may even be counter-productive t
 % REWRITE This section is a bit strange
 Undoubtedly these efforts have been at least somewhat successful as Linux has been successfully deployed in some safety-critical systems with hard real-time requirements. One big issue remains however, Linux is massive with several millions lines of code and safety can only be reasoned about on the basis of its "proven in use" status. This is not enough for most regulatory bodies, especially in devices with high criticality, where the benefits of mixed criticality are the most pronounced.
 
-% TODO Fix strange example
 Another big problem is damage limitation. While more and more Linux drivers are implemented in user space, a considerable amount still has to be in kernel space . Failures in these drivers can potentially cause a kernel panic, prompting the device to shut down. 
 
 Perhaps Linux, or another, yet unknown GPOS, will be able to solve the mixed criticality problem directly but for now it will be excluded from further analysis, on the grounds that it can not satisfy the separation architecture requirements well enough for a large set of safety-critical devices.
-\subsection{Microkernel}
+\subsection{Microkernel} \label{microkernel}
 Microkernels are not typically directly deployed on devices but they are very closely related to real time operating systems and hypervisors, architectures that will be introduced later in this chapter. For that reason it is important to review the key difference between microkernel design and traditional monolithic kernel design at this point.
-The kernel is the part of the operating system that has complete control over everything in the system. It handles all hardware access for applications running in user space.
+The kernel is the part of the operating system that has complete control over everything in the system. It handles all hardware access for applications running in user space. In traditional operating systems, access to \acrshort{os} functions is done through so called "system calls". To distinguish hypervisor \acrshort{api} access from this, functions that access hypervisor functionality will be referred to as "hypercalls".
 \paragraph{Minimality}
 \begin{figure}
 \centering
@@ -238,18 +237,18 @@ As the name suggests, the core principle of microkernel design is that of minima
 
 A microkernel on the other hand only includes the basic functions like \acrfull{ipc}, virtual memory and the scheduling of processes. This means that shared functionality is implemented in so called \keyword{server processes}. Any process that needs to access the file system for example, can do so over the \acrshort{ipc} mechanism of the microkernel. In figure \ref{fig:microkernel_vs_normal} the arrow between the "Application" process and the "File server" process indicates such a communication.
 
-Microkernels subsequently have much fewer lines of code than monolithic kernels with roughly 10.000 lines of code\cite{Heiser.2016}. Linux as an example of a monolithic kernel has over 15 million lines of code\cite{paul2012linux}. Being comprised of so a little code makes microkernels easier to maintain and refine. This property of microkernels is especially desirable for safety-critical device manufacturers, as it also makes the microkernel verification much easier.
+Microkernels subsequently have much fewer lines of code than monolithic kernels with roughly 10.000 lines of code\cite{Heiser.2016}. Linux as an example of a monolithic kernel has over 15 million lines of code\cite{paul2012linux}. Being comprised of so little code makes microkernels easier to maintain and refine. Another strong rule of thumb is: Less code means fewer faults \cite{Lipow.1982}. This property of microkernels is especially desirable for safety-critical device manufacturers, as it also makes the microkernel verification much easier.
 
 However, with such a reliance on \acrlong{ipc}, much of the system performance is dictated by the speed of the \acrshort{ipc} mechanism. Early microkernels struggled with this but since the advent of the L4 microkernel by Jochen Liedtke \acrshort{ipc} is no longer considered a bottleneck of microkernels\cite{Liedtke.1995}\cite{Liedtke.1996}.
-\subsection{Real-time operating system}
-% NOTE How do they deal with peripherals?
-Providing temporal separation is practically the main purpose of an RTOS, so there are no real problems on that front, and with the aid of an \acrshort{mpu} or \acrshort{mmu} spatial separation is also not a big issue.
 
-One thing to keep in mind though is that a lot of RTOS developers offer no multicore support, which can severely limit the complexity of an application. But perhaps the biggest limitation of application complexity on the RTOS architecture is its narrow target audience.
+\subsection{Real-time operating system} \label{rtos}
+The microkernel architecture is a naturally good fit for real-time operating systems. The objective of an \acrshort{rtos} is to provide deterministic scheduling and process management on embedded devices with limited resources. For that reason most modern real-time operating systems build on a microkernel core with some added functionality. Such functionality may include more scheduling options, extended \acrshort{api}s and hierarchical process management.
 
-% TODO Fix example
-As a result of this, there is a distinct lack of sophisticated middleware. Especially cutting edge usability technology, like touch gesture recognition, is likely not available on these platforms. At the same time consumers are becoming increasingly adept at recognizing good design and are demanding strong user interfaces \cite{HBR.September2015}.
-Additionally, a problem outlined in the section \ref{mixed-criticality} applies to RTOS middleware as well: These libraries have a similarly narrow target audience and can therefore be quite expensive for the functionality they offer.
+Because the \acrshort{rtos} has full control over the hardware it can schedule processes deterministically. This deterministic scheduling enables the device manufacturer to perform \acrlong{wcet} analysis and provide evidence for the temporal separation of processes. 
+
+When it comes to the spatial separation of processes, an \acrshort{rtos} typically relies on the \acrshort{mpu} or \acrshort{mmu} of the system to restrict unwanted resource access.
+
+One thing to keep in mind though is that a lot of \acrshort{rtos} developers offer no multicore support, which can severely limit the complexity of an application. But perhaps the biggest limitation of application complexity on the \acrshort{rtos} architecture is its narrow target audience. As a result of this narrow target audience, there is a distinct lack of sophisticated middleware. Especially cutting edge usability technology, like touch gesture recognition, is likely not available on these platforms. At the same time consumers are becoming increasingly adept at recognizing good design and are demanding strong user interfaces \cite{HBR.September2015}.
 
 Although the RTOS architecture remains quite a dominant one, it quickly loses its appeal with growing application complexity. Therefore it will be excluded from further analysis in this thesis.
 \subsection{Multicore system}
@@ -284,14 +283,14 @@ More specific advantages and disadvantages of this architecture will be analyzed
 \section{Hypervisor}
 Now let’s examine the main subject of this thesis, the hypervisor. Hypervisors originated in networking to optimize server usage and as such there are some misconceptions about their usefulness in embedded programming. These misconceptions will be addressed here but first, we need to take a look at the core functionality of a hypervisor.
 
-\subsection{Hardware virtualization}
+\subsection{Hardware virtualization} \label{hw-virt}
 The act of hardware virtualization refers to the creation of a virtual machine that
 acts like a real machine. A virtual machine is often referred to as a guest and the system it is virtualized on is called the host. The host can either assign hardware to the guests directly or provide them with virtualized hardware components. Virtualized hardware components also behave like their real counterparts from the view of the guest but in reality the host is translating any hardware operations that the guest performs to corresponding operations on the actual hardware. This means the guest can be unaware that it is only a virtual machine and does not have full control over the system.
 
 There are two types of hardware virtualization. Full virtualization and paravirtualization
 \subsubsection{Full virtualization}
 In full virtualization the virtualized guest is completely unaware that is not a real machine. That means any software that could run on an actual machine can also run on this machine, without any modification.
-In theory this can be completely achieved in software but this is very computationally expensive. That is why \acrshort{cpu} designers like Intel and ARM offer hardware virtualization extensions that can accelerate these processes \cite{uhlig2005intel}. However, this also means that if these virtualization extensions are not an option, other ways need to be found to efficiently virtualize a system. Which brings us to Paravirtualization.
+In theory this can be completely achieved in software but this is very computationally expensive. That is why \acrshort{cpu} designers like Intel and ARM offer hardware virtualization extensions that can accelerate these processes \cite{uhlig2005intel}\cite{ARM.v8.2018}. However, this also means that if these virtualization extensions are not an option, other ways need to be found to efficiently virtualize a system. Which brings us to Paravirtualization.
 \subsubsection{Paravirtualization}
 In paravirtualization the software running on the virtual machine is modified, so that it can communicate efficiently with the host platform. To elaborate: A process running atop an operating system can use the available system calls to interact with the hardware below. In a fully virtualized operating system the host system recognizes that an interaction with the hardware has been initiated by the guest, interrupts the communication and takes over. In a paravirtualized operating system on the other hand, the implementation of the system calls has been modified to talk directly to the host system instead of the hardware. This leads to overall more efficient virtualization process because.
 
@@ -310,16 +309,22 @@ As indicated in figure \ref{fig:hypervisor_types}, there are two types of hyperv
 
 But even among Type I hypervisors there can be significant differences in what they aim to achieve. Differentiating the two big use cases will be the topic of the following sections.
 \subsection{Traditional server hypervisor}
+% TODO Add sources for Xen and Hyper-V?
+The origin of hypervisors lies in mainframe computers, as a way to allow many users to concurrently use the system. After mainframe computers went of fashion so did hypervisors but they returned once the performance demand on servers rose significantly.
+Today, prominent examples of server hypervisors like Xen and Hyper-V are still used to maximize the efficient use of server resources, as well as provide secure encapsulation of environments.
+
+And this is where some confusion may arise, since maximizing the use of hardware resources is not a typical problem for embedded devices. Consequently, \bold{embedded hypervisors have drastically different goals than server hypervisors}.
 \subsection{Embedded safety hypervisor}
+% TODO Do I want to add more?
+For an embedded safety hypervisor the safe and robust separation of partitions is of utmost importance. It also needs to be able to satisfy real-time requirements and operate in an environment with very limited resources. And while performance is a concern, a safety hypervisor does not need to maximize the resource usage, like a safety hypervisor.
 
+For this reason the vast majority of embedded safety hypervisors are microkernel based, similarly to the real-time operating systems discussed in section \ref{rtos}. These hypervisors extend the minimal feature set of the microkernel by adding support for virtualized operating systems, running as a microkernel process. Additionally, they typically extend the microkernel \acrshort{api} with functions that are especially useful for safety-critical devices.
 
-
-
-
+To show how an embedded safety hypervisor achieves separation and what other features it can offer, the next chapter will introduce the concept of a \keyword{basic safety hypervisor}. A simplified representation of currently available safety hypervisors.
 
 
 \begin{comment}
-\XsecXtion{Embedded safety hypervisor origins}
+\Xsection{Embedded safety hypervisor origins}
 % TODO Add dat sauce
 Now let's examine the main subject of analysis, the embedded safety hypervisor. In this section it will be established where it comes from and some associated concepts. This should get rid of some common misconceptions about hypervisors and their applicability in the embedded sector.
 \subsection{Hardware virtualization} \label{hw-virt}
