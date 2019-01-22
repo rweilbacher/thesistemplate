@@ -114,9 +114,21 @@ On most systems
 There are two ways for two partitions to communicate: message passing and shared memory.
 
 \subsubsection{Shared memory}
-If two partitions are configured to share memory the hypervisor simply 
+\begin{figure}
+\centering
+\includegraphics[scale=0.75]{Figures/shared_memory.png}
+\decoRule
+\caption{Shared memory between two partitions}
+\label{fig:shared_memory}
+\end{figure}
+If two partitions are configured to share memory the hypervisor simply maps the same region of physical memory into the virtual address space of both partitions. Figure \ref{fig:shared_memory} shows that partition 1 and 2 both get access to the physical memory region C. In this example there is still some unmapped physical memory after memory region B. 
+
+It is up to the partitions to know how the data in the shared region needs to be interpreted and to synchronize access on the region. The hypervisor does not control access can therefore not guarantee that none of the partitions corrupts the memory. Therefore, this way of communication provides a lot of flexibility at the cost of safety.
+One way to get around the concurrency issues is to make memory access in this region read-only for one of the partitions.
 
 \subsubsection{Message passing}
+Message passing is the safe way for two partitions to communicate that builds on the hypervisor's \acrshort{ipc} mechanism.
+
 
 * There are two ways to communicate with another partition: message passing and shared memory.
 * In the shared memory case the hypervisor simply maps the same physical memory region into the virtual memory region of both partitions. The partitions then need to take care of everything else themselves. That means the partitions need to make sure they are not overwriting each others data and so on...
