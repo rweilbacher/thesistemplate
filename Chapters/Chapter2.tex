@@ -31,7 +31,7 @@ The guiding principle of microkernel design, minimality, has already been introd
 % SOURCE Do I need a source for this?
 Perhaps, the biggest trade-off is the inclusion of the virtual machine monitor code in the kernel itself. Some hypervisors also relegate this virtual machine control to user-space but it is more typical to see it inside of the microkernel. In reality the virtualization aspect of the hypervisor is almost always a critical component and it therefore makes sense to include it in the kernel verification efforts. 
 
-\subsection{Capability-based access control}
+\subsection{Capability-based access control} \label{sec:capability-based_ac}
 % TODO Explain concept of least privilege
 Capabilities are unforgeable tokens that grant access rights to an object. They contain the identification of the object and associated rights, for example read and write.
 They can be given to other processes which in turn grants them access according to the capability \cite{Levy.1984}. A capability could be for a specific memory region, a communication endpoint or to a hypervisor \acrshort{api} call.
@@ -82,9 +82,97 @@ A possible application of this is a shared device driver. The driver can be impl
 
 \section{Functionality}
 This section will explore what functionality the safety hypervisor can offer and how it achieves this.
+\subsection{Hardware access}
+Ultimately, the hypervisor partitions need to be able to interact with the hardware in some form. Access to the partition's assigned physical memory regions is established by the \acrshort{mmu} in the form of virtual memory.
+To communicate with its assigned peripherals the partition needs access to the peripheral device registers and it needs to be notified when the peripheral triggers an interrupt. 
+
+% TODO Is this true?
+In Intel \acrshort{cpu}s device registers are often accessed via \acrshort{io} ports. For simplicity's sake only the model typical for many other processors, memory mapped \acrshort{io}, is examined. With memory mapped \acrshort{io} the peripheral device registers get mapped into the physical address space. That means a process that can read this memory location is actually reading the content of the device register. Similarly, a process that writes to this memory location is actually modifying the device register that is mapped to it. Consequently, to give a partition the ability to interact with the registers of a peripheral device the hypervisor simply needs to give access to the corresponding memory regions. This can be configured through the \acrshort{mmu} as explained previously.
+
+* Interrupts are served by the interrupt controller
+* Interrupt controller also has the ability to disable interrupts selectively. Therefore partitions are not allowed to interact with interrupt controller directly only through the hypervisor API.
+* Through the API they can disable the interrupts they have permission for
+* Which interrupt lines a partition is allowed to control and gets notified for is defined at configuration time and cannot be changed during runtime.
+* The basic safety hypervisor also uses its power to extend the available interrupts with hypervisor specific interrupts, like the arrival of anew message at a port or other hypervisor events.
+* Apart from these caveats the behavior appears normal to the guest. They get the interrupts they are configured to receive.
+
+% TODO Include a source for IOMMU
+A special case of peripheral to process communication is that of \acrfull{dma}. \acrshort{dma} means that a peripheral device independently accesses the system memory without \acrshort{cpu} involvement. This can be drastically faster and relieves load and the \acrshort{cpu} but poses a special problem for safety-critical devices. Because the hypervisor can have no knowledge about \acrshort{dma} activity a misbehaving or hijacked peripheral device can write to potentially arbitrary memory locations. The only way to relieve this is with the help of an \acrfull{iommu}. A hardware component that, like an \acrshort{mmu}, can restrict the memory regions a peripheral can access via \acrshort{dma}.
+If this is not present, \acrshort{dma} should likely be disabled.
+
+\subsection{Inter-partition communication}
+There are two ways for two partitions to communicate: message passing and shared memory.
+
+\subsubsection{Shared memory}
+\begin{figure}[hbt!]
+\centering
+\includegraphics[scale=0.75]{Figures/shared_memory.png}
+\decoRule
+\caption{Shared memory between two partitions}
+\label{fig:shared_memory}
+\end{figure}
+If two partitions are configured to share memory the hypervisor simply maps the same region of physical memory into the virtual address space of both partitions. Figure \ref{fig:shared_memory} shows that partition 1 and 2 both get access to the physical memory region C. In this example there is still some unmapped physical memory after memory region B. 
+
+It is up to the partitions to know how the data in the shared region needs to be interpreted and to synchronize access on the region. The hypervisor does not control access can therefore not guarantee that none of the partitions corrupts the memory. Therefore, this way of communication provides a lot of flexibility at the cost of safety.
+One way to get around the concurrency issues is to make memory access in this region read-only for one of the partitions.
+
+\subsubsection{Message passing}
+Message passing is the safe way for two partitions to communicate that relies on the hypervisor's \acrshort{ipc} mechanism. A communication channel is a unidirectional path between one source and one or more destinations. The partitions can access a channel through ports, of which there are two types. Queuing ports maintain a \acrshort{fifo} queue of messages that can be read by the receiving partitions sequentially. In a sampling port there is only ever one message that either gets overwritten by a new message or invalidated by the partition reading the message. To make the polling of the ports unnecessary, the hypervisor triggers a specific interrupt in the receiving partitions when a new message is available.
+
+Figure \ref{fig:message_ports} shows an example of communication between three partitions. 
+Messages sent by partition 1 arrive at the ports in partition 2 and 3 individually. That means messages are maintained on a port by port basis and a partition can't stop another partition from receiving the message by consuming it. The hypervisor also ensures that message either arrive completely or not at all, where "not at all" would trigger an error. All message data is copied by the hypervisor and there is no direct memory access to the original message. Therefore, partition 1 can't change the message after it has been sent to the other partitions. These assurances can only be made by the hypervisor because it has full control over the communication, unlike the shared memory communication.
+
+All communication ports and channels need to be defined at configuration time. Once the system is compiled and running no ports or channels can be created that weren't already in the hypervisor configuration. This allows safety-critical device manufacturer to reason about the dependence between partitions.
+\begin{figure}[hbt!]
+\centering
+\includegraphics[scale=0.75]{Figures/message_ports.png}
+\decoRule
+\caption{Message ports between three partitions}
+\label{fig:message_ports}
+\end{figure}
+
+\subsection{Health monitoring}
+% TODO Do I want to explain this with an example?
+% TODO Add image?
+* Health monitoring is probably the most interesting addition to the microkernel functionality apart from virtualization
+* Health monitoring is a subsystem of the hypervisor that monitors and reacts to abnormal system behavior.
+* 
+
+
+* First events get detected. There are three types of events:
+    -> Events caused by abnormal hardware behavior. The hypervisor is notified of this by processor traps
+    -> Events detected and triggered by partition code. These are usually related to assertions or checks.
+    -> Events triggered by the hypervisor itself. Usually because of a violation of a sanity check performed by the hypervisor. Either on the hypervisors internal state or that of a partition. This may also include a partition attempting to perform actions it is not allowed to
+* A developer can then assign some basic actions that should follow a certain event, like restarting the partition or even the entire system. There doesn't have to be a defined action for everything.
+* Simultaneously all events also get reported to the global log stream. Any partition with access to this stream can read it and may take more intricate steps to resolve the problem. This can be performed either as a replacement to the basic action described previously or on top of it.
+* Add an image!
+\subsection{Timers}
+* Because the hypervisor can obfuscate a partitions view of time compared to if it was running on bare-metal (elaborate what this means), it offers virtual timers.
+* The partition may either request the current time or activate a timer and receive an interrupt when the timer expires [...]
+\subsection{Partition privileges}
+Capabilities have already been introduced in section \ref{sec:capability-based_ac} to show how privileges are assigned to partitions. But only some basic examples of what privileges there are have been given. 
+
+At the most basic level partitions can be split into two categories: system partitions and normal partitions. Normal partitions have access to all their resources like interrupt lines, memory regions and message ports. They are also allowed to use hypercalls that can not disrupt the system at large, like accessing timers or retrieving the current system status.
+
+System partitions have access to all their assigned resources and on top of that they can call hypercalls that can impact the entire system. They can change scheduling plans, access the health monitoring log and even start and stop other partitions. Naturally, system partitions need to be trusted by the safety-critical device manufacturer because they have the capabilities to stop the system from functioning correctly.
+
+Most hypervisors actually offer more granular distinction than normal partitions and system partitions, where individual hypercalls can be enabled or disabled for specific partitions.
+\subsection{Static configuration}
+% NOTE Maybe this should be at the end of functionality section so I can give better examples for configuration
+Configuration includes: 
+* hardware resource access
+* partition rights (ability to use restricted hypercalls)
+* scheduling (with a caveat)
+* partitions and what is running on them
+* allowed communication paths
+
+Any mechanism to modify a guest's rights at runtime, poses the risk of the system getting compromised, be it accidental or purposeful. For this reason dynamic configuration is not possible in the basic safety hypervisor. The only exception is the switching of scheduling plans by an authorized partition. But in this case all possible scheduling plans need to be defined at system design time and only these predefined scheduling plans can be activated.
+
+That is why these systems are typically statically configured and if configuration runtime is at all possible, it is restricted to reducing privilege. For example, a guest that is allowed to spawn other guests may give them his own rights or less than his own but never more.
+* Scheduling plans can usually be switched but only to predefined plans by authorized partitions. This
 \subsection{Separation}
 % IMPORTANT What about the other requirements of a sep-arch?!
-The concepts of separation have been introduced in section \ref{separation-arch}. Now it will be detailed how the hypervisor in particular achieves this separation.
+The concepts of separation have been introduced in section \ref{separation-arch}. In this chapter there have also already been mentions to the hypervisor assurance in regards to certain subsystems. For example, the assurance that messages are copied to all destination ports correctly or an appropriate error is triggered. They have already been part of the hypervisors separation assurances. Now it is time to take a more specific look at how the hypervisor aims to satisfy the most crucial requirements of a separation architecture. 
 \subsubsection{Temporal separation}
 How the hypervisor may schedule its partitions has already been explained in section \ref{hv-scheduling}. The most important property of a hypervisor scheduling algorithm that emerged from that was its determinism. If the algorithm is deterministic the device manufacturer can carry out a \acrshort{wcet} analysis, which allows him to reason about the device's temporal separation. The results of the \acrshort{wcet} analysis should show that even in the absolute worst case, the critical partitions still get the time they need to ensure the safety of the device. In all highly critical devices with real-time requirements this is a necessary step to achieve regulatory compliance.
 
@@ -110,66 +198,6 @@ On most systems
 * It achieves this through utilizing the MMU or more rarely the MPU
 * Some objects related to partitions need to be saved in kernel memory
 * Either, partitions have a kernel memory quota or they can only instantiate objects that were defined at configuration time. This stops them from starving other processes of kernel memory
-\subsection{Inter-partition communication}
-There are two ways for two partitions to communicate: message passing and shared memory.
-
-\subsubsection{Shared memory}
-\begin{figure}
-\centering
-\includegraphics[scale=0.75]{Figures/shared_memory.png}
-\decoRule
-\caption{Shared memory between two partitions}
-\label{fig:shared_memory}
-\end{figure}
-If two partitions are configured to share memory the hypervisor simply maps the same region of physical memory into the virtual address space of both partitions. Figure \ref{fig:shared_memory} shows that partition 1 and 2 both get access to the physical memory region C. In this example there is still some unmapped physical memory after memory region B. 
-
-It is up to the partitions to know how the data in the shared region needs to be interpreted and to synchronize access on the region. The hypervisor does not control access can therefore not guarantee that none of the partitions corrupts the memory. Therefore, this way of communication provides a lot of flexibility at the cost of safety.
-One way to get around the concurrency issues is to make memory access in this region read-only for one of the partitions.
-
-\subsubsection{Message passing}
-Message passing is the safe way for two partitions to communicate that builds on the hypervisor's \acrshort{ipc} mechanism.
-
-
-* There are two ways to communicate with another partition: message passing and shared memory.
-* In the shared memory case the hypervisor simply maps the same physical memory region into the virtual memory region of both partitions. The partitions then need to take care of everything else themselves. That means the partitions need to make sure they are not overwriting each others data and so on...
-* Message passing is done through so called ports. Ports are defined at configuration time and have one source and one or more destinations. There are two types of ports: Queuing ports maintain a FIFO queue of messages that the consumer can take. In sampling ports a new message overwrites the existing one. 
-* In the port scenario the hypervisor does have some control over the communication. [Explain what this means and what comes from it]
-\subsubsection{User space synchronization}
-* Some hypervisors may offer built-in synchronization mechanisms like semaphores to user space partitions
-* This is especially useful if two partitions share memory and need to synchronize who is allowed to access it. 
-\subsection{Partition privileges}
-* At the very least there is two privilege levels. That of a system partition and a normal partition. A system partition is allowed to monitor and change the state of other partitions or the system as a whole. For example, it is allowed to execute the hypercall for shutting down another partition.
-* There may also be more granular control where individual hypercalls can be allowed or disallowed
-\subsection{Health monitoring}
-* First events get detected. There are three types of events:
-    -> Events caused by abnormal hardware behavior. The hypervisor is notified of this by processor traps
-    -> Events detected and triggered by partition code. These are usually related to assertions or checks.
-    -> Events triggered by the hypervisor itself. Usually because of a violation of a sanity check performed by the hypervisor. Either on the hypervisors internal state or that of a partition. This may also include a partition attempting to perform actions it is not allowed to
-* A developer can then assign some basic actions that should follow a certain event, like restarting the partition or even the entire system. There doesn't have to be a defined action for everything.
-* Simultaneously all events also get reported to the global log stream. Any partition with access to this stream can read it and may take more intricate steps to resolve the problem. This can be performed either as a replacement to the basic action described previously or on top of it.
-* Add an image!
-\subsection{Device access}
-* To control a device, the partition needs control over the corresponding interrupt lines and device registers (typically handled by memory mapped IO on ARM and that or IO ports on x86)
-* If only one partition needs access to a device it can be assigned directly.
-* If devices are shared an IO Server partition needs to be implemented. It controls the device and gives access to the device over the inter-partition communication mechanism of the hypervisor. 
-* Hardware interrupts can be assigned during configuration. 
-* The hypervisor also often extends the interrupts there are with his own events. This can be used to notify partitions of hypervisor events like new messages at a queuing port for which they are a destination.
-\subsection{Timers}
-* Because the hypervisor can obfuscate a partitions view of time compared to if it was running on bare-metal (elaborate what this means), it offers virtual timers.
-* The partition may either request the current time or activate a timer and receive an interrupt when the timer expires [...]
-\subsection{Static configuration}
-% NOTE Maybe this should be at the end of functionality section so I can give better examples for configuration
-Configuration includes: 
-* hardware resource access
-* partition rights (ability to use restricted hypercalls)
-* scheduling (with a caveat)
-* partitions and what is running on them
-* allowed communication paths
-
-Any mechanism to modify a guest's rights at runtime, poses the risk of the system getting compromised, be it accidental or purposeful. For this reason dynamic configuration is not possible in the basic safety hypervisor. The only exception is the switching of scheduling plans by an authorized partition. But in this case all possible scheduling plans need to be defined at system design time and only these predefined scheduling plans can be activated.
-
-That is why these systems are typically statically configured and if configuration runtime is at all possible, it is restricted to reducing privilege. For example, a guest that is allowed to spawn other guests may give them his own rights or less than his own but never more.
-* Scheduling plans can usually be switched but only to predefined plans by authorized partitions. This
 
 %----------------------------------------------------------------------------------------
 \section{Initial considerations}
