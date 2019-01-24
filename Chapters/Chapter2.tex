@@ -107,7 +107,13 @@ If this is not present, \acrshort{dma} should likely be disabled.
 If the hardware virtualization extensions are present in the \acrshort{cpu} the hypervisor can arbitrate access to most devices by presenting virtual devices to the partitions.
 But an interrupt line can only be assigned to one partition, so if direct assignment of the hardware is necessary, shared access needs to be realized differently 
 
-
+\begin{figure}[hbt!]
+\centering
+\includegraphics[scale=0.75]{Figures/sh.png}
+\decoRule
+\caption{Shared memory between two partitions}
+\label{fig:shared_memory}
+\end{figure}
 * Only one partition can use an interrupt line. 
 * Image for IO server
 * Can fully virtualized devices change this?
