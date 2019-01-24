@@ -53,7 +53,28 @@ This project exemplifies a case where separation is becoming increasingly attrac
 With the criticality level of the device and the specific risks involved, the hypervisor architecture's lack of support for advanced safety features and its less provable separation are no death sentence. And finally, the hypervisors malleability lends itself well to creating a future-proof design, if unit cost is not a bigger concern. 
 % TODO Is there more I want to say?
 \subsubsection{Implementation}
-To show what the hypervisor configuration could look like for a project like the gas detector, there will be a more detailed example in this section
+To show what the hypervisor configuration could look like for a project like the gas detector, there will be a more detailed example in this section.
+
+-- High level architecture image --
+* What does it generally represent?
+* What are the dimensions of the hardware? (Don't be too specific but give the general idea)
+* What partitions are there?
+* Which environment is running on each partition? Why?
+* Why does each partition have access to the peripherals it does?
+* What does each application do?
+* Which partitions are communicating?
+* Why are they separated this way?
+
+-- Low level architecture image --
+* How is the device access precisely configured?
+* What is the scheduling algorithm and plan?
+    -> Can I justify round-robin?
+    -> A simplified priority based preemptive is probably good. The critical part would often be dormant and this way the UI only gets starved of resources during measurement. That can be addressed by GUI design
+* What are the details of the partition communication?
+* Health monitoring?
+    -> Application B verifies through log stream that C is not running into issues.
+
+-> Why a decision has been made should always be clear. If there is no clear reason just say that it was not clear-cut and the other decision would have probably be fine too.
 
 \subsection{Automated blood diagnostics device}
 \subsubsection{Introduction}
