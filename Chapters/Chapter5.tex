@@ -55,14 +55,12 @@ With the criticality level of the device and the specific risks involved, the hy
 \subsubsection{Possible implementation}
 To show what the hypervisor configuration could look like for the gas detector, there will be a more detailed example in this section.
 
-
-
--- High level architecture image --
 \paragraph{High level architecture}
+Figure \ref{fig:gas_detect_high_level} shows a high level view of the device architecture. Communication paths between the partitions will be explored in a later section.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.50]{Figures/gas_detect_high_level.png}
+\includegraphics[scale=0.75]{Figures/gas_detect_high_level_no_ipc_with_criticality.png}
 \decoRule
 \caption{High-level view of the gas detector architecture}
 \label{fig:gas_detect_high_level}
@@ -94,12 +92,14 @@ To show what the hypervisor configuration could look like for the gas detector, 
 * Which partitions are communicating?
 * Why are they separated this way?
 
--- Low level architecture image --
+\paragraph{A more detailed look at user-space}
+Figure \ref{fig:gas_detect_low_leve} shows a more detailed view of the user-space in the previous figure. The hardware and hypervisor layer are not shown here but all communication paths between the partitions are included and numbered. Assigned peripherals are in grey. All the attachment points of communication channels and peripherals were chosen purely for aesthetic reasons. The following paragraphs will explain this figure in more detail.
+
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.50]{Figures/gas_detect_low_level.png}
+\includegraphics[scale=0.75]{Figures/gas_detect_low_level.png}
 \decoRule
-\caption{Detailed view of the gas detector architecture}
+\caption{Detailed view of the gas detector user-space}
 \label{fig:gas_detect_low_leve}
 \end{figure}
 \paragraph{Device access}
@@ -128,7 +128,7 @@ USB driver(non-critical)                     & 2
 \label{table:gasdetect_priorities}
 \end{table}
 
-\paragraph{Operation}
+\paragraph{Normal operation}
 
 
 A measurement is started once the button connected to the safety-critical application B is pressed. For this purpose the algorithm parameters are read from the \acrshort{nfc} chip. Then the pump is activated to suck air through the glass tube with the reagent. At the same time, several images are captured by the \acrshort{cmos} sensor.
