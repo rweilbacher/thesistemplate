@@ -74,11 +74,20 @@ Figure \ref{fig:gas_detect_high_level} shows a high level view of the device arc
 \newcommand{\usbTob}{5}
 \newcommand{\bTousb}{5}
 
-The hypervisor is running on a dual-core ARM Cortex-A7 without hardware virtualization extensions.  
+% TODO Explain in more detail
+The hypervisor is running on a dual-core ARM Cortex-A7 with hardware virtualization extensions. The virtualization extensions are used for the two-stage \acrshort{mmu} address translation and to stop the guests from using privileged processor instructions. Two-stage address translation means that the \acrshort{mmu} maintains a page table for each partition. 
+For performance reasons, the virtualization extensions are not used to fully virtualize the guest operating systems. Instead the operating systems have been modified to support paravirtualization.
 
-* The hypervisor is running on a dual core ARM Cortex-A7 without hardware virtualization extensions
+There are four partitions on the hypervisor. Two safety-critical partitions running a generic \acrshort{rtos} and a native C environment respectively. The non-safety critical partition responsible for the \acrshort{gui} is running a paravirtualized Linux and the \acrshort{usb} driver is also in a native C runtime environment.
+
+The only job of the \acrshort{usb} driver partition is to share the \acrshort{usb} device with the other partitions. How this precisely works will be examined in more detail later.
+
+The \acrshort{gui} application takes care of displaying the results as well as exporting them over \acrshort{usb} or Bluetooth. It is running on top of a paravirtualized Linux.
+
+All safety-critical peripherals are assigned to the measurement application. It carries out the measurement, monitors the system and updates the firmware over \acrshort{usb}. It is also responsible for providing measurement data to the concentration algorithm partition.
+
 * It has a number of peripheral devices but the exact interface (SPI, I2C...) is irrelevant.
-* There are four partitions. Two safety-critical partitions running a generic \acrshort{rtos} and a native C environment respectively. The non-safety critical partition responsible for the \acrshort{gui} is running a paravirtualized Linux and the \acrshort{usb} driver is also in a native C runtime environment.
+* 
 * Application A on the Linux partition takes care of displaying the results and exporting results over USB and Bluetooth.
 * Application B on the RTOS is responsible for any safety-critical hardware access.
 * Application C is the small part of the device that calculates the gas concentration based on the CMOS image data. This is a complex algorithm that likely doesn't need to be changed for a long time. That is why the manufacturer decided to seal it in a separate partition. Even if the RTOS application needs to be changed, the hypervisors separation means that Application C will not need to be reverified. That can save a lot of costs.

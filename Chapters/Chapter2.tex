@@ -52,7 +52,7 @@ The preemptive means that if a process with a higher priority than the currently
 
 \paragraph{Time-sliced round-robin scheduling}
 In time-sliced round-robin scheduling each process gets a dedicated time slice called a quantum. Figure \ref{fig:round_robin_example}  shows an example with three processes and their associated scheduling windows. If the end of the quantum is reached before the process is done, it gets interrupted and the next process is scheduled.
-\begin{figure}
+\begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.75]{Figures/round_robin_example.png}
 \decoRule
@@ -65,7 +65,24 @@ However, these were just the two most prevalent examples and in fact most hyperv
 Another feature of the basic safety hypervisor is the possibility of multiple scheduling plans. A hypervisor partition with the correct capabilities is allowed to switch the scheduling behavior to one of the plans that was provided at configuration time. For example, if there is an unexpected error the monitoring partition can put the device into a maintenance mode, where only the most critical and recovery processes are scheduled. Another use for this feature is during the boot process where some partitions might need to run uninterrupted for a longer time.
 
 \subsubsection{Multicore support}
+Multicore has been much sought after feature in safety-critical device development. However, traditional processors are difficult to use in safety-critical devices. 
+One big problem is presented by the shared cache between cores.
 
+Imagine a system with two partitions, one safety-critical one not-critical, that runs on a two-core \acrshort{cpu} with a shared cache between the two cores. During its allocated time the safety-critical partition may fill up the cache with relevant values. Once the non-safety-critical software runs it can evict all of the cache values by populating it with its own values. This can lead to large and potentially unpredictable interference across domains \cite{AlessandroBiondi.2018}.
+
+In the best case this scenario just leads to an excessively pessimistic \acrfull{wcet} analysis. To compensate this the safety-critical partition would get a lot more allocated time than it actually needed, leading to a worse average case performance. However, there are efforts to solve this issue reliably. One approach is to adjust the hypervisor to ensure safe cache usage \cite{PaoloModica.2018}. Another approach is focused on changing processor design to prevent unsafe, non-deterministic cache management in the first place \cite{el2013across}.
+
+Figure \ref{fig:multicore} shows how multicore support is realized in the hypervisor. Each physical core can be assigned to one or more virtual cores but each virtual core can only be assigned to one physical core. Scheduling plans are then defined for each physical core. To the partitions the virtual cores appear just like normal cores. This approach ensures temporal determinism.
+
+Currently, handling the cache safely is left to the partitions in most hypervisors. This typically results in the cache being flushed at the beginning of execution or disabled entirely. Naturally, this is inefficient but safety is more important than performance in most cases.
+
+\begin{figure}[hb!]
+\centering
+\includegraphics[scale=0.75]{Figures/multicore.png}
+\decoRule
+\caption{Multicore assignment example}
+\label{fig:multicore}
+\end{figure}
 
 \subsection{Available guest environments}
 \subsubsection{\acrshort{rtos}}
@@ -255,11 +272,8 @@ And finally, a hypervisor is fundamentally about isolating software components f
 
 However, with all of these restrictions laid out, there are developments that aim to make hypervisors viable on microcontrollers. Read more about this in section \ref{tech-progress}.
 
-\subsection{Effective multicore isolation}
-% NOTE Maybe add a graphic
-Imagine a system with two partitions, one safety-critical one not safety-critical, that runs on a two-core \acrshort{cpu} with a shared cache between the two cores. During its allocated time the safety-critical partition may fill up the cache with relevant values. Once the non-safety-critical software runs it can evict all of the cache values by populating it with its own values. This can lead to large and potentially unpredictable interference across domains \cite{AlessandroBiondi.2018}.
 
-In the best case this scenario just leads to an excessively pessimistic \acrfull{wcet} analysis and to compensate this the safety-critical partition would get a lot more allocated time than it actually needed, leading to a worse average case performance. There are efforts to solve this issue reliably \cite{PaoloModica.2018}.
+
 
 %----------------------------------------------------------------------------------------
 
