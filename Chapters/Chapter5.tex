@@ -52,10 +52,39 @@ This project exemplifies a case where separation is becoming increasingly attrac
 
 With the criticality level of the device and the specific risks involved, the hypervisor architecture's lack of support for advanced safety features and its less provable separation are no death sentence. And finally, the hypervisors malleability lends itself well to creating a future-proof design, if unit cost is not a bigger concern. 
 % TODO Is there more I want to say?
-\subsubsection{Implementation}
-To show what the hypervisor configuration could look like for a project like the gas detector, there will be a more detailed example in this section.
+\subsubsection{Possible implementation}
+To show what the hypervisor configuration could look like for the gas detector, there will be a more detailed example in this section.
+
+
 
 -- High level architecture image --
+\paragraph{High level architecture}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.50]{Figures/gas_detect_high_level.png}
+\decoRule
+\caption{High-level view of the gas detector architecture}
+\label{fig:gas_detect_high_level}
+\end{figure}
+
+\newcommand{\bToa}{3}
+\newcommand{\bToc}{1}
+\newcommand{\cTob}{2}
+\newcommand{\usbToa}{4}
+\newcommand{\aTousb}{4}
+\newcommand{\usbTob}{5}
+\newcommand{\bTousb}{5}
+
+* The hypervisor is running on a dual core ARM Cortex-A7 without hardware virtualization extensions
+* It has a number of peripheral devices but the exact interface (SPI, I2C...) is irrelevant.
+* There are four partitions. Two safety-critical partitions running a generic \acrshort{rtos} and a native C environment respectively. The non-safety critical partition responsible for the \acrshort{gui} is running a paravirtualized Linux and the \acrshort{usb} driver is also in a native C runtime environment.
+* Application A on the Linux partition takes care of displaying the results and exporting results over USB and Bluetooth.
+* Application B on the RTOS is responsible for any safety-critical hardware access.
+* Application C is the small part of the device that calculates the gas concentration based on the CMOS image data. This is a complex algorithm that likely doesn't need to be changed for a long time. That is why the manufacturer decided to seal it in a separate partition. Even if the RTOS application needs to be changed, the hypervisors separation means that Application C will not need to be reverified. That can save a lot of costs.
+* The \acrshort{usb} driver partition arbitrates the access to the \acrshort{usb} interface between application A and B. 
+* 
+
 * What does it generally represent?
 * What are the dimensions of the hardware? (Don't be too specific but give the general idea)
 * What partitions are there?
@@ -66,15 +95,51 @@ To show what the hypervisor configuration could look like for a project like the
 * Why are they separated this way?
 
 -- Low level architecture image --
-* How is the device access precisely configured?
-* What is the scheduling algorithm and plan?
-    -> Can I justify round-robin?
-    -> A simplified priority based preemptive is probably good. The critical part would often be dormant and this way the UI only gets starved of resources during measurement. That can be addressed by GUI design
-* What are the details of the partition communication?
-* Health monitoring?
-    -> Application B verifies through log stream that C is not running into issues.
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.50]{Figures/gas_detect_low_level.png}
+\decoRule
+\caption{Detailed view of the gas detector architecture}
+\label{fig:gas_detect_low_leve}
+\end{figure}
+\paragraph{Device access}
+* Figure \ref{fig:gas_detect_low_leve} shows a more detailed view of the previous figure.
+* Application A has direct access to the touch display, as well as the Bluetooth module to transmit data.
+* Application B has direct access to the NFC for reading the configuration, the pump for pumping a certain amount of air through the glass tube, the CMOS sensor for gathering image data and the warning LED. The warning LED mitigates the risk of a failure in non-critical application A leading to the operator thinking there is a non-dangerous concentration of gas present. To alert the operator the LED will blink red, if a dangerous concentration has been detected.
+% -- Shared USB --
+% TODO Update the introduction part to reflect the explanation
+* The USB driver is implemented in a Native C partition and has direct access to the USB peripheral. It communicates with Application A and B over the IPC channels \aTousb{} and \bTousb{}. This way both applications can use the USB for their purposes. The non-critical partition A uses USB to export measurement data from the device. The safety-critical Application B on the other hand, uses the USB connection to update the device firmware. 
+* To make sure the firmware will be transmitted correctly, the USB driver partition always gives precedence to the safety-critical application.
+\paragraph{Scheduling}
+The scheduling algorithm for this device is priority based preemptive scheduling. The partition's priorities can be found in table \ref{table:gasdetect_priorities}. Since their priorities are higher, one of the critical partitions can always take over control from the non-critical partition A. However, partition B and C only need to do work during the measurement cycle, so this is unlikely to impact the \acrshort{gui} running on partition A significantly. 
 
--> Why a decision has been made should always be clear. If there is no clear reason just say that it was not clear-cut and the other decision would have probably be fine too.
+Whenever, partition A or B want to use the \acrshort{usb} device, they will communicate with the \acrshort{usb} driver partition to wake it up. It will then process any data and go back to sleep. This way the \acrshort{usb} driver partition can also not interrupt the gas measurement process.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{l|l}
+\textbf{Partition} & \textbf{Priority} \\ \hline
+A (non-critical)                             & 1                                           \\ \hline
+B (critical)                                 & 4                                           \\ \hline
+C (critical)                                 & 3                                           \\ \hline
+USB driver(non-critical)                     & 2                                          
+\end{tabular}
+\caption{Partition priorities}
+\label{table:gasdetect_priorities}
+\end{table}
+
+\paragraph{Operation}
+
+
+A measurement is started once the button connected to the safety-critical application B is pressed. For this purpose the algorithm parameters are read from the \acrshort{nfc} chip. Then the pump is activated to suck air through the glass tube with the reagent. At the same time, several images are captured by the \acrshort{cmos} sensor.
+
+Then all the data is sent over the \acrshort{ipc} channel \bToc. Application C will use this data to calculate the gas concentration. After the calculation is completed the result gets sent back to Application B over the \acrshort{ipc} channel \cTob.
+
+If the measurement is over the dangerous limit specified on the \acrshort{nfc} chip, the red warning \acrshort{led} will begin blinking to alert the operator. And as a final step the result is sent over \acrshort{ipc} channel \bToa for display and further processing.
+
+\paragraph{Health monitoring}
+To keep an eye on the system's status, the safety-critical application B periodically checks the health monitoring log for abnormal events. If it encounters any unrecoverable issues in the Linux partition, it will simply restart the partition. 
+For the algorithm partition however this behavior would not be appropriate, since an incorrect calculation could lead to the endangerment of the operator. If there is an unexpected error in the algorithm partition during a calculation, application B will attempt to restart partition and reattempt the concentration calculation. After three failed attempts, it will begin flashing the red warning \acrshort{led} rapidly to indicate that there is a dangerous problem.
 
 \subsection{Automated blood diagnostics device}
 \subsubsection{Introduction}
@@ -167,7 +232,7 @@ Below is a list of some possible features that exist in current implementations.
 \begin{itemize}
     \item Different possible scheduling policies
     \item Health monitoring
-    \item Device pass-through (Requires an \acrshort{iommu} to work effectively)
+    \item Device pass-through
     \item Full virtualization
     \item Virtual input device support
     \item Security certifications

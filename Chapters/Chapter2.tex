@@ -105,22 +105,17 @@ If this is not present, \acrshort{dma} should likely be disabled.
 
 \subsubsection{Shared hardware access}
 If the hardware virtualization extensions are present in the \acrshort{cpu} the hypervisor can arbitrate access to most devices by presenting virtual devices to the partitions.
-But an interrupt line can only be assigned to one partition, so if direct assignment of the hardware is necessary, shared access needs to be realized differently 
+But an interrupt line can only be directly assigned to one partition, so if direct assignment of the hardware is necessary, shared access needs to be realized differently. 
 
 \begin{figure}[hbt!]
 \centering
-\includegraphics[scale=0.75]{Figures/sh.png}
+\includegraphics[scale=0.75]{Figures/shared_driver.png}
 \decoRule
-\caption{Shared memory between two partitions}
-\label{fig:shared_memory}
+\caption{High level view of an \acrshort{io} server partition}
+\label{fig:shared_driver}
 \end{figure}
-* Only one partition can use an interrupt line. 
-* Image for IO server
-* Can fully virtualized devices change this?
-* To get around this, shared access to peripherals is often done through a partition that act as an IO server.
-* The device driver for a particular are implemented in this partition and then other partition can communicate with the driver partition over the hypervisor \acrshort{ipc} mechanism.
-* How access is arbritated between partitions is up the implementer.
-* These do not come with the hypervisor and the implementation is left up to the device manufacturer
+Figure \ref{fig:shared_driver} depicts how this is typically done. The peripheral in question gets assigned to a hypervisor partition that acts as an \acrshort{io} server for the other partitions. Any partition that wants to use this peripheral can communicate with the \acrshort{io} server partition over the hypervisor \acrshort{ipc} mechanism. How access is granted and arbitrated between partitions is up to the implementer. It is important to note that these kinds of drivers do not typically come with the hypervisor and it is up to the device manufacturer to implement them.
+
 \subsection{Inter-partition communication}
 There are two ways for two partitions to communicate: message passing and shared memory.
 
@@ -218,28 +213,15 @@ The concepts of separation have been introduced in section \ref{separation-arch}
 \subsubsection{Temporal separation}
 How the hypervisor may schedule its partitions has already been explained in section \ref{hv-scheduling}. The most important property of a hypervisor scheduling algorithm that emerged from that was its determinism. If the algorithm is deterministic the device manufacturer can carry out a \acrshort{wcet} analysis, which allows him to reason about the device's temporal separation. The results of the \acrshort{wcet} analysis should show that even in the absolute worst case, the critical partitions still get the time they need to ensure the safety of the device. In all highly critical devices with real-time requirements this is a necessary step to achieve regulatory compliance.
 
-Because the hypervisor has full control over the system it can stop or start processes at will. Through this, the hypervisor can make sure the schedule is kept and no process oversteps its boundaries.
-
-% I kind of need to explain interrupts after I explain device access. And then I can also better explain how they are relevant to temporal separation
-Another way for a partition to impact the timing behavior of another partition is through interrupts. 
-
-
-
-* The ways of scheduling have already been detailed
-* The hypervisor can achieve temporal separation because it has full control over the system and can force partitions to stop or start
-* The deterministic scheduling behavior is also important to reason about the temporal separation
-* Maybe go into more detail
-* How are secondary timing problems solved (like interrupts etc.)
-    -> I think I may be overcomplicating this issue
+% TODO Does the interrupt system get disabled during IRQ or not?
+Because the hypervisor has full control over the system it can stop or start processes at will. Through this, the hypervisor can make sure the schedule is kept and no process oversteps its temporal boundaries.
+Additionally, the hypervisor prevents partitions from disabling interrupts they do not have permissions for. This makes sure all partitions always get timely interrupts which is an important aspect of temporal separation. 
 \subsubsection{Spatial separation}
-% Same as with temporal
-On most systems 
+Spatial separation is mostly concerned with preventing illegitimate access to memory. Because a hypervisor can only be deployed on a system with \acrshort{mmu} achieving this is fairly simple. The hypervisor configuration details all memory assignments to the partitions and the hypervisor configures the \acrshort{mmu} to only grant access to those assigned regions. 
 
-* DMA is only possible with IOMMU!
+Another important shared resource is kernel memory. Any objects that shouldn't be accessed directly by a partition are kept in kernel memory. A partition that continuously provokes the hypervisor to create objects in kernel memory could stop all other partitions from using certain hypervisor functionality. To prevent this the basic safety hypervisor implements a per partition kernel memory quota. Once this quota is full, the hypervisor will no longer create kernel objects for this partition.
 
-* It achieves this through utilizing the MMU or more rarely the MPU
-* Some objects related to partitions need to be saved in kernel memory
-* Either, partitions have a kernel memory quota or they can only instantiate objects that were defined at configuration time. This stops them from starving other processes of kernel memory
+\acrshort{dma} poses a serious threat to temporal separation and should only be enabled, if the device contains an \acrshort{iommu} to regulate and control direct memory access.
 
 %----------------------------------------------------------------------------------------
 \section{Initial considerations}
