@@ -74,6 +74,8 @@ Figure \ref{fig:gas_detect_high_level} shows a high level view of the device arc
 \newcommand{\usbTob}{5}
 \newcommand{\bTousb}{5}
 
+The hypervisor is running on a dual-core ARM Cortex-A7 without hardware virtualization extensions.  
+
 * The hypervisor is running on a dual core ARM Cortex-A7 without hardware virtualization extensions
 * It has a number of peripheral devices but the exact interface (SPI, I2C...) is irrelevant.
 * There are four partitions. Two safety-critical partitions running a generic \acrshort{rtos} and a native C environment respectively. The non-safety critical partition responsible for the \acrshort{gui} is running a paravirtualized Linux and the \acrshort{usb} driver is also in a native C runtime environment.
@@ -111,24 +113,27 @@ Figure \ref{fig:gas_detect_low_leve} shows a more detailed view of the user-spac
 * The USB driver is implemented in a Native C partition and has direct access to the USB peripheral. It communicates with Application A and B over the IPC channels \aTousb{} and \bTousb{}. This way both applications can use the USB for their purposes. The non-critical partition A uses USB to export measurement data from the device. The safety-critical Application B on the other hand, uses the USB connection to update the device firmware. 
 * To make sure the firmware will be transmitted correctly, the USB driver partition always gives precedence to the safety-critical application.
 \paragraph{Scheduling}
-The scheduling algorithm for this device is priority based preemptive scheduling. The partition's priorities can be found in table \ref{table:gasdetect_priorities}. Since their priorities are higher, one of the critical partitions can always take over control from the non-critical partition A. However, partition B and C only need to do work during the measurement cycle, so this is unlikely to impact the \acrshort{gui} running on partition A significantly. 
+The scheduling algorithm for this device is priority based preemptive scheduling. The partition's priorities can be found in table \ref{table:gasdetect_priorities}. Since their priorities are higher, one of the critical partitions can always take over control from the non-critical \acrshort{gui} partition. However, the concentration algorithm partition and the measurement partition only need to do work during the measurement cycle, so this is unlikely to impact the \acrshort{gui} significantly. 
 
-Whenever, partition A or B want to use the \acrshort{usb} device, they will communicate with the \acrshort{usb} driver partition to wake it up. It will then process any data and go back to sleep. This way the \acrshort{usb} driver partition can also not interrupt the gas measurement process.
+Whenever, the \acrshort{gui} application or the measurement application want to use the \acrshort{usb} device, they will communicate with the \acrshort{usb} driver partition over the associated \acrshort{ipc} channels. The \acrshort{usb} driver will then process any data and go back to sleep. Because of its lower priority the \acrshort{usb} driver partition can also not interrupt the gas measurement process.
+
+At the beginning it was mentioned that this device is running on a dual-core processor. The hypervisor is configured to always schedule the running partition on all cores 
 
 \begin{table}[h!]
 \centering
 \begin{tabular}{l|l}
 \textbf{Partition} & \textbf{Priority} \\ \hline
-A (non-critical)                             & 1                                           \\ \hline
-B (critical)                                 & 4                                           \\ \hline
-C (critical)                                 & 3                                           \\ \hline
-USB driver(non-critical)                     & 2                                          
+Measurement application                               & 4                                           \\ \hline
+Concentration algorithm                                & 3                                           \\ \hline
+USB driver                                  & 2                                           \\ \hline
+GUI application                    & 1                                          
 \end{tabular}
 \caption{Partition priorities}
 \label{table:gasdetect_priorities}
 \end{table}
 
 \paragraph{Memory allocation}
+The memory allocation of the device is depicted in figure \ref{fig:gas_detect_memory_allocation}. Bidirectional arrows indicate a memory region is configured as read and write, while unidirectional arrows indicate either read or write access. For example, the shared memory region C can only be read by the concentration algorithm partition and written to, by the measurement application. This region serves as a fast way of transmitting all the image data from the measurement to the algorithm. Two physical memory regions are marked with a minus, these two are reserved for future use and are not currently assigned to a partition.
 
 \begin{figure}[hb!]
 \centering

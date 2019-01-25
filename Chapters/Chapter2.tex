@@ -64,6 +64,9 @@ However, these were just the two most prevalent examples and in fact most hyperv
 
 Another feature of the basic safety hypervisor is the possibility of multiple scheduling plans. A hypervisor partition with the correct capabilities is allowed to switch the scheduling behavior to one of the plans that was provided at configuration time. For example, if there is an unexpected error the monitoring partition can put the device into a maintenance mode, where only the most critical and recovery processes are scheduled. Another use for this feature is during the boot process where some partitions might need to run uninterrupted for a longer time.
 
+\subsubsection{Multicore support}
+
+
 \subsection{Available guest environments}
 \subsubsection{\acrshort{rtos}}
 Any safety hypervisor can host a \acrlong{rtos} as a guest environment, as it is one of the core objectives to separate real-time, safety-critical domains from the less critical domains. However, as explained in section \ref{hw-virt} (Hardware virtualization) the full virtualization of operating systems is not always available or feasible and in fact many hypervisors don't currently offer full virtualization. That leaves paravirtualization as the only option but paravirtualization requires the modification of the operating system in question. To reduce the barrier of entry the developer of the basic safety hypervisor typically also offers an already paravirtualized \acrshort{rtos} that can be deployed on the hypervisor. 
