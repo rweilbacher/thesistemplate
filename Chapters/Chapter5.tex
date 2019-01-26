@@ -76,7 +76,7 @@ Figure \ref{fig:gas_detect_high_level} shows a high level view of the device arc
 
 % TODO Explain in more detail
 The hypervisor is running on a dual-core ARM Cortex-A7 with hardware virtualization extensions. The virtualization extensions are used for the two-stage \acrshort{mmu} address translation and to stop the guests from using privileged processor instructions. Two-stage address translation means that the \acrshort{mmu} maintains a page table for each partition. 
-For performance reasons, the virtualization extensions are not used to fully virtualize the guest operating systems. Instead the operating systems have been modified to support paravirtualization. H
+For performance reasons, the virtualization extensions are not used to fully virtualize the guest operating systems. Instead the operating systems have been modified to support paravirtualization. How the scheduling is setup to avoid problems with multicore will be explained.
 
 % TODO Risk levels belong to introduction (Or does it)
 There are four partitions on the hypervisor. Two safety-critical partitions running a generic \acrshort{rtos} and a native C environment respectively. The non-safety critical partition responsible for the \acrshort{gui} is running a paravirtualized Linux and the \acrshort{usb} driver is also in a native C runtime environment. 
@@ -115,11 +115,26 @@ The warning \acrshort{led} will begin blinking red, if the measured concentratio
 Unlike the other peripherals the \acrshort{usb} peripheral is not directly connected to the partitions that use it. The \acrshort{usb} stack for it is isolated on a native C partition. If either the \acrshort{gui} application or the measurement application want to use the \acrshort{usb} they start communicating over their \acrshort{ipc} channels that are connected to the \acrshort{usb} driver partition. So the two channels marked with 4 for the \acrshort{gui} application and the two channels marked with 5 for the measurement application. Arbitration implemented by the driver is very simple, it always gives access to the \acrshort{usb} port to the safety-critical measurement application when it asks for it. This ensure that the \acrshort{gui} application can not interfere with the firmware update process. 
 
 \paragraph{Scheduling}
+Since this system is a dual-core system, scheduling has to take this into account. Figure \ref{fig:gas_detect_vcpu_schedule} depicts how the physical cores are distributed among the partitions. Each partition only has one virtual \acrshort{cpu} which is 
+
+
+\begin{figure}[hb!]
+\centering
+\includegraphics[scale=0.75]{Figures/gas_detect_vcpu_schedule.png}
+\decoRule
+\caption{\acrshort{cpu} allocation for gas detector.}
+\label{fig:gas_detect_vcpu_schedule}
+\end{figure}
+
+
+
 The scheduling algorithm for this device is priority based preemptive scheduling. The partition's priorities can be found in table \ref{table:gasdetect_priorities}. Since their priorities are higher, one of the critical partitions can always take over control from the non-critical \acrshort{gui} partition. However, the concentration algorithm partition and the measurement partition only need to do work during the measurement cycle, so this is unlikely to impact the \acrshort{gui} significantly. 
 
 Whenever, the \acrshort{gui} application or the measurement application want to use the \acrshort{usb} device, they will communicate with the \acrshort{usb} driver partition over the associated \acrshort{ipc} channels. The \acrshort{usb} driver will then process any data and go back to sleep. Because of its lower priority the \acrshort{usb} driver partition can also not interrupt the gas measurement process.
 
 At the beginning it was mentioned that this device is running on a dual-core processor. The hypervisor is configured to always schedule the running partition on all cores 
+
+
 
 \begin{table}[h!]
 \centering
