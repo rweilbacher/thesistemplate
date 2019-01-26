@@ -76,32 +76,18 @@ Figure \ref{fig:gas_detect_high_level} shows a high level view of the device arc
 
 % TODO Explain in more detail
 The hypervisor is running on a dual-core ARM Cortex-A7 with hardware virtualization extensions. The virtualization extensions are used for the two-stage \acrshort{mmu} address translation and to stop the guests from using privileged processor instructions. Two-stage address translation means that the \acrshort{mmu} maintains a page table for each partition. 
-For performance reasons, the virtualization extensions are not used to fully virtualize the guest operating systems. Instead the operating systems have been modified to support paravirtualization.
+For performance reasons, the virtualization extensions are not used to fully virtualize the guest operating systems. Instead the operating systems have been modified to support paravirtualization. H
 
-There are four partitions on the hypervisor. Two safety-critical partitions running a generic \acrshort{rtos} and a native C environment respectively. The non-safety critical partition responsible for the \acrshort{gui} is running a paravirtualized Linux and the \acrshort{usb} driver is also in a native C runtime environment.
+% TODO Risk levels belong to introduction (Or does it)
+There are four partitions on the hypervisor. Two safety-critical partitions running a generic \acrshort{rtos} and a native C environment respectively. The non-safety critical partition responsible for the \acrshort{gui} is running a paravirtualized Linux and the \acrshort{usb} driver is also in a native C runtime environment. 
 
 The only job of the \acrshort{usb} driver partition is to share the \acrshort{usb} device with the other partitions. How this precisely works will be examined in more detail later.
 
-The \acrshort{gui} application takes care of displaying the results as well as exporting them over \acrshort{usb} or Bluetooth. It is running on top of a paravirtualized Linux.
+The \acrshort{gui} application takes care of displaying the results as well as exporting them over Bluetooth or \acrshort{usb} with the help of the \acrshort{usb} driver partition. It is running on top of a paravirtualized Linux. \acrshort{usb} is used by the safety-critical partition to update the firmware of the device. That means the measurement application will receive the update over \acrshort{usb}, verify that it is correct and then apply the update.
 
-All safety-critical peripherals are assigned to the measurement application. It carries out the measurement, monitors the system and updates the firmware over \acrshort{usb}. It is also responsible for providing measurement data to the concentration algorithm partition.
+All safety-critical peripherals are assigned to the measurement application. It carries out the measurement, monitors the system and updates the firmware over \acrshort{usb}. It is also responsible for providing measurement data to the concentration algorithm partition. With that data the concentration algorithm partition calculates the correct gas concentration and reports it to back to the measurement partition. \bold{These two partitions were separated to seal the complex algorithm.} The measurement partition is quite likely to be modified after release but the concentration algorithm will probably never have to be modified again. If the two are in separate partitions the manufacturer does not have to reverify the algorithm, if the measurement software was changed.
 
-* It has a number of peripheral devices but the exact interface (SPI, I2C...) is irrelevant.
-* 
-* Application A on the Linux partition takes care of displaying the results and exporting results over USB and Bluetooth.
-* Application B on the RTOS is responsible for any safety-critical hardware access.
-* Application C is the small part of the device that calculates the gas concentration based on the CMOS image data. This is a complex algorithm that likely doesn't need to be changed for a long time. That is why the manufacturer decided to seal it in a separate partition. Even if the RTOS application needs to be changed, the hypervisors separation means that Application C will not need to be reverified. That can save a lot of costs.
-* The \acrshort{usb} driver partition arbitrates the access to the \acrshort{usb} interface between application A and B. 
-* 
-
-* What does it generally represent?
-* What are the dimensions of the hardware? (Don't be too specific but give the general idea)
-* What partitions are there?
-* Which environment is running on each partition? Why?
-* Why does each partition have access to the peripherals it does?
-* What does each application do?
-* Which partitions are communicating?
-* Why are they separated this way?
+The development of the two safety-critical partitions will need to conform to the IEC 61508 standard. They're risk levels were classified as \acrshort{sil} 3, as a failure can potentially cause the loss of a life. But because of their risk mitigation techniques, like the warning \acrshort{led} and the start button being connected to the safety-critical application, it is reasonably unlikely that an operator would get injured. If the \acrshort{gui} partition fails, the device may no longer be usable but the operator can recognize this and leave the area before a dangerous gas concentration could cause harm.
 
 \paragraph{A more detailed look at user-space}
 Figure \ref{fig:gas_detect_low_leve} shows a more detailed view of the user-space in the previous figure. The hardware and hypervisor layer are not shown here but all communication paths between the partitions are included and numbered. Assigned peripherals are in grey. All the attachment points of communication channels and peripherals were chosen purely for aesthetic reasons. The following paragraphs will explain this figure in more detail.
@@ -114,13 +100,20 @@ Figure \ref{fig:gas_detect_low_leve} shows a more detailed view of the user-spac
 \label{fig:gas_detect_low_leve}
 \end{figure}
 \paragraph{Device access}
-* Figure \ref{fig:gas_detect_low_leve} shows a more detailed view of the previous figure.
-* Application A has direct access to the touch display, as well as the Bluetooth module to transmit data.
-* Application B has direct access to the NFC for reading the configuration, the pump for pumping a certain amount of air through the glass tube, the CMOS sensor for gathering image data and the warning LED. The warning LED mitigates the risk of a failure in non-critical application A leading to the operator thinking there is a non-dangerous concentration of gas present. To alert the operator the LED will blink red, if a dangerous concentration has been detected.
-% -- Shared USB --
-% TODO Update the introduction part to reflect the explanation
-* The USB driver is implemented in a Native C partition and has direct access to the USB peripheral. It communicates with Application A and B over the IPC channels \aTousb{} and \bTousb{}. This way both applications can use the USB for their purposes. The non-critical partition A uses USB to export measurement data from the device. The safety-critical Application B on the other hand, uses the USB connection to update the device firmware. 
-* To make sure the firmware will be transmitted correctly, the USB driver partition always gives precedence to the safety-critical application.
+The \acrshort{gui} application only has direct access to the touch display and the Bluetooth module to display and export results.
+
+The measurement application on the other hand directly controls all the peripherals that are necessary for the gas measurement. These are:
+\begin{itemize}
+    \item \keyword{Warning \acrshort{led}:} To warn the operator of a dangerous concentration.
+    \item \keyword{Start button:} To start the measurement.
+    \item \keyword{NFC reader:} To read the algorithm configuration parameters from the \acrshort{nfc} tag on the cartridge.
+    \item \keyword{Air pump:} To pump air through the glass tube with the reagent.
+    \item \keyword{\acrshort{cmos} sensor:} To take pictures of the reagent, while it is exposed to the outside air.
+\end{itemize}
+The warning \acrshort{led} will begin blinking red, if the measured concentration is above the dangerous limit, indicated on the cartridge \acrshort{nfc} tag. That is also part of the reason, why the \acrshort{nfc} tag needs to be read in the certified safety-critical application.
+
+Unlike the other peripherals the \acrshort{usb} peripheral is not directly connected to the partitions that use it. The \acrshort{usb} stack for it is isolated on a native C partition. If either the \acrshort{gui} application or the measurement application want to use the \acrshort{usb} they start communicating over their \acrshort{ipc} channels that are connected to the \acrshort{usb} driver partition. So the two channels marked with 4 for the \acrshort{gui} application and the two channels marked with 5 for the measurement application. Arbitration implemented by the driver is very simple, it always gives access to the \acrshort{usb} port to the safety-critical measurement application when it asks for it. This ensure that the \acrshort{gui} application can not interfere with the firmware update process. 
+
 \paragraph{Scheduling}
 The scheduling algorithm for this device is priority based preemptive scheduling. The partition's priorities can be found in table \ref{table:gasdetect_priorities}. Since their priorities are higher, one of the critical partitions can always take over control from the non-critical \acrshort{gui} partition. However, the concentration algorithm partition and the measurement partition only need to do work during the measurement cycle, so this is unlikely to impact the \acrshort{gui} significantly. 
 
