@@ -21,12 +21,12 @@
 
 % IMPORTANT Maybe remove the intro fluff?
 Now that the differences between traditional hypervisors and embedded safety hypervisors have been laid out, it is time to take a closer look at the embedded safety hypervisor.
-For this, a "basic safety hypervisor" will be proposed, that embodies the typical characteristics of a microkernel based safety hypervisor. Where there is no discernible consensus, differences will be highlighted. Both the typical hypervisor architecture and its simplified functionality will be examined.
+For this purpose, a "basic safety hypervisor" will be proposed, that embodies the typical characteristics of a microkernel based safety hypervisor. Where there is no discernible consensus, differences will be highlighted. Both the typical hypervisor architecture and its simplified functionality will be examined.
 
 \section{Architecture}
 Since, most safety hypervisors are microkernel based, the architecture for the basic safety hypervisor is also a more in-depth look at microkernel architecture. However, there are differences and additions to the microkernel core that will be explored as well.   
 
-The guiding principle of microkernel design, minimality, has already been introduced in section\ref{microkernel}. But while the academic microkernel representations try to achieve \keyword{absolute minimality}, most real safety hypervisor implementations forego this to add useful features to the kernel. The small trusted code base is still an integral part of safety hypervisors, but with some minor trade-offs. 
+The guiding principle of microkernel design, minimality, has already been introduced in section \ref{microkernel}. But while the academic microkernel representations try to achieve \keyword{absolute minimality}, most real safety hypervisor implementations forego this to add useful features to the kernel. The small trusted code base is still an integral part of safety hypervisors, but with some minor trade-offs. 
 
 % SOURCE Do I need a source for this?
 Perhaps, the biggest trade-off is the inclusion of the virtual machine monitor code in the kernel itself. Some hypervisors also relegate this virtual machine control to user-space but it is more typical to see it inside of the microkernel. In reality the virtualization aspect of the hypervisor is almost always a critical component and it therefore makes sense to include it in the kernel verification efforts. 
@@ -36,9 +36,9 @@ Perhaps, the biggest trade-off is the inclusion of the virtual machine monitor c
 Capabilities are unforgeable tokens that grant access rights to an object. They contain the identification of the object and associated rights, for example read and write.
 They can be given to other processes which in turn grants them access according to the capability \cite{Levy.1984}. A capability could be for a specific memory region, a communication endpoint or to a hypervisor \acrshort{api} call.
 
-The capabilities a process has are maintained in a part of memory that it can not write, to stop the process from attempting to forge capabilities. It is however still up to the process to use the appropriate capability for access to reduce kernel involvement.
+The capabilities a process has are maintained in a part of memory that it can not write, to stop the process from attempting to forge capabilities. It is however still up to the process to use the appropriate capability for access to reduce kernel involvement. In practice, this means that the process will request access by pointing to his corresponding capability in kernel memory. The kernel then checks the capability and if it does indeed grant access to the requested rights, the kernel approve the request. If it was not the user processe's responsibility to know the right capability, the kernel would have to be extended with code that looks up a processe's capabilities. But this would violate the microkernel's principle of minimality.
 
-Capability-based access control has dominated in microkernels because of its flexibility and because it doesn't require extensive kernel involvement. Since, the typical safety hypervisor is an extension of a microkernel, this mechanism has propagated to them as well.
+Capability-based access control has dominated in microkernels because of its flexibility and because it doesn't require extensive kernel involvement. Since, the typical safety hypervisor is an extension of a microkernel, this mechanism has propagated to them as well and is typically seen in extensive configuration files.
 
 \subsection{Scheduling} \label{hv-scheduling}
 All hypervisors implement some form of hierarchical scheduling, where a container task is scheduled that then schedules its children according to a global scheduling algorithm. This is most evident with virtualized operating systems. The hypervisor schedules the virtualized operating system according to the system configuration but how the \acrshort{os} in turn schedules its processes is up to the \acrshort{os}. Hierarchical scheduling can have the benefit of reducing scheduling slack in mixed criticality systems \cite{MalcolmS.Mollison.2010}. 
@@ -48,7 +48,7 @@ When it comes to how the container tasks are scheduled there is no single soluti
 \paragraph{Preemptive priority based scheduling}
 % FIGURE This might need one
 In preemptive priority based scheduling each process has a priority and processes that are ready to be scheduled are scheduled based on their priority.
-The preemptive means that if a process with a higher priority than the currently running process becomes ready to be executed, the currently running process gets interrupted. This ensures that the most critical task always gets the time it needs. If there are multiple processes with the same priority, the first to arrive gets scheduled first.
+The preemptive in the name means that, if a process with a higher priority than the currently running process becomes ready to be executed, the currently running process gets interrupted. This ensures that the most critical task always gets the time it needs. If there are multiple processes with the same priority, the first to arrive gets scheduled first.
 
 \paragraph{Time-sliced round-robin scheduling}
 In time-sliced round-robin scheduling each process gets a dedicated time slice called a quantum. Figure \ref{fig:round_robin_example}  shows an example with three processes and their associated scheduling windows. If the end of the quantum is reached before the process is done, it gets interrupted and the next process is scheduled.
@@ -60,7 +60,7 @@ In time-sliced round-robin scheduling each process gets a dedicated time slice c
 \label{fig:round_robin_example}
 \end{figure}
 
-However, these were just the two most prevalent examples and in fact most hypervisors even allow the implementation of custom scheduling algorithms if the provided ones are not sufficient.
+However, these were just the two most prevalent examples and in fact most hypervisors even allow the implementation of custom scheduling algorithms, if the provided ones are not sufficient.
 
 Another feature of the basic safety hypervisor is the possibility of multiple scheduling plans. A hypervisor partition with the correct capabilities is allowed to switch the scheduling behavior to one of the plans that was provided at configuration time. For example, if there is an unexpected error the monitoring partition can put the device into a maintenance mode, where only the most critical and recovery processes are scheduled. Another use for this feature is during the boot process where some partitions might need to run uninterrupted for a longer time.
 
@@ -68,11 +68,11 @@ Another feature of the basic safety hypervisor is the possibility of multiple sc
 Multicore has been much sought after feature in safety-critical device development. However, traditional processors are difficult to use in safety-critical devices. 
 One big problem is presented by the shared cache between cores.
 
-Imagine a system with two partitions, one safety-critical one not-critical, that runs on a two-core \acrshort{cpu} with a shared cache between the two cores. During its allocated time the safety-critical partition may fill up the cache with relevant values. Once the non-safety-critical software runs it can evict all of the cache values by populating it with its own values. This can lead to large and potentially unpredictable interference across domains \cite{AlessandroBiondi.2018}.
+Imagine a system with two partitions, one safety-critical one non-critical, that runs on a two-core \acrshort{cpu} with a shared cache between the two cores. During its allocated time, the safety-critical partition may fill up the cache with relevant values. Once the non-safety-critical software runs, it can evict all of the cache values by populating it with its own values. The resulting cache misses can lead to large and potentially unpredictable interference across domains \cite{AlessandroBiondi.2018}.
 
 In the best case this scenario just leads to an excessively pessimistic \acrfull{wcet} analysis. To compensate this the safety-critical partition would get a lot more allocated time than it actually needed, leading to a worse average case performance. However, there are efforts to solve this issue reliably. One approach is to adjust the hypervisor to ensure safe cache usage \cite{PaoloModica.2018}. Another approach is focused on changing processor design to prevent unsafe, non-deterministic cache management in the first place \cite{el2013across}.
 
-Figure \ref{fig:multicore} shows how multicore support is realized in the hypervisor. Each physical core can be assigned to one or more virtual cores but each virtual core can only be assigned to one physical core. Scheduling plans are then defined for each physical core. To the partitions the virtual cores appear just like normal cores. This approach ensures temporal determinism.
+Figure \ref{fig:multicore} shows how multicore support is realized in the hypervisor. Each physical core can be assigned to one or more virtual cores but each virtual core can only be assigned to one physical core. Scheduling plans are then defined for each physical core. To the partitions, the virtual cores appear just like normal cores. This approach ensures temporal determinism.
 
 Currently, handling the cache safely is left to the partitions in most hypervisors. This typically results in the cache being flushed at the beginning of execution or disabled entirely. Naturally, this is inefficient but safety is more important than performance in most cases.
 
@@ -88,30 +88,30 @@ Currently, handling the cache safely is left to the partitions in most hyperviso
 \subsubsection{\acrshort{rtos}}
 Any safety hypervisor can host a \acrlong{rtos} as a guest environment, as it is one of the core objectives to separate real-time, safety-critical domains from the less critical domains. However, as explained in section \ref{hw-virt} (Hardware virtualization) the full virtualization of operating systems is not always available or feasible and in fact many hypervisors don't currently offer full virtualization. That leaves paravirtualization as the only option but paravirtualization requires the modification of the operating system in question. To reduce the barrier of entry the developer of the basic safety hypervisor typically also offers an already paravirtualized \acrshort{rtos} that can be deployed on the hypervisor. 
 
-However, this significantly reduces the possible \acrshort{rtos} options the safety-critical device manufacturer can choose for his application. Since most real-time operating systems are closed source they cannot be modified to work on the hypervisor. This makes the \acrshort{rtos} provided by the hypervisor developer the potentially only viable option and therefore increases the dependence on the developer. What the potential consequences of this are needs to be evaluated based on the context of the situation but it is an important aspect to keep in mind.
+However, this significantly reduces the possible \acrshort{rtos} options the safety-critical device manufacturer can choose for his application. Since most real-time operating systems are closed source they cannot be modified to work on the hypervisor. This makes the \acrshort{rtos} provided by the hypervisor developer the potentially only viable option and therefore increases the dependence on the developer. What the potential consequences of this are, needs to be evaluated based on the context of the situation but it is an important aspect to keep in mind.
 
 \subsubsection{Linux}
 An already paravirtualized version of Linux is another standard guest environment. Since, Linux is open-source the pressure of paravirtualization is not an immediate issue. Furthermore, there is less of a difference between versions of Linux than between real-time operating systems by different vendors. It is therefore unlikely that the safety-critical device manufacturer is even interested in using another version than the one provided.
 
 \subsubsection{Native C runtime environment}
-For a partition completing a very simple task, running a full-blown operating system is a waste of resources. For that reason the basic safety hypervisor includes a guest environment that is nothing more than a native C application with access to the hypervisor \acrshort{api}. The safety-critical device manufacturer can provide one or multiple C files that then get compiled into a hypervisor process. This process is then scheduled like any of the other partitions.
+For a partition completing a very simple task, running a full-blown operating system is a waste of resources. For that reason, the basic safety hypervisor includes a guest environment that is nothing more than a native C application with access to the hypervisor \acrshort{api}. The safety-critical device manufacturer can provide one or multiple C files that then get compiled into a hypervisor process. This process is then scheduled like any of the other partitions.
 
-A possible application of this is a shared device driver. The driver can be implemented in the native C environment and communicate with the other partitions over the hypervisors \acrshort{ipc} mechanism. A more detailed explanation of this will be given in a future section.
+A possible application of this is a shared device driver. The driver can be implemented in the native C environment and communicate with the other partitions over the hypervisors \acrshort{ipc} mechanism. A more detailed explanation of this scenario will be given in a future section.
 
 %----------------------------------------------------------------------------------------
 
 \section{Functionality}
-This section will explore what functionality the safety hypervisor can offer and how it achieves this.
+This section will explore what functionality the safety hypervisor can offer and what the basics of their implementation are.
 \subsection{Hardware access}
 Ultimately, the hypervisor partitions need to be able to interact with the hardware in some form. Access to the partition's assigned physical memory regions is established by the \acrshort{mmu} in the form of virtual memory.
 To communicate with its assigned peripherals the partition needs access to the peripheral device registers and it needs to be notified when the peripheral triggers an interrupt. How the hypervisor deals with the special case of \acrfull{dma} will also be explained.
 
 \paragraph{Device register access}
 % TODO Is this true?
-In Intel \acrshort{cpu}s device registers are often accessed via \acrshort{io} ports. For simplicity's sake only the model typical for many other processors, memory mapped \acrshort{io}, is examined. With memory mapped \acrshort{io} the peripheral device registers get mapped into the physical address space. That means a process that can read this memory location is actually reading the content of the device register. Similarly, a process that writes to this memory location is actually modifying the device register that is mapped to it. Consequently, to give a partition the ability to interact with the registers of a peripheral device the hypervisor simply needs to give access to the corresponding memory regions. This can be configured through the \acrshort{mmu} as explained previously.
+In Intel \acrshort{cpu}s device registers are often accessed via \acrshort{io} ports. For simplicity's sake only the model typical for many other processors, memory mapped \acrshort{io}, is examined. With memory mapped \acrshort{io} the peripheral device registers get mapped into the physical address space. That means a process that can read this memory location is actually reading the contents of the device register. Similarly, a process that writes to this memory location is actually modifying the device register that is mapped to it. Consequently, to give a partition the ability to interact with the registers of a peripheral device the hypervisor simply needs to give access to the corresponding memory regions. This can be configured through the \acrshort{mmu} as explained previously.
 
 \paragraph{Interrupts}
-Interrupts are the asynchronous way for peripheral devices to communicate with the \acrshort{cpu}. Every peripheral has an associated interrupt line to the interrupt controller. Once the peripheral wants to signal the \acrshort{cpu} it wants to communicate, it activates its interrupt line. Then the interrupt controller buffers this interrupt request and forwards it to the \acrshort{cpu} which interrupts its current execution to handle the interrupt. Then the \acrshort{cpu} can notify the kernel. The interrupt handler is responsible for retrieving the data from the device registers and preparing the peripheral for the next communication.
+Interrupts are the asynchronous way for peripheral devices to communicate with the \acrshort{cpu}. Every peripheral has an associated interrupt line to the interrupt controller. Once the peripheral wants to signal the \acrshort{cpu} it wants to communicate, it activates its interrupt line. Then the interrupt controller buffers this interrupt request and forwards it to the \acrshort{cpu} which interrupts its current execution to handle the interrupt. Then the \acrshort{cpu} can notify the kernel via the interrupt handler code that is assigned to the number of the interrupt line that was just activated. The interrupt handler is responsible for retrieving the data from the device registers and preparing the peripheral for the next communication.
 
 In a fully virtualized guest, the hypervisor can utilize the hardware virtualization extensions to trap an interrupt request and send a virtual interrupt to the partition. Another option that also works without the virtualization extensions is interrupt pass-through. In the pass-through scenario the hypervisor simply routes the interrupt to the interrupt handler in the partition and the partition has to take care of everything else.
 
@@ -120,21 +120,21 @@ In any case the partitions can not be allowed to gain unmitigated access to the 
 
 \paragraph{\acrshort{dma}}
 % TODO Include a source for IOMMU
-A special case of peripheral to process communication is that of \acrfull{dma}. \acrshort{dma} means that a peripheral device independently accesses the system memory without \acrshort{cpu} involvement. This can be drastically faster and relieves load and the \acrshort{cpu} but poses a special problem for safety-critical devices. Because the hypervisor can have no knowledge about \acrshort{dma} activity a misbehaving or hijacked peripheral device can write to potentially arbitrary memory locations. The only way to relieve this is with the help of an \acrfull{iommu}. A hardware component that, like an \acrshort{mmu}, can restrict the memory regions a peripheral can access via \acrshort{dma}.
-If this is not present, \acrshort{dma} should likely be disabled.
+A special case of peripheral to process communication is that of \acrfull{dma}. \acrshort{dma} means that a peripheral device independently accesses the system memory without \acrshort{cpu} involvement. This can be drastically faster and relieves the load on the \acrshort{cpu} but poses a special problem for safety-critical devices. Because the hypervisor can have no knowledge about \acrshort{dma} activity, a misbehaving or hijacked peripheral device can write to potentially arbitrary memory locations. The only way to relieve this is with the help of an \acrfull{iommu}. A hardware component that, like an \acrshort{mmu}, can restrict the memory regions a peripheral can access via \acrshort{dma}.
+If this is not present, \acrshort{dma} should likely be disabled. [source]
 
 \subsubsection{Shared hardware access}
-If the hardware virtualization extensions are present in the \acrshort{cpu} the hypervisor can arbitrate access to most devices by presenting virtual devices to the partitions.
+If the hardware virtualization extensions are present in the \acrshort{cpu}, the hypervisor can arbitrate access to most devices by presenting virtual devices to the partitions.
 But an interrupt line can only be directly assigned to one partition, so if direct assignment of the hardware is necessary, shared access needs to be realized differently. 
 
 \begin{figure}[hbt!]
 \centering
-\includegraphics[scale=0.75]{Figures/shared_driver.png}
+\includegraphics[scale=1]{Figures/shared_driver.png}
 \decoRule
 \caption{High level view of an \acrshort{io} server partition}
 \label{fig:shared_driver}
 \end{figure}
-Figure \ref{fig:shared_driver} depicts how this is typically done. The peripheral in question gets assigned to a hypervisor partition that acts as an \acrshort{io} server for the other partitions. Any partition that wants to use this peripheral can communicate with the \acrshort{io} server partition over the hypervisor \acrshort{ipc} mechanism. How access is granted and arbitrated between partitions is up to the implementer. It is important to note that these kinds of drivers do not typically come with the hypervisor and it is up to the device manufacturer to implement them.
+Figure \ref{fig:shared_driver} depicts how this is typically done. The peripheral in question gets assigned to a hypervisor partition that acts as an \acrshort{io} server for the other partitions. Any partition that wants to use this peripheral can communicate with the \acrshort{io} server partition over the hypervisor \acrshort{ipc} mechanism, which is represented here by the arrows between partitions. How access is granted and arbitrated between partitions is up to the implementer. It is important to note that these kinds of drivers do not typically come with the hypervisor and it is up to the device manufacturer to implement them.
 
 \subsection{Inter-partition communication}
 There are two ways for two partitions to communicate: message passing and shared memory.
@@ -149,23 +149,24 @@ There are two ways for two partitions to communicate: message passing and shared
 \end{figure}
 If two partitions are configured to share memory the hypervisor simply maps the same region of physical memory into the virtual address space of both partitions. Figure \ref{fig:shared_memory} shows that partition 1 and 2 both get access to the physical memory region C. In this example there is still some unmapped physical memory after memory region B. 
 
-It is up to the partitions to know how the data in the shared region needs to be interpreted and to synchronize access on the region. The hypervisor does not control access can therefore not guarantee that none of the partitions corrupts the memory. Therefore, this way of communication provides a lot of flexibility at the cost of safety.
+It is up to the partitions to know how the data in the shared region needs to be interpreted and to synchronize access on the region. The hypervisor does not control access can therefore not guarantee that none of the partitions corrupts the memory. Consequently, this way of communication provides a lot of flexibility at the cost of safety.
 One way to get around the concurrency issues is to make memory access in this region read-only for one of the partitions.
 
 \subsubsection{Message passing}
 Message passing is the safe way for two partitions to communicate that relies on the hypervisor's \acrshort{ipc} mechanism. A communication channel is a unidirectional path between one source and one or more destinations. The partitions can access a channel through ports, of which there are two types. Queuing ports maintain a \acrshort{fifo} queue of messages that can be read by the receiving partitions sequentially. In a sampling port there is only ever one message that either gets overwritten by a new message or invalidated by the partition reading the message. To make the polling of the ports unnecessary, the hypervisor triggers a specific interrupt in the receiving partitions when a new message is available.
 
 Figure \ref{fig:message_ports} shows an example of communication between three partitions. 
-Messages sent by partition 1 arrive at the ports in partition 2 and 3 individually. That means messages are maintained on a port by port basis and a partition can't stop another partition from receiving the message by consuming it. The hypervisor also ensures that message either arrive completely or not at all, where "not at all" would trigger an error. All message data is copied by the hypervisor and there is no direct memory access to the original message. Therefore, partition 1 can't change the message after it has been sent to the other partitions. These assurances can only be made by the hypervisor because it has full control over the communication, unlike the shared memory communication.
+Messages sent by partition 1 arrive at the ports in partition 2 and 3 individually. That means messages are maintained on a port by port basis and a partition can't stop another partition from receiving the message by consuming it. The hypervisor also ensures that messages either arrive completely or not at all, where "not at all" would trigger an error. All message data is copied by the hypervisor and there is no direct memory access to the original message. Therefore, partition 1 can't change the message after it has been sent to the other partitions. These assurances can only be made by the hypervisor because it has full control over the communication, unlike the shared memory communication.
 
 All communication ports and channels need to be defined at configuration time. Once the system is compiled and running no ports or channels can be created that weren't already in the hypervisor configuration. This allows safety-critical device manufacturer to reason about the dependence between partitions.
 \begin{figure}[hb!]
 \centering
-\includegraphics[scale=0.50]{Figures/message_ports.png}
+\includegraphics[scale=0.75]{Figures/message_ports.png}
 \decoRule
 \caption{Message ports between three partitions}
 \label{fig:message_ports}
 \end{figure}
+
 
 \subsection{Health monitoring}
 
@@ -182,7 +183,7 @@ Apart from virtualization, health monitoring is likely the most interesting hype
 % TODO Are these examples clear?
 There are three types of events the health monitoring system can recognize: First, are events that are triggered by abnormal hardware behaviour. Some examples of this are division by zero and attempted access to a protected memory region. The hypervisor gets notified of abnormal hardware behaviour by processor exceptions.
 
-The second type of events are triggered by the code running in a partition. These are typically caused by failed assertions 
+The second type of event is triggered by the code running in a partition. These are typically caused by failed assertions. 
 
 The final event type is triggered by the hypervisor itself. This is typically a response to a violation of the hypervisor configuration. For example, a partition that tries to create an \acrshort{ipc} port that has not been defined in the configuration or a partition that attempts to use a hypercall it does not have permissions for.
 
@@ -200,7 +201,7 @@ After an event has occurred, it gets recognized by the event detection component
 If the event is configured to create a log entry it then gets written to the health monitoring log stream. The entry contains information about the offending partition and relevant information about the event itself. In figure \ref{fig:health_monitoring} there is a hypervisor partition, called "monitoring partition" that has access to the log stream. If the predefined actions are not capable of resolving the issue, this monitoring partition can take further actions. Whatever this partition does with the information is up to the device manufacturer but an example would be to put the device into a maintenance mode, where only the most critical partitions are scheduled. 
 
 \subsection{Timers}
-To aid the partition with time management the hypervisor offers two clocks. One is the elapsed microseconds since the last device reset and the other is the partition execution clock for every partition. The partition execution time is maintained on a per partition basis and only advances when the respective partition is being executed.
+To aid the partition with time management, the hypervisor offers two clocks. One is the elapsed microseconds since the last device reset and the other is the partition execution clock for every partition. The partition execution time is maintained on a per partition basis and only advances when the respective partition is being executed.
 
 Partitions can request the current time and also arm a timer for each clock. Once this timer elapses the partition receives a virtual interrupt by the hypervisor. 
 \subsection{Partition privileges}
@@ -231,7 +232,7 @@ Any configuration of the hypervisor and its subsystems is static and explicit. S
 The concepts of separation have been introduced in section \ref{separation-arch}. In this chapter there have also already been mentions to the hypervisor assurance in regards to certain subsystems. For example, the assurance that messages are copied to all destination ports correctly or an appropriate error is triggered. They have already been part of the hypervisors separation assurances. Now it is time to take a more specific look at how the hypervisor satisfies the most crucial requirements of a separation architecture. 
 
 \subsubsection{Temporal separation}
-How the hypervisor may schedule its partitions has already been explained in section \ref{hv-scheduling}. The most important property of a hypervisor scheduling algorithm that emerged from that was its determinism. If the algorithm is deterministic the device manufacturer can carry out a \acrshort{wcet} analysis, which allows him to reason about the device's temporal separation. The results of the \acrshort{wcet} analysis should show that even in the absolute worst case, the critical partitions still get the time they need to ensure the safety of the device. In all highly critical devices with real-time requirements this is a necessary step to achieve regulatory compliance.
+How the hypervisor may schedule its partitions has already been explained in section \ref{hv-scheduling}. The most important property of a hypervisor scheduling algorithm that emerged from that was its determinism. If the algorithm is deterministic the device manufacturer can carry out a \acrshort{wcet} analysis, which allows him to reason about the device's temporal separation. The results of the \acrshort{wcet} analysis should show that even in the absolute worst case, the critical partitions still get the time they need to fulfill safety-critical functions. In all highly critical devices with real-time requirements this is a necessary step to achieve regulatory compliance.
 
 % TODO Does the interrupt system get disabled during IRQ or not?
 Because the hypervisor has full control over the system it can stop or start processes at will. Through this, the hypervisor can make sure the schedule is kept and no process oversteps its temporal boundaries.
@@ -239,7 +240,7 @@ Additionally, the hypervisor prevents partitions from disabling interrupts they 
 \subsubsection{Spatial separation}
 Spatial separation is mostly concerned with preventing illegitimate access to memory. Because a hypervisor can only be deployed on a system with \acrshort{mmu} achieving this is fairly simple. The hypervisor configuration details all memory assignments to the partitions and the hypervisor configures the \acrshort{mmu} to only grant access to those assigned regions. 
 
-Another important shared resource is kernel memory. Any objects that shouldn't be accessed directly by a partition are kept in kernel memory. A partition that continuously provokes the hypervisor to create objects in kernel memory could stop all other partitions from using certain hypervisor functionality. To prevent this the basic safety hypervisor implements a per partition kernel memory quota. Once this quota is full, the hypervisor will no longer create kernel objects for this partition.
+Another important shared resource is kernel memory. Any objects that shouldn't be accessed directly by a partition are kept in kernel memory. A partition that continuously provokes the hypervisor to create objects in kernel memory could stop all other partitions from using certain hypervisor functionality. To prevent this, the basic safety hypervisor implements a per partition kernel memory quota. Once this quota is depleted, the hypervisor will no longer create kernel objects for this partition.
 
 \acrshort{dma} poses a serious threat to temporal separation and should only be enabled, if the device contains an \acrshort{iommu} to regulate and control direct memory access.
 

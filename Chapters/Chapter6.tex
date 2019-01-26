@@ -59,12 +59,9 @@ Through the theoretical analysis in \ref{Chapter4}, some crucial differences bet
 
 % IMPORTANT Update this if I decide to add another reference project.
 The reference projects of section \ref{ref-projects} introduced two broad categories of safety-critical devices that could benefit from the hypervisor architecture. In the first device category, separation is becoming increasingly important because of growing user demands but the traditional \acrshort{hss} architecture can not fulfill the requirements of the manufacturer. These devices are often hand-held and battery powered and are consequently very sensitive to negative changes in size, weight and power. All of which are negatively impacted by the \acrshort{hss} architecture.
-Devices of this scope are also more likely to be produced in larger quantities, so the added hardware cost of a second processor would be quite undesirable.
+Devices of this scope are also more likely to be produced in larger quantities, so the added hardware cost of a second processor would be quite undesirable. This project was also used as the basis of an extensive example hypervisor configuration.
 
 The second device category was one of much higher complexity, where a separation architecture would even be used if the hypervisor was not available. Devices in this category will often have more stringent regulations to follow, so the manufacturer will have a harder time deploying a hypervisor compared to the \acrshort{hss} architecture. But if these challenges can be overcome, the hypervisor architecture can provide hardware consolidation and a more future-proof device.
-
-* separation is becoming increasingly attractive because of growing consumer demands and processing power but the HSS architecture violates the core demands of the use case.
-* This example represents a high complexity, high criticality project that can already profit from the more traditional approaches of separation but where, in a reevaluation of device architecture, the hypervisor approach might come out on top.
 
 Finally, the questions proposed in section \ref{how-to-decide} give a concrete list of criteria to evaluate before moving on to use the hypervisor architecture in a real-world project. To paraphrase the broad categories of questions:
 \begin{itemize}

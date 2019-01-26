@@ -16,32 +16,32 @@
 %----------------------------------------------------------------------------------------
 After the free form analysis of chapter \ref{Chapter4} it is now time to give more concrete examples on when and why the hypervisor architecture should be chosen. For this purpose several \keyword{reference projects} will be laid out and it will be discussed what makes them good or bad examples for the architecture. Afterwards some basic guidance will be given on how a specific third-party hypervisor implementation should be chosen and what metrics need to be gathered.
 \section{Reference projects} \label{ref-projects}
-This list of imaginary reference projects serves as a tool for the safety-critical device engineer to categorize his project's characteristics. Each project is chosen to conform with a broad category of safety-critical devices in terms of scope and criticality to make a statement about the hypervisor architectures suitability for that category.
+This list of imaginary reference projects serves as a tool for the safety-critical device engineer to categorize his project's characteristics. Each project is chosen to conform with a broad category of safety-critical devices in terms of scope and criticality to make a statement about the hypervisor architectures suitability for that category. 
 
-The proposed projects are simplified and only attributes relevant to the architectural decision are examined. Metrics that can't be considered, like license cost, will not be mentioned. 
+The proposed projects are simplified and only attributes relevant to the architectural decision are examined. Metrics that can't be considered, like license cost, will not be mentioned. The first proposed project, the portable gas detector, will be used to construct a concrete implementation example. This will show an example of what a hypervisor configuration may actually look like on a real device.
 
 \subsection{Portable gas detector}
 % https://www.elektroniknet.de/markt-technik/elektronikfertigung/perfekte-symbiose-von-oem-und-ems-151254.html
 \subsubsection{Introduction}
-This example project is a general, portable gas detector that measures the concentration of different gases by detecting the color change of a chemical, sensitive to the gas in question. Cartridges with clear, sealed tubes can be inserted into the device and once a measurement begins, one of the tubes is punctured and air is pumped through at a specific rate. Then the color change is observed by a \acrshort{cmos} sensor. Because the color change, pump speed and other metrics are different for every gas, information can be extracted from the cartridge via an \acrshort{nfc} tag. This tag also contains general information about the cartridge in question.
+This example project is a general, portable gas detector that measures the concentration of different gases by detecting the color change of a chemical, sensitive to the gas in question. Cartridges with clear, sealed tubes can be inserted into the device and once a measurement begins, one of the tubes is punctured and air is pumped through at a specific rate. Then the color change is observed by a \acrshort{cmos} sensor. Because the color change, pump speed and other metrics are different for every gas, information can be extracted from the cartridge via an \acrshort{nfc} tag. This tag also contains general information about the cartridge in question. [source]
 % TODO Mention device use environment
 
 In this thought experiment the first version of this device has already been on the market for some time and now the manufacturer is looking to create the next generation. The current generation is equipped with an ARM Cortex-M4, a USB port for transmitting measurement data and an LCD display with a simplistic \acrshort{gui}. All of the software sits on top of a small \acrshort{rtos}, with the \acrshort{gui} framework also being provided by the \acrshort{rtos} developer.
 
-In the upcoming generation the manufacturer wants to expand the device's functionality by adding Bluetooth support and a more flexible \acrshort{gui} . Furthermore, the manufacturer wants to be able to extend both the safety-critical and non-safety-critical functionality without having to release a new hardware revision. The core gas measurement code is hardware independent and already verified. Therefore, it could be included in the next generation with minimal effort, if the code's integrity can be guaranteed.
+In the upcoming generation the manufacturer wants to expand the device's functionality by adding Bluetooth support and a more flexible \acrshort{gui} . Furthermore, the manufacturer wants to be able to extend both the safety-critical and non-safety-critical functionality without having to release a new hardware revision. The core gas measurement code is hardware independent and already verified. It is also very unlikely to change in the future, so it could be beneficial to attempt to \keyword{seal} the software. Oftentimes, if one part of the software has been changed, other potentially related parts, also need to be reverified to achieve regulatory compliance. A sealed piece of software can forego this reverification, if it can be reasonably evidenced that it will not be affected by changes in the other software. A separation architecture is ideal for providing this evidence.
 % NOTE How important is unit cost?
 \subsubsection{Discussion}
 % TODO I only mention SWaP but SWaP-C is probably improved. At least in terms of direct hardware cost!
 The current device generation uses no separation architecture because it is not very complex and any components of lower criticality were feasible to achieve within the chosen architecture. With the upcoming generation there are now stronger initial incentives to consider the separation of software components:
 \begin{enumerate}
-\item There is already verified code available that the manufacturer wants to reuse with little to no modification.
+\item There is easily sealable, expensive to verify code, in the form of the gas concentration algorithm.
 \item \acrshort{gui} libraries on Linux would be a great fit for realizing a more complex \acrshort{gui} with less effort than on a typical \acrshort{rtos}. But Linux can not be feasibly verified for the safety-critical use case.
 \item Both safety-critical and non-safety-critical functionality will likely be extended in the future. As established in section  \ref{safety-analysis}, granular partitions or the ability to add more can make regression testing cheaper and less error-prone.
 \end{enumerate}
 Additionally, the planned features do not directly impact the operators safety. The only component that can pose a threat is the \acrshort{gui} because the display could show an incorrect concentration. To mitigate this a red \acrshort{led}, controlled by the critical code, will begin blinking if the measured concentration is above the limit specified on the cartridge's \acrshort{nfc} tag. Any other failure in these components will either just prohibit retrieving data from the device for later analysis or render the device unusable. And while these effects are undesirable, the operator can recognize them and take actions to protect himself.
 
 % NOTE References to relevant sections?
-So now that the manufacturer has come to the conclusion that a separation architecture would be beneficial for the device, he needs to find one that supports his use case. For a battery powered, hand-held device \acrshort{swap} are all very important and this provides a big advantage for the hypervisor, as the \acrshort{hss} architecture compares unfavourably in regards to these criteria. Of course using the Linux \acrshort{gui} offerings would invariably lead to a stronger processor being necessary to support Linux but this would be the case for both separation architectures and for this case we will assume the manufacturer has decided that this is a worthwhile drawback for the increased graphical fidelity. 
+So now that the manufacturer has come to the conclusion that a separation architecture would be beneficial for the device, he needs to find one that supports his use case. For a battery powered, hand-held device \acrfull{swap} are all very important and this provides a big advantage for the hypervisor, as the \acrshort{hss} architecture compares unfavourably in regards to these criteria. Of course using the Linux \acrshort{gui} offerings would invariably lead to a stronger processor being necessary to support Linux but this would be the case for both separation architectures and for this case we will assume the manufacturer has decided that this is a worthwhile drawback for the increased graphical fidelity. 
 
 Separating the gas measurement code from other parts of the software, at least the non verified parts, is equally doable on both architectures. However, the hypervisors support for more granular partitions makes regression testing of a software revision cheaper and can generally aid the software extendibility and maintainability.
 
@@ -53,7 +53,7 @@ This project exemplifies a case where separation is becoming increasingly attrac
 With the criticality level of the device and the specific risks involved, the hypervisor architecture's lack of support for advanced safety features and its less provable separation are no death sentence. And finally, the hypervisors malleability lends itself well to creating a future-proof design, if unit cost is not a bigger concern. 
 % TODO Is there more I want to say?
 \subsubsection{Possible implementation}
-To show what the hypervisor configuration could look like for the gas detector, there will be a more detailed example in this section.
+To show what the hypervisor configuration could look like for the gas detector, there will be a more detailed example in this section. Keep in mind that this is an imagined project. That means the requirements of the device were chosen to create a plausible and informative example and may or may not be common in real-world devices.
 
 \paragraph{High level architecture}
 Figure \ref{fig:gas_detect_high_level} shows a high level view of the device architecture. Communication paths between the partitions will be explored in a later section.
@@ -76,16 +76,16 @@ Figure \ref{fig:gas_detect_high_level} shows a high level view of the device arc
 
 % TODO Explain in more detail
 The hypervisor is running on a dual-core ARM Cortex-A7 with hardware virtualization extensions. The virtualization extensions are used for the two-stage \acrshort{mmu} address translation and to stop the guests from using privileged processor instructions. Two-stage address translation means that the \acrshort{mmu} maintains a page table for each partition. 
-For performance reasons, the virtualization extensions are not used to fully virtualize the guest operating systems. Instead the operating systems have been modified to support paravirtualization. How the scheduling is setup to avoid problems with multicore will be explained.
+For performance reasons, the virtualization extensions are not used to fully virtualize the guest operating systems. Instead the operating systems have been modified to support paravirtualization.
 
 % TODO Risk levels belong to introduction (Or does it)
 There are four partitions on the hypervisor. Two safety-critical partitions running a generic \acrshort{rtos} and a native C environment respectively. The non-safety critical partition responsible for the \acrshort{gui} is running a paravirtualized Linux and the \acrshort{usb} driver is also in a native C runtime environment. 
 
 The only job of the \acrshort{usb} driver partition is to share the \acrshort{usb} device with the other partitions. How this precisely works will be examined in more detail later.
 
-The \acrshort{gui} application takes care of displaying the results as well as exporting them over Bluetooth or \acrshort{usb} with the help of the \acrshort{usb} driver partition. It is running on top of a paravirtualized Linux. \acrshort{usb} is used by the safety-critical partition to update the firmware of the device. That means the measurement application will receive the update over \acrshort{usb}, verify that it is correct and then apply the update.
+The \acrshort{gui} application takes care of displaying the results, as well as exporting them over Bluetooth or \acrshort{usb} with the help of the \acrshort{usb} driver partition. \acrshort{usb} is used by the safety-critical partition to update the firmware of the device. That means the measurement application will receive the update over \acrshort{usb}, verify that it is correct and then apply the update.
 
-All safety-critical peripherals are assigned to the measurement application. It carries out the measurement, monitors the system and updates the firmware over \acrshort{usb}. It is also responsible for providing measurement data to the concentration algorithm partition. With that data the concentration algorithm partition calculates the correct gas concentration and reports it to back to the measurement partition. \bold{These two partitions were separated to seal the complex algorithm.} The measurement partition is quite likely to be modified after release but the concentration algorithm will probably never have to be modified again. If the two are in separate partitions the manufacturer does not have to reverify the algorithm, if the measurement software was changed.
+All safety-critical peripherals are assigned to the measurement application. It carries out the measurements, monitors the system and updates the firmware over \acrshort{usb}. It is also responsible for providing the measurement data to the concentration algorithm partition. With that data the concentration algorithm partition calculates the correct gas concentration and reports it to back to the measurement partition. \bold{These two partitions were separated to seal the complex algorithm.} The measurement partition is quite likely to be modified after release but the concentration algorithm will probably never have to be modified again. If the two are in separate partitions the manufacturer does not have to reverify the algorithm, if the measurement software was changed.
 
 The development of the two safety-critical partitions will need to conform to the IEC 61508 standard. They're risk levels were classified as \acrshort{sil} 3, as a failure can potentially cause the loss of a life. But because of their risk mitigation techniques, like the warning \acrshort{led} and the start button being connected to the safety-critical application, it is reasonably unlikely that an operator would get injured. If the \acrshort{gui} partition fails, the device may no longer be usable but the operator can recognize this and leave the area before a dangerous gas concentration could cause harm.
 
@@ -110,43 +110,34 @@ The measurement application on the other hand directly controls all the peripher
     \item \keyword{Air pump:} To pump air through the glass tube with the reagent.
     \item \keyword{\acrshort{cmos} sensor:} To take pictures of the reagent, while it is exposed to the outside air.
 \end{itemize}
-The warning \acrshort{led} will begin blinking red, if the measured concentration is above the dangerous limit, indicated on the cartridge \acrshort{nfc} tag. That is also part of the reason, why the \acrshort{nfc} tag needs to be read in the certified safety-critical application.
+The warning \acrshort{led} will begin blinking red, if the measured concentration is above the dangerous limit, indicated on the cartridge \acrshort{nfc} tag. That is also part of the reason, why the \acrshort{nfc} tag needs to be read in the certified, safety-critical application.
 
-Unlike the other peripherals the \acrshort{usb} peripheral is not directly connected to the partitions that use it. The \acrshort{usb} stack for it is isolated on a native C partition. If either the \acrshort{gui} application or the measurement application want to use the \acrshort{usb} they start communicating over their \acrshort{ipc} channels that are connected to the \acrshort{usb} driver partition. So the two channels marked with 4 for the \acrshort{gui} application and the two channels marked with 5 for the measurement application. Arbitration implemented by the driver is very simple, it always gives access to the \acrshort{usb} port to the safety-critical measurement application when it asks for it. This ensure that the \acrshort{gui} application can not interfere with the firmware update process. 
+% TODO Maybe talk about the impairment of the GUI partition in this relationship and how the manufacturer aims to resolve it
+Unlike the other peripherals the \acrshort{usb} peripheral is not directly connected to the partition that uses it. The \acrshort{usb} stack for it is isolated on a native C partition. If either the \acrshort{gui} application or the measurement application want to use the \acrshort{usb} they start communicating over their \acrshort{ipc} channels that are connected to the \acrshort{usb} driver partition. So the two channels marked with 4 for the \acrshort{gui} application and the two channels marked with 5 for the measurement application. Arbitration implemented by the driver is very simple, it always gives access to the safety-critical partition. This ensures that the \acrshort{gui} application can not interfere with the firmware update process. 
 
 \paragraph{Scheduling}
-Since this system is a dual-core system, scheduling has to take this into account. Figure \ref{fig:gas_detect_vcpu_schedule} depicts how the physical cores are distributed among the partitions. Each partition only has one virtual \acrshort{cpu} which is 
+Since this system is a dual-core system, scheduling has to take this into account. Figure \ref{fig:gas_detect_vcpu_schedule} depicts how the physical cores are distributed among the partitions. Each partition only has one virtual \acrshort{cpu} which is assigned to one of the physical \acrshort{cpu}s. Both safety-critical applications are scheduled on one physical \acrshort{cpu} while the non-critical partitions are scheduled on the other to reduce the chance of interference and keep the system simple. The second level cache that is shared between cores is disabled to eliminate the problems with determinism. 
 
+However, there still needs to be a scheduling algorithm for each physical \acrshort{cpu}. In this case it is a simple priority based preemptive scheduling algorithm. Whenever, the partition with the higher priority wants to execute it gets control over the \acrshort{cpu}. The priorities for this system are shown in table \ref{tab:gasdetect_priorities}. For the non-critical partitions, resource starvation is not a dangerous issue but in theory, the concentration algorithm partition could consume all \acrshort{cpu} time from the measurement application. However, the concentration algorithm is much simpler than the other applications and it can be mathematically asserted that the chance of the algorithm doing this are sufficiently low.
 
-\begin{figure}[hb!]
+\begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.75]{Figures/gas_detect_vcpu_schedule.png}
+\includegraphics[scale=1]{Figures/gas_detect_vcpu_schedule.png}
 \decoRule
 \caption{\acrshort{cpu} allocation for gas detector.}
 \label{fig:gas_detect_vcpu_schedule}
 \end{figure}
 
-
-
-The scheduling algorithm for this device is priority based preemptive scheduling. The partition's priorities can be found in table \ref{table:gasdetect_priorities}. Since their priorities are higher, one of the critical partitions can always take over control from the non-critical \acrshort{gui} partition. However, the concentration algorithm partition and the measurement partition only need to do work during the measurement cycle, so this is unlikely to impact the \acrshort{gui} significantly. 
-
-Whenever, the \acrshort{gui} application or the measurement application want to use the \acrshort{usb} device, they will communicate with the \acrshort{usb} driver partition over the associated \acrshort{ipc} channels. The \acrshort{usb} driver will then process any data and go back to sleep. Because of its lower priority the \acrshort{usb} driver partition can also not interrupt the gas measurement process.
-
-At the beginning it was mentioned that this device is running on a dual-core processor. The hypervisor is configured to always schedule the running partition on all cores 
-
-
-
-\begin{table}[h!]
+\begin{table}[hb!]
 \centering
-\begin{tabular}{l|l}
-\textbf{Partition} & \textbf{Priority} \\ \hline
-Measurement application                               & 4                                           \\ \hline
-Concentration algorithm                                & 3                                           \\ \hline
-USB driver                                  & 2                                           \\ \hline
-GUI application                    & 1                                          
+\begin{tabular}{lllll}
+\multicolumn{2}{c}{\textit{\textbf{Scheduling priority CPU1}}}                         &                       & \multicolumn{2}{c}{\textit{\textbf{Scheduling priority CPU2}}}                   \\ \cline{1-2} \cline{4-5} 
+\multicolumn{1}{|l|}{\textbf{Partition}}      & \multicolumn{1}{l|}{\textbf{Priority}} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\textbf{Partition}} & \multicolumn{1}{l|}{\textbf{Priority}} \\ \cline{1-2} \cline{4-5} 
+\multicolumn{1}{|l|}{Concentration algorithm} & \multicolumn{1}{l|}{2}                 & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{USB driver}         & \multicolumn{1}{l|}{2}                 \\ \cline{1-2} \cline{4-5} 
+\multicolumn{1}{|l|}{Measurement application} & \multicolumn{1}{l|}{1}                 & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{GUI application}    & \multicolumn{1}{l|}{1}                 \\ \cline{1-2} \cline{4-5} 
 \end{tabular}
 \caption{Partition priorities}
-\label{table:gasdetect_priorities}
+\label{tab:gasdetect_priorities}
 \end{table}
 
 \paragraph{Memory allocation}
@@ -154,26 +145,25 @@ The memory allocation of the device is depicted in figure \ref{fig:gas_detect_me
 
 \begin{figure}[hb!]
 \centering
-\includegraphics[scale=0.75]{Figures/gas_detect_memory_allocation.png}
+\includegraphics[scale=1]{Figures/gas_detect_memory_allocation.png}
 \decoRule
 \caption{Memory allocation for gas detector}
 \label{fig:gas_detect_memory_allocation}
 \end{figure}
 
-\paragraph{Normal operation}
-
-
-A measurement is started once the button connected to the safety-critical application B is pressed. For this purpose the algorithm parameters are read from the \acrshort{nfc} chip. Then the pump is activated to suck air through the glass tube with the reagent. At the same time, several images are captured by the \acrshort{cmos} sensor.
-
-Then all the data is sent over the \acrshort{ipc} channel \bToc. Application C will use this data to calculate the gas concentration. After the calculation is completed the result gets sent back to Application B over the \acrshort{ipc} channel \cTob.
-
-If the measurement is over the dangerous limit specified on the \acrshort{nfc} chip, the red warning \acrshort{led} will begin blinking to alert the operator. And as a final step the result is sent over \acrshort{ipc} channel \bToa for display and further processing.
-
 \paragraph{Health monitoring}
-To keep an eye on the system's status, the safety-critical application B periodically checks the health monitoring log for abnormal events. If it encounters any unrecoverable issues in the Linux partition, it will simply restart the partition. 
-For the algorithm partition however this behavior would not be appropriate, since an incorrect calculation could lead to the endangerment of the operator. If there is an unexpected error in the algorithm partition during a calculation, application B will attempt to restart partition and reattempt the concentration calculation. After three failed attempts, it will begin flashing the red warning \acrshort{led} rapidly to indicate that there is a dangerous problem.
+To keep an eye on the system's status, the measurement application also periodically checks the health monitoring log for abnormal events. If it encounters any unrecoverable issues in the Linux partition, it will simply restart the partition. 
+For the algorithm partition however this behavior would not be appropriate, since an incorrect calculation could lead to the endangerment of the operator. If there is an unexpected error in the algorithm partition during a calculation, the measurement application will attempt to restart the algorithm partition and reattempt the concentration calculation. After three failed attempts, it will begin flashing the red warning \acrshort{led} rapidly to indicate that there is a dangerous problem.
+
+\paragraph{Normal operation}
+A measurement is started once the button connected to the safety-critical measurement application is pressed. First, the algorithm parameters are read from the \acrshort{nfc} chip on the reagent cartridge. Then the pump is activated to suck air through the glass tube with the reagent. At the same time, several images are captured by the \acrshort{cmos} sensor.
+
+Then the algorithm parameters and the raw image data is placed in the memory region shared by the measurement application and the concentration algorithm. Then the \acrshort{ipc} channel 1 is used to wake up the algorithm partition and prompt it to start the calculation. After the calculation is complete, the results get sent over \acrshort{ipc} channel 2 back to the measurement application. 
+
+If the calculated concentration is higher than the dangerous limit specified on the \acrshort{nfc} tag, the red warning \acrshort{led} will be activated. Then, regardless, of the gas concentration, the measurement application will report the results to the \acrshort{gui} application. If this is unsuccessful, the measurement application simply discards the message after several failed retries and restarts the \acrshort{gui} partition.
 
 \subsection{Automated blood diagnostics device}
+In this example, the focus will be on the decision between the \acrshort{hss} architecture and the hypervisor architecture. A detailed example, like the last reference project will not given.
 \subsubsection{Introduction}
 % TODO Describe informally what the machinery does and what it consists of
 This reference project is an upcoming in Vitro diagnostics device that analyzes a patients blood. Its functionalities include automatic test processing, result interpretation and data management. Blood assays include both standard blood characteristics, as well as disease screening.
@@ -298,9 +288,9 @@ seL4 is a formally verified microkernel with a focus on security, so far it has 
 PikeOS is unique because it is a real-time operating system first and foremost with hypervisor functionality added on top. Similar to seL4 with CAmkES it can provide much more flexibility in designing the system than a hypervisor that offers only virtualized guest environments. Partitions can host \acrshort{rtos} task trees or a virtualized operating system respectively. This also eliminates the need to virtualize an \acrshort{rtos} in the first place.
 
 Additionally, PikeOS offers a form of hierarchical scheduling which can make the scheduling of mixed criticality systems more efficient and potentially easier [source].
+\begin{comment}
 \subsection{OpenSynergy's COQOS MICRO SDK}
 TBD
-\begin{comment}
 * (LynxSecure)
 * Mentor (as a really small example, maybe find additional)
 * PROVENVISOR (formally verified, security focus)
