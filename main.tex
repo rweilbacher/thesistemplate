@@ -62,7 +62,7 @@ headsepline, % Uncomment to get a line under the header
 
 \usepackage{palatino} % Use the Palatino font by default
 
-\usepackage[backend=bibtex,style=alphabetic,natbib=true]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
+\usepackage[backend=bibtex,style=alphabetic, citestyle=authoryear,natbib=true]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
 % possible styles: numeric, alphabetic, authoryear, authortitle, verbose, reading, draft
 \addbibresource{example.bib} % The filename of the bibliography
 
@@ -72,19 +72,7 @@ headsepline, % Uncomment to get a line under the header
 \usepackage{float}
 \usepackage[acronym]{glossaries}
 \usepackage{listings}
-\begin{comment}
-    
 
-<pre style='color:#000000;background:#ffffff;'><span style='color:#000084; '>#</span><span style='color:#000084; '>include</span><span style='color:#0000ff; '>&lt;</span><span style='color:#3f3fbf; '>stdio.h</span><span style='color:#0000ff; '>></span>
-<span style='color:#000084; '>#</span><span style='color:#000084; '>include</span><span style='color:#0000ff; '>&lt;</span><span style='color:#3f3fbf; '>iostream</span><span style='color:#0000ff; '>></span>
-<span style='color:#808080; '>// A comment</span>
-<span style='color:#000084; font-weight:bold; '>int</span> <span style='color:#000084; font-weight:bold; '>main</span>(<span style='color:#000084; font-weight:bold; '>void</span>) {
-    <span style='color:#000084; font-weight:bold; '>printf</span>(<span style='color:#0000ff; '>"</span><span style='color:#0000ff; '>Hello World</span><span style='color:#0000ff; '>\n</span><span style='color:#0000ff; '>"</span>);
-    <span style='color:#000084; font-weight:bold; '>return</span> 0;
-}
-</pre>
-<!--Created using ToHtml.com on 2019-01-15 10:13:57 UTC -->
-\end{comment}
 
 \definecolor{dark_blue}{HTML}{200090}
 \definecolor{gray}{HTML}{808080}
@@ -135,7 +123,7 @@ headsepline, % Uncomment to get a line under the header
 \university{{Hochschule Darmstadt}} % Your university's name and URL, this is used in the title page and abstract, print 
 %\department{\href{http://fbi.h-da.de}{Fachbereich Informatik}} % Your department's name and URL, this is used in the title page and abstract, print it elsewhere with \deptname
 \department{{Fachbereich Informatik}}
-\group{\href{http://researchgroup.university.com}{Research Group Name}} % Your research group's name and URL, this is used in the title page, print it elsewhere with \groupname
+%\group{\href{http://researchgroup.university.com}{Research Group Name}} % Your research group's name and URL, this is used in the title page, print it elsewhere with \groupname
 \faculty{\href{http://faculty.university.com}{Faculty Name}} % Your faculty's name and URL, this is used in the title page and abstract, print it elsewhere with \facname
 
 \AtBeginDocument{
@@ -230,12 +218,15 @@ headsepline, % Uncomment to get a line under the header
 %----------------------------------------------------------------------------------------
 %	QUOTATION PAGE
 %----------------------------------------------------------------------------------------
-
+%\begin{comment}
+    
 \vspace*{0.2\textheight}
 
 \noindent\enquote{\itshape Thanks to my solid academic training, today I can write hundreds of words on virtually any topic without possessing a shred of information, which is how I got a good job in journalism.}\bigbreak
 
 \hfill Dave Barry
+
+%\end{comment}
 
 %----------------------------------------------------------------------------------------
 %	ABSTRACT PAGE
@@ -249,11 +240,14 @@ The Thesis Abstract is written here (and usually kept to just this page). The pa
 %----------------------------------------------------------------------------------------
 %	ACKNOWLEDGEMENTS
 %----------------------------------------------------------------------------------------
+%\begin{comment}
 
 \begin{acknowledgements}
 \addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
 The acknowledgments and the people to thank go here, don't forget to include your project advisor\ldots
 \end{acknowledgements}
+
+%\end{comment}
 
 %----------------------------------------------------------------------------------------
 %	LIST OF CONTENTS/FIGURES/TABLES PAGES
@@ -300,7 +294,6 @@ The acknowledgments and the people to thank go here, don't forget to include you
 \newacronym{usb}{USB}{Universal serial bus}
 \newacronym{fifo}{FIFO}{First-in-First-out}
 \newacronym{xml}{XML}{Extensible Markup Language}
-\newacronym{}{}{}
 
 
 \begin{abbreviations}{ll} % Include a list of abbreviations (a table of two columns)
@@ -330,7 +323,11 @@ The acknowledgments and the people to thank go here, don't forget to include you
 \textbf{\acrshort{led}} & \acrlong{led}\\
 \textbf{\acrshort{cli}} & \acrlong{cli}\\
 \textbf{\acrshort{jtag}} & \acrlong{jtag}\\
-
+\textbf{\acrshort{io}} & \acrlong{io}\\
+\textbf{\acrshort{dma}} & \acrlong{dma}\\
+\textbf{\acrshort{usb}} & \acrlong{usb}\\
+\textbf{\acrshort{fifo}} & \acrlong{fifo}\\
+\textbf{\acrshort{xml}} & \acrlong{xml}\\
 
 \end{abbreviations}
 
@@ -392,15 +389,17 @@ The acknowledgments and the people to thank go here, don't forget to include you
 %----------------------------------------------------------------------------------------
 %	THESIS CONTENT - APPENDICES
 %----------------------------------------------------------------------------------------
+\begin{comment}
 
 \appendix % Cue to tell LaTeX that the following "chapters" are Appendices
 
 % Include the appendices of the thesis as separate files from the Appendices folder
 % Uncomment the lines as you write the Appendices
 
-\include{Appendices/AppendixA}
+%\include{Appendices/AppendixA}
 %\include{Appendices/AppendixB}
 %\include{Appendices/AppendixC}
+\end{comment}
 
 %----------------------------------------------------------------------------------------
 %	BIBLIOGRAPHY
