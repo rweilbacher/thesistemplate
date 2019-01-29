@@ -79,7 +79,7 @@ So only looking at the final unit cost, adding a partition to a hypervisor is ch
  % TODO Make this a crucial difference and change refs to "safety-analysis" to point to that section
  % TODO Include point about the HV being a single point of failure
  % NOTE I am mixing redundancy with fault detection
- At the highest criticality levels redundancy is often required to reduce the devices criticality level. Alternatively, a second partition may supervise the first to detect erroneous output, even if it can't fully replace the first in case of a failure. With Moore's law coming to an end transistors have achieved staggeringly small sizes. One unintended consequence of this is that complex processors have become more prone to random errors \cite{Constantinescu.2003}. Consequently, this scenario is becoming more relevant.
+ At the highest criticality levels redundancy is often required to reduce the devices criticality level. Alternatively, a second partition may supervise the first to detect erroneous output, even if it can't fully replace the first in case of a failure. With Moore's law coming to an end transistors have achieved staggeringly small sizes. One unintended consequence of this is that complex processors have become more prone to random errors \cite{constantinescu2003trends}. Consequently, this scenario is becoming more relevant.
  
  % TODO Make an architecture diagram highlighting my point
  A hypervisor can at most offer software redundancy with two partitions running distinct software that achieve the same functionality. These partitions can then act as a fallback, supervise the other partition or operate in tandem and vote on each output. Hardware separated subsystems are much more confident in achieving this safety as they can offer both hardware and software redundancy. 
@@ -150,7 +150,7 @@ There are two ways for an architecture to influence the faults in a device. Firs
 
 % https://docs.microsoft.com/en-us/previous-versions/msp-n-p/ee658124(v=pandp.10)
 % TODO This section sounds weird, also it needs to be moved to a more general place
-There is a key principle of how a separation architecture might influence faults in the business software running on top: The basic attributes of a separation architecture are similar to the principles of good software architecture design below. Those have been successfully used to reduce faults and manage complexity in software projects over the past decades \cite{Randell.1996}\cite{martin2009clean}. Even the smallest possible separation architecture, is ultimately about information hiding and enforcing the separation of concerns.
+There is a key principle of how a separation architecture might influence faults in the business software running on top: The basic attributes of a separation architecture are similar to the principles of good software architecture design below. Those have been successfully used to reduce faults and manage complexity in software projects over the past decades \cite{martin2009clean}. Even the smallest possible separation architecture, is ultimately about information hiding and enforcing the separation of concerns.
 % TODO Explain the ones I rely on and cut the ones that don't apply
 \begin{enumerate}
 \item Separation of concerns

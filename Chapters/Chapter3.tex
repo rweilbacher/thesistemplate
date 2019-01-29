@@ -20,14 +20,14 @@
 The two separation architectures that will be analyzed in \ref{Chapter4} are the hardware separated subsystems architecture (from now on referred to as \acrshort{hss} architecture) and the embedded safety hypervisor architecture. It has been established that both can conceptually solve the mixed criticality problem and now it is time to compare the non-functional criteria of the architectures in question. 
 
 To achieve this a list of criteria will be proposed that will serve as a categorization tool for the analysis.
-This list comprises the key wants that manufactures of safety-critical devices want to achieve, when engineering a device. A want can be understood as a business driver for device manufacturers. Fulfilling all wants to the best degree possible, would result in a perfect device. These idealized wants will be used to compare the hypervisor architecture to other device architectures and recommend the features to look for, when choosing a real-world hypervisor implementation.
+This list comprises the key wants that manufactures of safety-critical devices want to achieve when engineering a device. A want can be understood as a business driver for device manufacturers. Fulfilling all wants to the best degree possible, would result in a perfect device. These idealized wants will be used to compare the hypervisor architecture to other device architectures and recommend the features to look for, when choosing a real-world hypervisor implementation.
 
 In an ideal world each want could be satisfied individually but in reality they have complex interactions and need to be carefully balanced. 
 Additionally they are not equally desirable for every device. Some devices, for example, might have less potential for causing damage and therefore need to adhere to less strict safety regulations. Therefore choosing the absolute safest architecture is not paramount for the devices success.
 
 \section{Safety}
 %[This section is kind of a duplicate of a section in Chapter 1]
-It is self-evident that safety is going to be a key want in the engineering process of safety-critical devices. A device that is considered safer is often going to have an edge over that of a competitor. Furthermore, a perfectly safe device protects the manufacturer from expensive lawsuits.
+It is self-evident that safety is going to be a key want in the engineering process of safety-critical devices. A device that is considered safer is often going to have an edge over a less safe device. Furthermore, a perfectly safe device protects the manufacturer from expensive lawsuits that may reuslt from a device failure.
 
 Because of this, it is often beneficial for the manufacturer to ensure higher safety than required. However, in terms of economic viability, there are even more critical wants, as will become clear in the next section.
 
@@ -57,16 +57,16 @@ The biggest part of the development cost is based on how many developers work on
 How much the hardware in the device costs can be very important in some projects. Most costs associated with development are one-time costs, while hardware costs have to be paid for each produced unit. Therefore, this is an especially important factor in devices that are produced in high volume.
 
 \subsection{Optimal time to market \label{optimal-ttm}}
-Time ultimately costs money but a faster development process can have additional benefits that will be examined in more detail. To help with this, we will lean on the categorization of functional requirements established by the Kano model \cite{KanoNoriaki.1984}\cite{ElmarSauerwein.1996}. According to the Kano model there are three types of functional requirements.
+Time ultimately costs money but a faster development process can have additional benefits that will be examined in more detail. To help with this, we will lean on the categorization of functional requirements established by the Kano model \cite{sauerwein1996kano}. According to the Kano model there are three types of functional requirements.
 % TODO Add graph
 \paragraph{Must-be requirements} \textquote{If these requirements are not fulfilled, the customer will be extremely dissatisfied. [...] Fulfilling
-the must-be requirements will only lead to a state of "not dissatisfied"} \autocite{ElmarSauerwein.1996}
+the must-be requirements will only lead to a state of "not dissatisfied"} \autocite{sauerwein1996kano}
 
 \paragraph{One-dimensional requirements} \textquote{With regard to these requirements, customer satisfaction is
-proportional to the level of fulfillment.}\cite{ElmarSauerwein.1996}
+proportional to the level of fulfillment.}\autocite{sauerwein1996kano}
 
 \paragraph{Attractive requirements} \textquote{Attractive requirements are
-neither explicitly expressed nor expected by the customer. Fulfilling these requirements leads to more than proportional satisfaction. If they are not met, however, there is no feeling of dissatisfaction.}\autocite{ElmarSauerwein.1996}
+neither explicitly expressed nor expected by the customer. Fulfilling these requirements leads to more than proportional satisfaction. If they are not met, however, there is no feeling of dissatisfaction.}\autocite{sauerwein1996kano}
 
 This analysis is only based on the theoretical concepts and does not mean a Kano model analysis needs to be carried out. Furthermore, one-dimensional requirements will not be further considered as they can be simplified to be must-be requirements below zero satisfaction and attractive above zero satisfaction. 
 
@@ -83,10 +83,11 @@ Faults are undesirable in any engineering environment but they are especially un
 Reducing the amount of faults to a minimum has multiple dimensions:
 \paragraph{Reducing the frequency of fault implementation}
 % TODO Go into modular architecture benefits once that section exists 
-It is still the common understanding that all non-trivial software that isn't formally verified will contain faults \cite{klein2009sel4}\cite{Lipow.1982}. But in the decades since the software crisis it has become evident that development processes and architectures can have a positive impact on how many bugs are built into the software \cite{Randell.1996}.  Measures that reduce the likelihood of fault implementation can avoid all costs associated with the faults entirely and can therefore bring the biggest improvements. 
+% CRITICAL Remove the "decades since" thing
+It is still the common understanding that all non-trivial software that isn't formally verified will contain faults \cite{klein2009sel4}\cite{lipow1982number}. But in the decades since the software crisis it has become evident that development processes and architectures can have a positive impact on how many bugs are built into the software. Measures that reduce the likelihood of fault implementation can avoid all costs associated with the faults entirely and can therefore bring the biggest improvements. 
 \paragraph{Finding faults effectively}
 % TODO Go into modular architecture benefits once that section exists 
-But not just frequency of fault implementation can be improved by a strong architecture. After a significant period of sophisticated testing, almost all "hard" bugs will be found. That is bugs that can be found easily and reliably with standard techniques. Most of the remaining bugs will be "soft" bugs, often called "Heisenbugs" \cite{Gray.1986}. Named after the Heisenberg uncertainty principal because they often disappear when you look for them. Typically this is because the bugs are caused by complex interactions and race conditions that don't necessarily appear in the software debug environment.
+But not just frequency of fault implementation can be improved by a strong architecture. After a significant period of sophisticated testing, almost all "hard" bugs will be found. That is bugs that can be found easily and reliably with standard techniques. Most of the remaining bugs will be "soft" bugs, often called "Heisenbugs" \cite{gray1986computers}. Named after the Heisenberg uncertainty principal because they often disappear when you look for them. Typically this is because the bugs are caused by complex interactions and race conditions that don't necessarily appear in the software debug environment.
 
 A system that can aid the discovery of these bugs, maybe through clever compartmentalization or logging, can save time and money for the manufacturer.
 \paragraph{Fixing faults effectively}
@@ -111,10 +112,12 @@ Even in the event of a fault, a lot of safety-critical systems have to continue 
 \section{Human factors}
 Even human factors can not be left unconsidered in such an important architectural decision. First and foremost there is the importance of the manufacturers employees. If they are unhappy with their work, they are more prone to errors.
 
-One example of this could be a difficult to work with piece of software that requires performing many repetitive tasks. Repetitive tasks are shown to decrease efficiency and increase the chance for mistakes \cite{Wyatt.1937}. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. In this instance the employee dissatisfaction is only an indicator for a hidden root cause.
+% CRITICAL Find a different source for wyatt
+One example of this could be a difficult to work with piece of software that requires performing many repetitive tasks. Repetitive tasks are shown to decrease efficiency and increase the chance for mistakes. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. In this instance the employee dissatisfaction is only an indicator for a hidden root cause.
 
 % TODO Incorporate both of these points into the analysis, if they are not there already
-Another aspect of this are the end customers of the safety-critical device manufacturer. Their desire for a high quality device is already encapsulated in the other key wants, this want is about more indirect customer demands. Two relevant representations of this are device design and ecological footprint. Customers are becoming increasingly aware of good design \cite{HBR.September2015} and this affects both the \acrfull{gui} design as well as the physical design. 
+% CRITICAL Find source
+Another aspect of this are the end customers of the safety-critical device manufacturer. Their desire for a high quality device is already encapsulated in the other key wants, this want is about more indirect customer demands. Two relevant representations of this are device design and ecological footprint. Customers are becoming increasingly aware of good design and this affects both the \acrfull{gui} design as well as the physical design. 
 
 Ecological footprint is also becoming increasingly important for a companies public image. A development process that can reduce waste and used resources can help realize this want.
 
@@ -144,7 +147,7 @@ Whenever there is an associated hardware , future-proof design is especially imp
 Safety-critical devices are particularly notable in this respect, since they are often very complex and have an expensive engineering process. Airplanes are typically used for 3 decades and hospitals have notoriously tight budgets and have to squeeze as much lifetime out of their devices as possible. 
 \end{comment}
 \subsection{Extendibility and maintainability}
-Nowadays it is becoming increasingly more plausible that it is possible to deliver software updates to an embedded device \cite{OndrejKachman.2016}. Along with the previously mentioned long life cycle it is a beneficial strategy, if not an expected service, to provide updates for the device.
+Nowadays it is becoming increasingly more plausible to deliver software updates to an embedded device. Along with the previously mentioned long life cycle it is a beneficial strategy, if not an expected service, to provide updates for the device.
 If the device's hardware supports it, new features could be implemented but the currently more typical scenario are updates of a more basic kind. Meaning, bug fixes and security updates.
 
 In any case an easily extendable device can have significant benefits.
