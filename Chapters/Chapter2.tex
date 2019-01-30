@@ -21,7 +21,8 @@
 
 % IMPORTANT Maybe remove the intro fluff?
 Now that the differences between traditional hypervisors and embedded safety hypervisors have been laid out, it is time to take a closer look at the embedded safety hypervisor.
-For this purpose, a "basic safety hypervisor" will be proposed, that embodies the typical characteristics of a microkernel based safety hypervisor. Where there is no discernible consensus, differences will be highlighted. Both the typical hypervisor architecture and its simplified functionality will be examined.
+For this purpose, a "basic safety hypervisor" will be proposed that embodies the typical characteristics of a microkernel based safety hypervisor. Where there is no discernible consensus, differences will be highlighted. Both the typical hypervisor architecture and its simplified functionality will be examined.
+Most of the information in this chapter has been collected by analyzing the manuals of open-source safety hypervisors and industry white papers. \cite{okl4manual} \cite{xtratum3} \cite{sel4faq} \cite{pikeosscheduling} \cite{masmano2009xtratum}
 
 \section{Architecture}
 Since, most safety hypervisors are microkernel based, the architecture for the basic safety hypervisor is also a more in-depth look at microkernel architecture. However, there are differences and additions to the microkernel core that will be explored as well.   
@@ -207,7 +208,7 @@ Partitions can request the current time and also arm a timer for each clock. Onc
 \subsection{Partition privileges}
 Capabilities have already been introduced in section \ref{sec:capability-based_ac} to show how privileges are assigned to partitions. But only some basic examples of what privileges there are have been given. 
 
-At the most basic level partitions can be split into two categories: system partitions and normal partitions. Normal partitions have access to all their resources like interrupt lines, memory regions and message ports. They are also allowed to use hypercalls that can not disrupt the system at large, like accessing timers or retrieving the current system status.
+At the most basic level partitions can be split into two categories: system partitions and normal partitions \cite{xtratum3}. Normal partitions have access to all their resources like interrupt lines, memory regions and message ports. They are also allowed to use hypercalls that can not disrupt the system at large, like accessing timers or retrieving the current system status.
 
 System partitions have access to all their assigned resources and on top of that they can call hypercalls that can impact the entire system. They can change scheduling plans, access the health monitoring log and even start and stop other partitions. Naturally, system partitions need to be trusted by the safety-critical device manufacturer because they have the capabilities to stop the system from functioning correctly.
 

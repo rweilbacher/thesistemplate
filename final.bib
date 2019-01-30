@@ -348,42 +348,41 @@
 
 % Mark as absent
 % Verify all the IEC sources are cited correctly
-@misc{IEC.2010-1,
- year = {2010},
+@misc{IEC.2000-1,
+ year = {2000},
  title = {IEC 61508-1: Functional safety of electrical/electronic/programmable electronic safety-related systems: Part 1: General requirements},
  author = {IEC}
 }
 
 % Mark as absent
-@misc{IEC.2010-2,
- year = {2010},
+@misc{IEC.2000-2,
+ year = {2000},
  title = {IEC 61508-2: Functional safety of electrical/electronic/programmable electronic safety-related systems: Part 2: Requirements for electrical/electronic/programmable electronic safety-related systems},
  author = {IEC}
 }
 
 % Mark as absent
-@misc{IEC.2010-3,
- year = {2010},
+@misc{IEC.2000-3,
+ year = {2000},
  title = {IEC 61508-3: Functional safety of electrical/electronic/programmable electronic safety-related systems: Part 3: Software requirements},
  author = {IEC}
 }
 
 % In folder
-@techreport{Lauterbach.2018,
+@misc{Lauterbach.2018,
+author={Lauterbach GmbH},
  title = {Hypervisor Debugging},
  date = {2018},
  url = {https://www.lauterbach.com/hypervisor_article_2017_web.pdf},
  urldate = {2019-01-09},
- institution = {Lauterbach}
 }
 
 % Not applicable
 @online{Greenhills.2018,
  title = {INTEGRITY Real-Time Operating System},
- author = {Greenhills},
+ author = {Green Hills Software},
  url = {https://www.ghs.com/products/rtos/integrity.html},
  urldate = {2019-01-20},
- organization = {Greenhills}
 }
 
 % Not applicable
@@ -392,12 +391,12 @@
  author = {QNX},
  url = {http://blackberry.qnx.com/en/products/neutrino-rtos/neutrino-rtos},
  urldate = {2019-01-20},
- organization = {QNX}
 }
 
 % In folder
 % This source just says that the markets are growing
-@techreport{ITA.May2016,
+@misc{ITA.May2016,
+author={International Trade Administration},
  institution = {{International Trade Administration}},
  date = {2016-05-01},
  title = {Top Markets Report Medical Devices: A Market Assessment Tool for U.S. Exporters},
@@ -408,47 +407,113 @@
 % In folder
 % Insert url
 % https://www.mtl-inst.com/images/uploads/datasheets/App_Notes/AN9025.pdf
-@techreport{MTL2002introduction,
+@misc{MTL2002introduction,
+  author={MTL Instruments},
   title={An introduction to Functional Safety and IEC 61508},
-  institution={{MTL Instruments}},
-  year={2002}
+  url= {https://www.mtl-inst.com/images/uploads/datasheets/App_Notes/AN9025.pdf},
+  urldate={2018-12-04},
+  year={2002},
+  month={03}
 }
 
 % In folder
-@techreport{wittenstein2017temporal,
+@misc{wittenstein2017temporal,
+author = {Wittenstein SE},
  date = {2017-04-24},
  title = {Checkpoints and Temporal Separation},
  url = {https://highintegritysystems.com/downloads/white_papers/Checkpoints_and_Temporal_Separation.pdf},
  urldate = {2018-12-04},
- institution = {Wittenstein}
 }
 
 % In folder
-@techreport{wittenstein2017spatial,
+@misc{wittenstein2017spatial,
+author = {Wittenstein SE},
  date = {2017-05-30},
  title = {Using an MPU to Enforce Spatial Separation},
  url = {https://highintegritysystems.com/downloads/white_papers/Using_an_MPU_to_Enforce_Spatial_Separation.pdf},
  urldate = {2018-12-04},
- institution = {Wittenstein}
 }
 
 % In folder
 @manual{ARM.v8.2018,
- year = {2018-10-31},
+ author={Arm Holdings},
+ date = {2018-10-31},
  title = {ARM Architecture Reference Manual: ARMv8, for ARMv8-A architecture profile},
  url = {https://static.docs.arm.com/ddi0487/da/DDI0487D_a_armv8_arm.pdf?_ga=2.107188996.763906419.1543418758-795050915.1528805110},
  urldate = {2018-12-04},
- organization = {ARM}
 }
 
 % NATO software engineering report replacement is missing
 
 % --------------- Sources added after first review ---------------
 @online{gasdetect,
-year={2018-03-22},
+date={2018-03-22},
  title = {Dräger und Plexus: Perfekte Symbiose von OEM und EMS},
  author = {Karin Zühlke},
  url = {https://www.elektroniknet.de/markt-technik/elektronikfertigung/perfekte-symbiose-von-oem-und-ems-151254.html},
  urldate = {2019-01-29},
- organization = {elektroniknet.de}
 }
+
+@manual{xtratum3,
+ author = {Masmano, Miguel and Ripoll, Ismael and Crespo, Alfons},
+ date = {2011-02-01},
+ title = {XtratuM Hypervisor for LEON3 Volume 2: User Manual},
+ url = {http://www.xtratum.org/files/xm-3-usermanual-022c.pdf},
+ urldate = {2018-01-29},
+ organization = {XtratuM}
+}
+
+@manual{okl4manual,
+ author = {Open Kernel Labs},
+ date = {2008-09-11},
+ title = {OKL4 Microkernel Reference Manual: API Version 03},
+ url = {http://l4hq.org/docs/manuals/okl4-ref-manual-3.0.pdf},
+ urldate = {2018-01-29},
+}
+
+@online{sel4faq,
+ author = {seL4},
+ title = {Frequently Asked Questions on seL4 | seL4 docs},
+ url = {https://docs.sel4.systems/FrequentlyAskedQuestions},
+ year={2018},
+ month={06},
+ urldate = {2019-01-29},
+}
+
+@online{pikeos,
+ author={SYSGO AG},
+ title = {PikeOS Hypervisor},
+ url = {https://www.sysgo.com/products/pikeos-hypervisor/},
+ urldate = {2019-01-29},
+}
+
+@online{camkes,
+ author = {seL4},
+ title = {CAmkES | seL4 docs},
+ url = {https://docs.sel4.systems/CAmkES/},
+ urldate = {2019-01-29},
+ year={2018},
+ month={12},
+}
+
+@online{pikeosscheduling,
+ author={SYSGO AG},
+ year={2016},
+ title = {PikeOS Safe Real-Time Scheduling},
+ subtitle={Adaptive Time-Partitioning Scheduler for EN 50128 certified Multi-Core Platforms},
+ url = {https://www.sysgo.com/products/pikeos-hypervisor/},
+ urldate = {2019-12-29},
+}
+
+
+@inproceedings{masmano2009xtratum,
+  title={Xtratum: a hypervisor for safety critical embedded systems},
+  author={Masmano, Miguel and Ripoll, Ismael and Crespo, Alfons and Metge, J},
+  booktitle={11th Real-Time Linux Workshop},
+  pages={263--272},
+  year={2009},
+  organization={Citeseer}
+}
+
+
+
