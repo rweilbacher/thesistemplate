@@ -17,11 +17,11 @@
 \newcommand{\mfg}{manufacturer}
 
 % TODO Talk about how information has been gathered
-Conservatism is very prominent in the safety-critical device industry and rightfully so. Using the latest, barely tested technology in a device on which many lives may depend on is probably not a good idea. That is why any new technology that does actually get serious attention is all the more exciting. The safety hypervisor is one of such technologies. Specifically the aviation and automotive industry have made advancements in this territory \cite{reinhardt2014embedded} \cite{vanderleest2015mpsoc}. Their drive for hardware consolidation and accommodating multicore architectures in strict regulatory environments has made innovation necessary.
+Conservatism is very prominent in the safety-critical device industry and rightfully so. Using the latest, barely tested technology in a device on which many lives may depend on is probably not a good idea. That is why any new technology that does get serious attention is all the more exciting. The safety hypervisor is one of such technologies. Specifically the aviation and automotive industry have made advancements in this territory \cite{reinhardt2014embedded} \cite{vanderleest2015mpsoc}. Their drive for hardware consolidation and accommodating multicore architectures in strict regulatory environments has made innovation necessary.
 
 Some prior research and real-world deployments have shown that hypervisors can be used in safety-critical devices from a regulatory standpoint \cite{larrucea2015modular}.
-This thesis will now examine the broader reasons for using hypervisors, not just in the context of extremely complex endeavours like aviation and automotive, but also in industries that typically deal with smaller devices. After the introduction of some basic concepts, the hypervisor will be compared to the status quo of comparable architectures and from this theoretical analysis, essential device categories will be extracted. These serve as a connection between the abstract analysis and the concrete world and will be presented as "example projects". One of these projects will include a simplified but detailed hypervisor configuration that can show what a hypervisor might look like on a real device. 
-This approach should enable the safety-critical device engineers reading this thesis, to construct powerful arguments for or against the hypervisor architecture in the context of their real-world project.
+This thesis will now examine the broader reasons for using hypervisors, not just in the context of extremely complex endeavors like aviation and automotive, but also in industries that typically deal with smaller devices. After the introduction of some basic concepts, the hypervisor will be compared to the status quo of comparable architectures, and from this theoretical analysis, essential device categories will be extracted. These serve as a connection between the abstract analysis and the concrete world and will be presented as "example projects". One of these projects will include a simplified but detailed hypervisor configuration that can show what a hypervisor might look like on a real device. 
+This approach should enable the safety-critical device engineers reading this thesis, to construct persuasive arguments for or against the hypervisor architecture in the context of their real-world project.
 
 \begin{comment}
 * This thesis about using embedded hypervisors in safety-critical devices.
@@ -48,38 +48,38 @@ The failure or malfunction of a safety-critical system has the potential to caus
 \item damage to property
 \item environmental harm
 \end{itemize}
-A safety-critical device is consequently an embedded device with a dedicated function that has one or more of the above mentioned properties. Such a device always contains electronic hardware but may also have mechanical and/or software components. This thesis will mostly examine devices with medium to high complexity, which all include software.
+A safety-critical device is consequently an embedded device with a dedicated function that has one or more of the above-mentioned properties. Such a device always contains electronic hardware but may also have mechanical or software components. This thesis will mostly examine devices with medium to high complexity, which all include software.
 
 % TODO Verify that that is actually part of IEC-61508
 The legal entity responsible for designing and manufacturing the device will be referred to as \mfg{}.
 \subsection{Basic concepts}
 \subsubsection{Safety regulations}
 
-The main goal of safety-critical device manufacturers is to create a safe device. This protects them from expensive lawsuits and can give them a competitive advantage.
+The primary goal of safety-critical device manufacturers is to create a safe device. This protects them from expensive lawsuits and can give them a competitive advantage.
 
-However, in most markets, a favourable real-world safety alone is not enough to gain permission to sell the device.  Each market (medical, nuclear, aviation etc.) and regulatory body (EU, US etc.) has their own standard for normative safety that needs to be met. The goal of this thesis is to be relevant for most regulations, therefore references to actual regulations will be scarce. However, to introduce the concepts of a safety regulation IEC 61508 will be used because it represents a general standard from which many others derive \cite{IEC.2000-1}\cite{IEC.2000-2}\cite{IEC.2000-3}. IEC 61508 is a standard that is mostly concerned with the device development process. That means the regulatory body expects the manufacturer to define how the device needs to be designed to be safe and then provide appropriate evidence for his decisions. Standards like this are common in industries where the devices are very different from each other. A counterexample for this is the ARINC series of standards. They govern how aircraft need to be designed and because aircraft are quite similar to each other they can be very specific with their requirements. ARINC 653 for example specifies precisely how a real-time operating system needs to be designed to separate its processes safely. Since, this thesis will not go into the details of regulatory requirements, the standards are similar enough to be interchangeable. Most standards share the following requirements for the device development process:
+However, in most markets, a favorable real-world safety alone is not enough to gain permission to sell the device.  Each market (for example medical, nuclear and aviation) and regulatory body (for example EU and the US) has their own standard for normative safety that needs to be met. The goal of this thesis is to be relevant for most regulations. Therefore references to actual regulations will be scarce. However, to introduce the concepts of a safety regulation, IEC 61508 will be used because it represents a general standard from which many others derive \cite{IEC.2000-1}\cite{IEC.2000-2}\cite{IEC.2000-3}. IEC 61508 is a standard that is mostly concerned with the device development process. That means the regulatory body expects the manufacturer to define how the device needs to be designed to be safe and then provide appropriate evidence for his decisions. Standards like this are common in industries where the devices are very different from each other. A counterexample for this is the ARINC series of standards. They govern how aircraft need to be designed and because aircraft are quite similar to each other they can be very specific with their requirements. ARINC 653, for example, specifies precisely how a real-time operating system needs to be designed to separate its processes safely. Since this thesis will not go into the details of regulatory requirements, the standards are similar enough to be interchangeable. Most standards share the following requirements for the device development process:
 \begin{itemize}
 \item A compliant quality management system needs to be used.
 \item Device requirements need to be analyzed.
-\item Requirements need to be verified and compliance tested.
+\item Requirements need to be verified, and compliance tested.
 \item Unreasonable risk needs to be reduced.
 \item Extensive documentation on all aspects of design and manufacturing needs to be created.
 \end{itemize}
 
-The \mfg{} also has to present the documents that he generated along the way to the authorities. There are exceptions to this rule, if third-party or legacy parts are used but these need to be justified as well. Therefore, it is usually infeasible to certify a device after the development process, if it was not designed with certification in mind. 
+The \mfg{} also has to present the documents that he generated along the way to the authorities. There are exceptions to this rule if third-party or legacy parts are used but these need to be justified as well. Therefore, it is usually infeasible to certify a device after the development process, if it was not designed with certification in mind. 
 
 % SOURCE1 Devices failing the initial certification
-A failed certification attempt is undesirable, as it is associated with additional cost and time but it does not necessarily make the device commercially unviable. In fact a lot of devices fail the initial verification process. After a failed attempt, the regulatory body will point out the problems and give the \mfg{} the option to fix them and resubmit the device for certification.
+A failed certification attempt is undesirable, as it is associated with additional cost and time, but it does not necessarily make the device commercially unviable. Many devices fail the initial verification process. After a failed attempt, the regulatory body will point out the problems and give the \mfg{} the option to fix them and resubmit the device for certification.
 
-The rigour that is demanded by regulatory bodies is dependent on the risk category that can be assigned to the safety functions of the device. These risk categories will be called \keyword{criticality levels} from here on out. 
+The rigor that is demanded by regulatory bodies is dependent on the risk category that can be assigned to the safety functions of the device. These risk categories will be called \keyword{criticality levels} from here on out. 
 
 \subsubsection{Criticality levels}
 % TODO Verify that this is actually all true
 % TODO Differentiate between logical and actual criticality
 % TODO Add probability table
-IEC 61508 calls criticality levels \keyword{Safety integrity levels} or  \acrshort{sil} for short. The standard defines \keyword{safety integrity} as \textquote{the likelihood of a safety-related system satisfactorily performing the required safety functions under all the stated conditions, within a stated period of time}\cite{IEC.2000-1}. The \acrshort{sil} of a device is the target probability of a dangerous failure occurring. In IEC 61508 there are safety integrity levels from 1 to 4, where SIL 1 is the lowest and SIL 4 the highest. Table \ref{tab:sil_high_demand} and table \ref{tab:sil_low_demand} show what estimated failure probabilities are allowed for each \acrshort{sil}. The level basically defines the rigor that is required during the development process.
+IEC 61508 calls criticality levels \keyword{Safety integrity levels} or  \acrshort{sil} for short. The standard defines \keyword{safety integrity} as \textquote{the likelihood of a safety-related system satisfactorily performing the required safety functions under all the stated conditions, within a stated period of time}\cite{IEC.2000-1}. The \acrshort{sil} of a device is the target probability of a dangerous failure occurring. In IEC 61508 there are safety integrity levels from 1 to 4, where SIL 1 is the lowest and SIL 4 the highest. Table \ref{tab:sil_high_demand} and table \ref{tab:sil_low_demand} show what estimated failure probabilities are allowed for each \acrshort{sil}. The level defines the rigor that is required during the development process.
 
-Risk assessment is the process that drives the categorization of a system into the safety integrity levels and if the SIL of a system is too high it can be reduced by introducing risk mitigation mechanisms. For example, if the software of a device would be SIL 4 initially, its criticality level might be reduced by adding a second processor that runs distinct software, that can verify the validity of the initial software's output. This also means the device manufacturer has to hit a lower target probability for a dangerous failure.  In fact SIL 4 is considered too high to be feasible and is practically always reduced \cite{MTL2002introduction}.
+Risk assessment is the process that drives the categorization of a system into the safety integrity levels, and if the SIL of a system is too high, it can be reduced by introducing risk mitigation mechanisms. For example, if the software of a device would be SIL 4 initially, its criticality level might be reduced by adding a second processor that runs distinct software, that can verify the validity of the first software's output. This also means the device manufacturer has to hit a lower target probability for a dangerous failure.  SIL 4 is considered too high to be feasible and is practically always reduced \cite{MTL2002introduction}.
 
 \begin{table}[hb!]
 \centering
@@ -162,31 +162,31 @@ Incredible          & IV           & IV       & IV       & IV         \\ \hline
 \end{itemize}
 \end{comment}
 
-Other standards define criticality levels differently, but no matter what definition of criticality levels is applied, all definitions share two properties that motivate the rest of this thesis: First, a function with a higher criticality level is more expensive to implement and to verify than one with a lower level. There is more documentation effort, more rigorous risk analysis, verification and validation. 
+Other standards define criticality levels differently, but no matter what definition of criticality levels is applied, all definitions share two properties that motivate the rest of this thesis: First, a function with a higher criticality level is more expensive to implement and to verify than one with a lower level. There is more documentation effort, more rigorous risk analysis, verification, and validation. 
 
-Second, two units of a device are only allowed to be implemented according to differing criticality levels, if there is sufficient evidence that the higher criticality function is independent from the lower criticality function \cite{IEC.2000-1}\cite{IEC.2000-2}.  
+Second, two units of a device are only allowed to be implemented according to differing criticality levels, if there is sufficient evidence that the higher criticality function is independent, the lower criticality function \cite{IEC.2000-1}\cite{IEC.2000-2}.  
 
 This constellation of heterogeneous criticality levels within the device is very common and usually referred to as mixed criticality. Its other motivations and problems that may arise will be explored in the next section.
 \subsection{Mixed criticality} \label{mixed-criticality}
 % IMPORTANT introduce this a bit better. Distinguish between the criticality that a component logically has and the criticality it will be certified to
 \subsubsection{Motivations}
 % NOTE Unhappy with the word assigning
-The core motivation for assigning different criticality levels within a device has already been mentioned: It is cheaper to implement and verify a low criticality part than a high criticality part \cite{perez2013safety}. But this is not the only motivation, as it just applies to functionality that is implemented by the \mfg{} and not by a third-party.
+The core motivation for assigning different criticality levels within a device has already been mentioned: It is cheaper to implement and verify a low criticality part than a high criticality part \cite{perez2013safety}. However, this is not the only motivation, as it just applies to functionality that is implemented by the \mfg{} and not by a third-party.
 
 % NOTE Get a hardware perspective
-Using third-party software can save costs and accelerate time to market. Currently the default is to use pre-certified software that is specifically developed for the purpose of safety-critical software. This can limit the problems that mixed criticality entails all together but because of the narrow target audience this kind of software is more expensive and more limited in its functionality. Ideally it would be possible to use regular off-the-shelf software or even free open-source software but as established earlier, certifying this software in accordance with a high level of criticality after the fact is infeasible.
+Using third-party software can save costs and accelerate time to market. Currently, the default is to use pre-certified software that is specifically developed for safety-critical software. This can limit the problems that mixed criticality entails all together, but because of the narrow target audience, this kind of software is more expensive and more limited in its functionality. Ideally, it would be possible to use regular off-the-shelf software or even free open-source software but as established earlier, certifying this software in accordance with a high level of criticality after the fact is infeasible.
 
 % SOURCE3 Explain that everything has seen an increase in connectivity (IoT) and this trend will likely continue (and to some degree already has) in safety-critical engineering.
-Actually, being able to use third-party software unhindered can have even more drastic impacts than saving money on the certification process. It can make certain functionality, especially in the realm of usability, feasible in the first place. And with the growing consumer demands, even in the safety-critical sector \cite{ITA.May2016}, this can really differentiate a device from the rest of the market.
+Being able to use third-party software unhindered can have even more drastic impacts than saving money on the certification process. It can make certain functionality, especially in the realm of usability, feasible in the first place. And with the growing consumer demands, even in the safety-critical sector \cite{ITA.May2016}, this can differentiate a device from the rest of the market.
 
-The uncomfortable reality is that mixed criticality is most beneficial in devices where it is also most difficult to mitigate the associated problems. If the highest criticality level is SIL 2, there is less to gain from developing other components at SIL 1 than when the highest level is SIL 3. But a higher criticality level also means that, whatever facilitates independence between components,  needs to withstand more rigorous scrutiny. 
+The uncomfortable reality is that mixed criticality is most beneficial in devices where it is also most difficult to mitigate the associated problems. If the highest criticality level is SIL 2, there is less to gain from developing other components at SIL 1 than when the highest level is SIL 3. However, a higher criticality level also means that, whatever facilitates independence between components,  needs to withstand more rigorous scrutiny. 
 
-Now it has been detailed why mixed criticality is actually a desirable property in a lot of devices. \bold{Mixed criticality can save cost and time, as well as provide functionality indirectly that would have been infeasible to realize without.}
+Now it has been detailed why mixed criticality is a desirable property in many devices. \bold{Mixed criticality can save cost and time, as well as provide functionality indirectly that would have been infeasible to realize without.}
 \subsubsection{Problems}
-As alluded to earlier, mixed criticality does not come without problems. Regulatory standards require sufficient evidence for independence between functions of different criticality be shown to them \cite{IEC.2000-1}\cite{IEC.2000-2}. If the \mfg{} can not provide this evidence, all functions need to comply to the highest criticality level. 
+As alluded to earlier, mixed criticality does not come without problems. Regulatory standards require sufficient evidence for independence between functions of different criticality is shown to them \cite{IEC.2000-1}\cite{IEC.2000-2}. If the \mfg{} can not provide this evidence, all functions need to comply with the highest criticality level. 
 
 % SOURCE3 Maybe direct quote from IEC 615085
-Sufficient independence is given, if it can be reliably shown that a a component can not negatively impact the operation of another component.
+Sufficient independence is given if it can be reliably shown that a component can not negatively impact the operation of another component.
 To achieve this, a system architecture is required that can reliably separate components. The precise requirements this separation architecture needs to fulfill will be described in the next section.
 
 %----------------------------------------------------------------------------------------
@@ -195,19 +195,19 @@ To achieve this, a system architecture is required that can reliably separate co
 There are four attributes a separation architecture needs to solve the mixed criticality problem.  The components that are separated through this architecture will be referred to as "partitions".
 \subsection{Spatial separation}
 
-Spatial separation means that access of physical resources cannot lead to conflicts or corruption. This includes memory access as well as system resources such as hardware peripherals. \cite{wittenstein2017spatial}\cite{perez2013safety}
+Spatial separation means that access to physical resources cannot lead to conflicts or corruption. This includes memory access as well as system resources such as hardware peripherals. \cite{wittenstein2017spatial}\cite{perez2013safety}
 
 If shared access to any system resources is necessary, some kind of arbiter needs to be in place to give consistent access to components based on their criticality. 
 \subsection{Temporal separation}
-Temporal separation is achieved, if it is sufficiently unlikely for any system software to compromise the processing demands of another \cite{wittenstein2017temporal}. 
+Temporal separation is achieved if it is sufficiently unlikely for any system software to compromise the processing demands of another \cite{wittenstein2017temporal}. 
 Managing access to available processing resources is the main part of temporal separation. However, system events and triggers may also require analysis. Excessive interrupt routine run time, for example, can cause processing resources to be unavailable to the main system \cite{wittenstein2017temporal}. 
 \subsection{Data integrity and validity}
-Data passed through unsafe components has to be either not safety related or protected. Where protection refers to ensuring the data's integrity and validity after it has passed through the unsafe components and before it is used in safety related processing \cite{wittenstein2017spatial}.
+Data passed through unsafe components has to be either not safety related or protected. Where protection refers to ensuring the data's integrity and validity after it has passed through the unsafe components and before it is used in safety-related processing \cite{wittenstein2017spatial}.
 
-In practice this requirement doesn't have to be met by the architecture but may be handled in the application software. Nevertheless it is an important aspect that needs to be kept in mind.
+In practice, this requirement does not have to be met by the architecture but may be handled in the application software. Nevertheless, it is an important aspect that needs to be kept in mind.
 \subsection{Certifiable compliance}
 It may not come as a surprise that the separation architecture also needs to fulfill the requirements above in the eyes of the regulatory bodies, as they are the reason for the architecture's inception.
-How this may be achieved differs based on architecture and standard but it needs to be feasible at the very least. 
+How this may be achieved differs based on architecture and standard, but it needs to be feasible at the very least. 
 
 %----------------------------------------------------------------------------------------
 
@@ -216,18 +216,18 @@ There are some possible contenders for feasible separation architectures. This s
 \subsection{General purpose operating system}
 Even though this section's title is \acrfull{gpos} realistically it can be substituted with Linux. Windows Embedded is not typically considered adequate for safety-critical devices and other options, like FreeBSD, do no enjoy the same popularity as Linux. Regardless, the same arguments should apply to other general purpose operating systems.
 
-With the help of an \acrfull{mmu} or \acrfull{mpu}  a \acrshort{gpos} can achieve the spatial separation of memory between applications. The operating system's access control may be used to limit peripheral access and drivers can arbitrate conflicts. However, if the \acrshort{gpos} has not been developed with safety in mind, it is unlikely that the implementation could achieve regulatory compliance.
+With the help of an \acrfull{mmu} or \acrfull{mpu}  a \acrshort{gpos} can achieve the spatial separation of memory between applications. The operating system's access control may be used to limit peripheral access, and drivers can arbitrate conflicts. However, if the \acrshort{gpos} has not been developed with safety in mind, it is unlikely that the implementation could achieve regulatory compliance.
 
-Temporal separation is usually not possible and may even be counter-productive to the standard processing model of general purpose operating systems, since they are designed to optimize average case performance and sacrifice determinism for it. There are however ongoing efforts to introduce temporal separation as well as the ability to reliably satisfy real-time requirements into the Linux kernel \cite{arthur2007assessment}.
+Temporal separation is usually not possible and may even be counter-productive to the standard processing model of general purpose operating systems since they are designed to optimize average case performance and sacrifice determinism for it. There are however ongoing efforts to introduce temporal separation as well as the ability to reliably satisfy real-time requirements into the Linux kernel \cite{arthur2007assessment}.
 
-Undoubtedly these efforts have been at least somewhat successful as Linux has been successfully deployed in some safety-critical systems with hard real-time requirements. One big issue remains however, Linux has a very large codebase with over 15 million lines of code \cite{paul2012linux}. This makes Linux very difficult to certify, especially in devices with high criticality, where the benefits of mixed criticality are the most pronounced.
+Undoubtedly these efforts have been at least somewhat successful as Linux has been successfully deployed in some safety-critical systems with hard real-time requirements. One big issue remains, however, Linux has a massive codebase with over 15 million lines of code \cite{paul2012linux}. This makes Linux very difficult to certify, especially in devices with high criticality, where the benefits of mixed-criticality are the most pronounced.
 
 Another big problem is damage limitation. While more and more Linux drivers are implemented in user space, a considerable amount still has to be in kernel space. Failures in these drivers can potentially cause a kernel panic, prompting the device to shut down. 
 
-Perhaps Linux, or another, yet unknown GPOS, will be able to solve the mixed criticality problem directly but for now it will be excluded from further analysis, on the grounds that it cannot satisfy the separation architecture requirements well enough for a large set of safety-critical devices.
+Perhaps Linux, or another, yet unknown GPOS, will be able to solve the mixed criticality problem directly but for now it will be excluded from further analysis, because it cannot satisfy the separation architecture requirements well enough for a large set of safety-critical devices.
 \subsection{Microkernel} \label{microkernel}
-Microkernels are not typically directly deployed on devices but they are very closely related to real time operating systems and hypervisors, architectures that will be introduced later in this chapter. For that reason it is important to review the key difference between microkernel design and traditional monolithic kernel design at this point.
-The kernel is the part of the operating system that has complete control over everything in the system. It handles all hardware access for applications running in user space. In traditional operating systems, access to \acrshort{os} functions is done through so called "system calls". To distinguish hypervisor \acrshort{api} access from this, functions that access hypervisor functionality will be referred to as "hypercalls".
+Microkernels are not typically directly deployed on devices, but they are very closely related to real-time operating systems and hypervisors, architectures that will be introduced later in this chapter. For that reason, it is important to review the key difference between microkernel design and traditional monolithic kernel design at this point.
+The kernel is the part of the operating system that has complete control over everything in the system. It handles all hardware access for applications running in userspace. In traditional operating systems, access to \acrshort{os} functions is done through so-called "system calls". To distinguish hypervisor \acrshort{api} access from this, functions that access hypervisor functionality will be referred to as "hypercalls".
 \paragraph{Minimality}
 \begin{figure}
 \centering
@@ -236,71 +236,70 @@ The kernel is the part of the operating system that has complete control over ev
 \caption{Traditional monolithic kernel in comparison to a microkernel}
 \label{fig:microkernel_vs_normal}
 \end{figure}
-As the name suggests, the core principle of microkernel design is that of minimality. Meaning, anything that doesn't absolutely need to be in the kernel for the system to function is handled in user space instead. As can be seen in figure \ref{fig:microkernel_vs_normal}, typical monolithic kernels implement everything from the file system to device drivers in the kernel.
-A microkernel on the other hand only includes the basic functions like \acrfull{ipc}, virtual memory and the scheduling of processes. This means that shared functionality is implemented in so called \keyword{server processes}. Any process that needs to access the file system for example, can do so over the \acrshort{ipc} mechanism of the microkernel. In figure \ref{fig:microkernel_vs_normal} the arrow between the "Application" process and the "File server" process indicates such a communication.
+As the name suggests, the core principle of microkernel design is that of minimality. Meaning, anything that doesn't absolutely need to be in the kernel for the system to function is handled in userspace instead. As can be seen in figure \ref{fig:microkernel_vs_normal}, standard monolithic kernels implement everything from the file system to device drivers in the kernel.
+A microkernel on the other hand only includes the essential functions like \acrfull{ipc}, virtual memory and the scheduling of processes. This means that shared functionality is implemented in so-called \keyword{server processes}. Any process that needs to access the file system, for example, can do so over the \acrshort{ipc} mechanism of the microkernel. In figure \ref{fig:microkernel_vs_normal} the arrow between the "Application" process and the "File server" process indicates such a communication.
 
 Microkernels subsequently have much fewer lines of code than monolithic kernels with roughly 10.000 lines of code \cite{heiser2016l4}. Linux as an example of a monolithic kernel has over 15 million lines of code \cite{paul2012linux}. \bold{Being comprised of so little code makes microkernels easier to maintain and improve}. Another strong rule of thumb is: Less code means fewer faults \cite{lipow1982number}. This property of microkernels is especially desirable for safety-critical device manufacturers, as it also makes the microkernel verification much easier.
 
-However, with such a reliance on \acrlong{ipc}, much of the system performance is dictated by the speed of the \acrshort{ipc} mechanism. Early microkernels struggled with this but since the advent of the L4 microkernel by Jochen Liedtke \acrshort{ipc} is no longer considered a bottleneck of microkernels \cite{liedtke1995micro}\cite{liedtke1996toward}.
+However, with such a reliance on \acrlong{ipc}, much of the system performance is dictated by the speed of the \acrshort{ipc} mechanism. Early microkernels struggled with this, but since the advent of the L4 microkernel by Jochen Liedtke \acrshort{ipc} is no longer considered a bottleneck of microkernels \cite{liedtke1995micro}\cite{liedtke1996toward}.
 
 \subsection{Real-time operating system} \label{rtos}
-The microkernel architecture is a naturally good fit for real-time operating systems. The objective of an \acrshort{rtos} is to provide deterministic scheduling and process management on embedded devices with limited resources. For that reason most modern real-time operating systems build on a microkernel core with added functionality. Such functionality may include more scheduling options, extended \acrshort{api}s and hierarchical process management.
+The microkernel architecture is a naturally good fit for real-time operating systems. The objective of an \acrshort{rtos} is to provide deterministic scheduling and process management on embedded devices with limited resources. For that reason, most modern real-time operating systems build on a microkernel core with added functionality. Such functionality may include more scheduling options, extended \acrshort{api}s, and hierarchical process management.
 
-Because the \acrshort{rtos} has full control over the hardware it can schedule processes deterministically. This deterministic scheduling enables the device manufacturer to perform a \acrlong{wcet} analysis and provide evidence for the temporal separation of processes. 
+Because the \acrshort{rtos} has full control over the hardware, it can schedule processes deterministically. This deterministic scheduling enables the device manufacturer to perform a \acrlong{wcet} analysis and provide evidence for the temporal separation of processes. 
 
 When it comes to the spatial separation of processes, an \acrshort{rtos} typically relies on the \acrshort{mpu} or \acrshort{mmu} of the system to restrict unwanted resource access.
 
 % CRITICAL Find source for UI claim
 
-One thing to keep in mind though is that a lot of \acrshort{rtos} developers offer no multicore support, which can severely limit the complexity of an application. But perhaps the biggest limitation of application complexity on the \acrshort{rtos} architecture is its narrow target audience. As a result of this narrow target audience, there is a distinct lack of sophisticated middleware. Especially cutting edge usability technology, like touch gesture recognition, is likely not available on these real-time operating systems. At the same time consumers are becoming increasingly adept at recognizing good design and are demanding strong user interfaces.
+One thing to keep in mind though is that a lot of \acrshort{rtos} developers offer no multicore support, which can severely limit the complexity of an application. However, perhaps the most significant limitation of application complexity on the \acrshort{rtos} architecture is its narrow target audience. As a result of this narrow target audience, there is a distinct lack of sophisticated middleware. Especially cutting edge usability technology, like touch gesture recognition, is likely not available on these real-time operating systems. At the same time, consumers are becoming increasingly adept at recognizing good design and are demanding strong user interfaces.
 
 Although the RTOS architecture remains quite a dominant one, it quickly loses its appeal with growing application complexity. Therefore it will be excluded from further analysis in this thesis.
 \subsection{Multicore system}
 % TODO Intro: An entirely different approach to separation is separating the components in hardware instead of software
-More and more silicon vendors are offering multicore systems with a dedicated safety and a support core. These are usually heterogeneous processors with one application core, like an ARM Cortex A7, and one microcontroller core, like an ARM Cortex M4. Proving temporal separation on these systems is typically not difficult, as the cores are physically separated \cite{wittenstein2017temporal}. 
+More and more silicon vendors are offering multicore systems with a dedicated safety and a support core. These are usually heterogeneous processors with one application core, like an ARM Cortex A7, and one microcontroller core, like an ARM Cortex M4. Proving temporal separation on these systems is typically not painful, as the cores are physically separated \cite{wittenstein2017temporal}. 
 
-But the cores in these systems share hardware resources like peripherals and memory. Consequently, it can be challenging to show sufficient evidence for spatial separation. An \acrshort{mmu} or \acrshort{mpu} can be useful to enforce spatial separation but it is not a perfect solution, especially for peripherals.
+But the cores in these systems share hardware resources like peripherals and memory. Consequently, it can be challenging to show sufficient evidence for spatial separation. An \acrshort{mmu} or \acrshort{mpu} can be useful to enforce spatial separation, but it is not a perfect solution, especially for peripherals.
 \subsection{Hardware supervised multicore system}
 These systems are identical to the ones described in the previous section, except they contain additional hardware to control and arbitrate peripheral access, as well as providing inter-core communication.
 Because there is no standard for this, the implementation is entirely up to the silicon vendor. 
 
-Although this hardware supervision has limited functionality, it has a clear advantage over comparable software solutions, like a hypervisor: Hardware is less error prone than software and this is recognized by regulatory bodies. Software typically has to adhere to a more rigorous development and verification process \cite{IEC.2000-3}. It is therefore possible that these systems are cheaper than hypervisors overall. 
+Although this hardware supervision has limited functionality, it has a clear advantage over comparable software solutions, like a hypervisor: Hardware is less error-prone than software, and this is recognized by regulatory bodies. Software typically has to adhere to a more rigorous development and verification process \cite{IEC.2000-3}. It is, therefore, possible that these systems are cheaper than hypervisors overall. 
 
-This architecture should be considered when designing a safety-critical device but it is still fairly new and a full analysis of it is not in the scope of this thesis.
+This architecture should be considered when designing a safety-critical device but it is still fairly new, and a full analysis of it is not in the scope of this thesis.
 \subsection{Hardware separated subsystems \label{HSS}}
 % NOTE review http://www.ia.pw.edu.pl/~tkruk/edu/eopsya/lecture/eopsy08.pdf and http://www-5.unipv.it/mferretti/cdol/aca/Charts/07-multiprocessors-MF.pdf and if these are viable
 % TODO https://witekio.com/blog/introduction-heterogeneous-multicore-processing-architecture/ Read about the need for software support on this architecture
 % TODO actually explain what they are
 Multiprocessor systems or even completely separate subsystems are the current status quo for dealing with the mixed criticality problem. The multiprocessor architecture should not be confused with the multicore architecture, as it has distinct processors, usually with their own resources, on the same or even different \acrlong{pcb}s (\acrshort{pcb}).
 
-Such a system starts out with perfect temporal and spatial separation because the systems are fully independent. The \mfg{} can then reintroduce dependence in very deliberate and controlled ways, that don't impact the device's safety rating. For example by introducing a dedicated communication channel between the processors. 
+Such a system starts with perfect temporal and spatial separation because the systems are entirely independent. The \mfg{} can then reintroduce dependence in very deliberate and controlled ways, that don't impact the device's safety rating. For example by introducing a dedicated communication channel between the processors. 
 
 % NOTE Is this a qualitative assessment better reserved for the analysis part?
-Keep in mind however that, while sharing external peripherals is theoretically possible, it is not commonly done and poses some difficult concurrency challenges. This means that any external peripheral that could theoretically be shared has to be duplicated instead. The same goes for memory.
+Keep in mind however that, while sharing external peripherals is theoretically possible, it is not commonly done and poses some problematic concurrency challenges. This means that any external peripheral that could theoretically be shared has to be duplicated instead. The same goes for memory.
 
 % TODO Give an example and make an architecture diagram
-So what exactly does this architecture look like? Because this is more so a design methodology than a general solution, specific implementations are bound to look very different. In theory there is no limit on the number of processors or how they communicate, that depends on the size of the overall system and the safety requirements. 
+So what exactly does this architecture look like? Because this is more so a design methodology than a general solution, specific implementations are bound to look very different. In theory, there is no limit on the number of processors or how they communicate, that depends on the size of the overall system and the safety requirements. 
 
 More specific advantages and disadvantages of this architecture will be analyzed in more detail later in the thesis.
 
 %----------------------------------------------------------------------------------------
 \section{Hypervisor}
-Now let’s examine the main subject of this thesis, the hypervisor. Hypervisors originated in networking to optimize server usage and as such there are some misconceptions about their usefulness in embedded programming. These misconceptions will be addressed here but first, we need to take a look at the core functionality of a hypervisor.
+Now let’s examine the main subject of this thesis, the hypervisor. Hypervisors originated in networking to optimize server usage, and as such there are some misconceptions about their usefulness in embedded programming. These misconceptions will be addressed here, but first, we need to take a look at the core functionality of a hypervisor.
 
 \subsection{Hardware virtualization} \label{hw-virt}
-The act of hardware virtualization refers to the creation of a virtual machine that
-acts like a real machine. A virtual machine is often referred to as a guest and the system it is virtualized on is called the host. The host can either assign hardware to the guests directly or provide them with virtualized hardware components. Virtualized hardware components also behave like their real counterparts from the view of the guest but in reality the host is translating any hardware operations that the guest performs to corresponding operations on the actual hardware. This means the guest can be unaware that it is only a virtual machine and does not have full control over the system.
+The act of hardware virtualization refers to the creation of a virtual machine that acts like a real machine. A virtual machine is often referred to as a guest, and the system it is virtualized on is called the host. The host can either assign hardware to the guests directly or provide them with virtualized hardware components. Virtualized hardware components also behave like their real counterparts from the view of the guest, but in reality, the host is translating any hardware operations that the guest performs to corresponding operations on the actual hardware. This means the guest can be unaware that it is only a virtual machine and does not have full control over the system.
 
 There are two types of hardware virtualization. Full virtualization and paravirtualization
 \subsubsection{Full virtualization}
-In full virtualization the virtualized guest is completely unaware that is not a real machine. That means any software that could run on an actual machine can also run on this machine, without any modification.
-In theory this can be completely achieved in software but this is very computationally expensive. That is why \acrshort{cpu} designers like Intel and ARM offer hardware virtualization extensions that can accelerate these processes \cite{uhlig2005intel}\cite{ARM.v8.2018}. However, this also means that if these virtualization extensions are not an option, other ways need to be found to efficiently virtualize a system. Which brings us to Paravirtualization.
+In full virtualization, the virtualized guest is entirely unaware that it is not a real machine. That means any software that could run on an actual machine can also run on this machine, without any modification.
+In theory, this can be completely achieved in software, but this is very computationally expensive. That is why \acrshort{cpu} designers like Intel and ARM offer hardware virtualization extensions that can accelerate these processes \cite{uhlig2005intel}\cite{ARM.v8.2018}. However, this also means that if these virtualization extensions are not an option, other ways need to be found to virtualize a system efficiently. Which brings us to Paravirtualization.
 \subsubsection{Paravirtualization}
-In paravirtualization the software running on the virtual machine is modified, so that it can communicate efficiently with the host platform. To elaborate: A process running atop an operating system can use the available system calls to interact with the hardware below. In a \keyword{fully virtualized operating system} the host system recognizes that an interaction with the hardware has been initiated by the guest, interrupts the communication and takes over. In a \keyword{paravirtualized operating system} on the other hand, the implementation of the system calls has been modified to talk directly to the hypervisor on the host system instead of the hardware. This leads to an overall more efficient virtualization process.
+In paravirtualization, the software running on the virtual machine is modified so that it can communicate efficiently with the host platform. To elaborate: A process running atop an operating system can use the available system calls to interact with the hardware below. In a \keyword{fully virtualized operating system} the host system recognizes that interaction with the hardware has been initiated by the guest, interrupts the communication and takes over. In a \keyword{paravirtualized operating system} on the other hand, the implementation of the system calls has been modified to talk directly to the hypervisor on the host system instead of the hardware. This leads to an overall more efficient virtualization process.
 
-In reality there are often hybrid version that take advantage of both paravirtualization and the hardware virtualization extensions of the \acrshort{cpu}. The virtualization extensions are very good at stopping the virtual machines from doing things they are not allowed to and the combination of paravirtualization and hardware extensions increase the efficiency and performance of the virtualization.
+In reality, there are often hybrid versions that take advantage of both paravirtualization and the hardware virtualization extensions of the \acrshort{cpu}. The virtualization extensions are very good at stopping the virtual machines from doing things they are not allowed to, and the combination of paravirtualization and hardware extensions increase the efficiency and performance of the virtualization.
 \subsection{Hypervisor}
-The virtual machine monitor, more commonly referred to as hypervisor, is the software that actually facilitates the communication between the virtualized guest machine and the hardware on the host platform. In a paravirtualized operating system the system calls would need to be adjusted to talk to the specific hypervisor implementation that is used. 
+The virtual machine monitor, more commonly referred to as hypervisor, is the software that facilitates the communication between the virtualized guest machine and the hardware on the host platform. In a paravirtualized operating system, the system calls would need to be adjusted to talk to the specific hypervisor implementation that is used. 
 
 \begin{figure}
 \centering
@@ -309,20 +308,20 @@ The virtual machine monitor, more commonly referred to as hypervisor, is the sof
 \caption{The two hypervisor types}
 \label{fig:hypervisor_types}
 \end{figure}
-As indicated in figure \ref{fig:hypervisor_types}, there are two types of hypervisors. Type II hypervisors don't interface with the hardware directly and instead delegate any hardware access to the operating system they are running on. This scenario adds additional overhead and necessarily requires an operating system to run on the device. Therefore, Type II hypervisors are not relevant to this thesis.
+As indicated in figure \ref{fig:hypervisor_types}, there are two types of hypervisors. Type II hypervisors do not interface with the hardware directly and instead delegate any hardware access to the operating system they are running on. This scenario adds additional overhead and necessarily requires an operating system to run on the device. Therefore, Type II hypervisors are not relevant to this thesis.
 
-But even among Type I hypervisors there can be significant differences in what they aim to achieve. Differentiating the two big use cases will be the topic of the following sections.
+However, even among Type I hypervisors, there can be significant differences in what they aim to achieve. Differentiating the two significant use cases will be the topic of the following sections.
 \subsection{Traditional server hypervisor}
 % TODO Add sources for Xen and Hyper-V?
-The origin of hypervisors lies in mainframe computers, as a way to allow many users to concurrently use the system. After mainframe computers went of fashion so did hypervisors but they returned once the performance demand on servers rose significantly.
+The origin of hypervisors lies in mainframe computers, as a way to allow many users to use the system concurrently. After mainframe computers went of fashion so did hypervisors, but they returned once the performance demand on servers rose significantly.
 Today, prominent examples of server hypervisors like Xen and Hyper-V are still used to maximize the efficient use of server resources, as well as provide secure encapsulation of environments.
 
 And this is where some confusion may arise, since maximizing the use of hardware resources is not a typical problem for embedded devices. Consequently, \bold{embedded hypervisors have drastically different goals than server hypervisors}.
 \subsection{Embedded safety hypervisor}
 % TODO Do I want to add more?
-For an embedded safety hypervisor the safe and robust separation of partitions is of utmost importance. It also needs to be able to satisfy real-time requirements and operate in an environment with very limited resources. And while performance is a concern, a safety hypervisor does not need to maximize the resource usage, like a safety hypervisor.
+For an embedded safety hypervisor the safe and robust separation of partitions is of utmost importance. It also needs to be able to satisfy real-time requirements and operate in an environment with minimal resources. Moreover, while performance is a concern, a safety hypervisor does not need to maximize the resource usage, like a safety hypervisor.
 
-For this reason the vast majority of embedded safety hypervisors are microkernel based, similarly to the real-time operating systems discussed in section \ref{rtos}. These hypervisors extend the minimal feature set of the microkernel by adding support for virtualized operating systems, running as a microkernel process. Additionally, they typically extend the microkernel \acrshort{api} with functions that are especially useful for safety-critical devices.
+For this reason the vast majority of embedded safety hypervisors are microkernel-based, similar to the real-time operating systems discussed in section \ref{rtos}. These hypervisors extend the minimal feature set of the microkernel by adding support for virtualized operating systems, running as a microkernel process. Additionally, they typically extend the microkernel \acrshort{api} with functions that are especially useful for safety-critical devices.
 
 To show how an embedded safety hypervisor achieves separation and what other features it can offer, the next chapter will introduce the concept of a \keyword{basic safety hypervisor}. A simplified representation of currently available safety hypervisors.
 
@@ -330,32 +329,32 @@ To show how an embedded safety hypervisor achieves separation and what other fea
 \begin{comment}
 \Xsection{Embedded safety hypervisor origins}
 % TODO Add dat sauce
-Now let's examine the main subject of analysis, the embedded safety hypervisor. In this section it will be established where it comes from and some associated concepts. This should get rid of some common misconceptions about hypervisors and their applicability in the embedded sector.
+Now let's examine the main subject of analysis, the embedded safety hypervisor. In this section, it will be established where it comes from and some associated concepts. This should get rid of some common misconceptions about hypervisors and their applicability in the embedded sector.
 \subsection{Hardware virtualization} \label{hw-virt}
 The act of \keyword{hardware virtualization} refers to the creation of a virtual machine  that acts exactly like a real device. Software executed on this machine has no direct access to the underlying hardware resources. Virtual machines are typically called guests, whereas the device virtualizing them is referred to as the host machine
 There are two types of \keyword{hardware virtualization}.
 \paragraph{Para-virtualization}
-Para-virtualized guests run in a separated environment with no direct access to the hardware but their hardware environment is not simulated. That means guest software needs to be modified to run in this environment.
+Para-virtualized guests run in a separated environment with no direct access to the hardware, but their hardware environment is not simulated. That means guest software needs to be modified to run in this environment.
 \paragraph{Full virtualization}
 In full virtualization the entire guest hardware is simulated, allowing guest software to run completely unmodified.
 
 Doing this kind of simulation entirely in software is very computationally expensive and has only really become feasible with hardware virtualization extensions. These virtualization extensions add an additional level of privilege to the processor, along with additional instructions and hardware enhancements that make virtualization a lot more efficient \cite{ARM.v8.2018}.
 
-Notably, while these extensions were originally limited to high powered hardware, they have since become available in more embedded focused processor lines like the Intel Atom and ARMv7/v8 processors.
+Notably, while these extensions were initially limited to high powered hardware, they have since become available in more embedded focused processor lines like the Intel Atom and ARMv7/v8 processors.
 \subsection{Original hypervisor use case}
-Hypervisors were originally conceived in the 1960s as a way of accommodating multiple users on mainframe computers. After a hiatus they enjoyed their resurgence in the 2000s when the demand on servers rose again. 
+Hypervisors were originally conceived in the 1960s as a way of accommodating multiple users on mainframe computers. After a hiatus, they enjoyed their resurgence in the 2000s when the demand on servers rose again. 
 
 So they started out as a way to maximize resource utilization in large servers. However, low resource utilization is usually not an issue in embedded systems, quite the opposite in fact. Therefore these original hypervisors are not the point of discussion for this thesis.
 \subsection{Microkernels}
-At this point it is useful to make a quick excursion to the realm of microkernels. As the name implies their guiding principal is that of a minimal kernel. Basically, everything that doesn't absolutely have to be handled in kernel space for the device to work is implemented in user space.
+At this point, it is useful to make a quick excursion to the realm of microkernels. As the name implies their guiding principle is that of a minimal kernel. Basically, everything that doesn't absolutely have to be handled in kernel space for the device to work is implemented in userspace.
 
-This kind of system was exclusive to academia for a long time, until it somewhat matured in the late 90s \cite{Liedtke.1995}\cite{Liedtke.1996}. With this development they had already become attractive to safety-critical device manufacturers and saw some large scale deployment.
+This kind of system was exclusive to academia for a long time until it somewhat matured in the late 90s \cite{Liedtke.1995}\cite{Liedtke.1996}. With this development, they had already become attractive to safety-critical device manufacturers and saw some large scale deployment.
 
 \subsection{Unification of the two concepts}
 In 2005 an academic debate broke out about the legitimacy of microkernels versus the hypervisors that were around at this time. 
-The argument was that, despite their architectural similarities, hypervisors are a special case of microkernels \textquote{microkernels done right} \cite{StevenHand.2005}\cite{Heiser.2006}. Without examining the back and forth that ensued, the result was the addition of hypervisor functionality to existing microkernels \cite{Heiser.2010}. And these hypervisors with a minimal trusted computing base were focused on the safety-critical market, providing safe separation instead of maximum resource utilization.
+The argument was that, despite their architectural similarities, hypervisors are a special case of microkernels \textquote{microkernels done right} \cite{StevenHand.2005}\cite{Heiser.2006}. Without examining the back and forth that ensued, the result was the addition of hypervisor functionality to existing microkernels \cite{Heiser.2010}. Also, these hypervisors with a minimal trusted computing base were focused on the safety-critical market, providing safe separation instead of maximum resource utilization.
 
-This does not necessarily mean that microkernel based hypervisors are the definitive embedded safety hypervisor but it is their origin and still by far the most prevalent architecture.
+This does not necessarily mean that microkernel-based hypervisors are the definitive embedded safety hypervisor, but it is their origin and still by far the most common architecture.
 
 \end{comment}
 
