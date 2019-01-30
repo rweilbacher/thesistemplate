@@ -188,7 +188,7 @@ The second type of event is triggered by the code running in a partition. These 
 
 The final event type is triggered by the hypervisor itself. This is typically a response to a violation of the hypervisor configuration. For example, a partition that tries to create an \acrshort{ipc} port that has not been defined in the configuration or a partition that attempts to use a hypercall it does not have permissions for.
 
-Figure \ref{fig:health_monitoring} depicts a high level view of the health monitoring subsystem. Health monitoring is split into three parts: event detection, automated actions and the health monitoring log stream. The behaviour of the entire subsystem is dictated by the hypervisor configuration.
+Figure \ref{fig:health_monitoring} depicts a high level view of the health monitoring subsystem. This figure is a modified version of the health monitoring image in \cite{xtratum3}. Health monitoring is split into three parts: event detection, automated actions and the health monitoring log stream. The behaviour of the entire subsystem is dictated by the hypervisor configuration.
 After an event has occurred, it gets recognized by the event detection component. Then, depending on the hypervisor configuration, an automatic action may get triggered. Possible actions are:
 \begin{enumerate}
     \item Ignore the event.

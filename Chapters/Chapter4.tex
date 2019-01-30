@@ -25,37 +25,45 @@ First of, the most crucial differences between the two architecture will be elab
 \subsection{Hardware or software}
 Even though the hypervisor can be supported by hardware the separation is still fundamentally implemented in software. In the\acrshort{hss} architecture on the other hand, separation is entirely realized through hardware, or rather lack of shared hardware. This does not mean that a device with the \acrshort{hss} architecture does not contain software, only that the software is limited to the business components of the device.
 
-% TODO Try to find sources for these claims and explain them more deeply
-% NOTE Have I ever explained the difference between random and systematic faults
-% IMPORTANT This is missing something
-There are a number of differences between hardware and software developments that are relevant to this analysis. 
+There are two differences between hardware and software developments that will be relevant to this analysis. 
 \begin{itemize}
 \item Software is easier to change than hardware. 
 \item Hardware complexity is restricted by physical laws. Software complexity is only really limited by our ability to manage it.
 \end{itemize}
+The hardware of a device is final once it has been released and no more changes can be made until a new generation is designed. Software updates on the other hand can be deployed to the device after it has been manufactured and shipped to customers. Software developers are reliant on the hardware being available for testing, so hardware development may be more focused at the beginning of the development cycle. Making large changes to the hardware platform after the software team has started development could invalidate a lot of work. This further restricts the changeability of the hardware after its initial design.
+
+The ways hardware can fail and function are in large parts dictated by physical laws. This does not mean that hardware is not complex or can't fail, just that hardware typically fails in expected and testable ways.
+
+Perhaps as a result of its modifiability, software architecture and design can be almost entirely decided by its engineers. The software may still be limited by the hardware it is running on but within those boundaries there are no actual rules. To conquer this complexity, software engineers have developed design principles that govern how software should be developed \cite{martin2009clean}.
+But ultimately, these design principles are only self imposed rules with little enforcement and software complexity is often the cause for development delays \cite{hegde2011insight}. 
+\bold{Therefore, a regulatory body may expect higher rigour in testing, verification and documentation of the safety-critical device software than its hardware.}
+
 \subsection{Specialized or general}
 A hypervisor is a general software solution that is meant to be usable in a lot of cases with minor modification. It is often procured from an external company and not developed in-house specifically for a project.
 
 The \acrshort{hss} architecture is technically a very general methodology but each implementation is a specialized solution for one project or project line. This does not mean there is no overlap between different projects using hardware separated subsystems but that there is little room for reuse of the architecture implementation.
 
-% TODO Is there more to add?
-An advantage of a more general solution is that the one-time development costs can be spread across multiple projects, or in the case of third-party solutions, across multiple customers.   
+\bold{The big advantage of a more general solution is that the one-time development costs can be spread across multiple projects, or in the case of third-party solutions, even across multiple customers.}   
 
 \subsection{Distributed or centralized system} \label{distributed-or-centralized}
-The \acrshort{hss} architecture ultimately achieves its separation through being a distributed system. In contrast, a hypervisor is a centralized system with added separation between the partitions. In the special case of hardware separated subsystems the subsystems are typically also heterogeneous, which leads to a number of potential disadvantages.
-% NOTE Verify these claims
+The \acrshort{hss} architecture ultimately achieves its separation through being a distributed system. In contrast, a hypervisor is a centralized system with added separation between the partitions. In the special case of hardware separated subsystems the subsystems are typically also comprised of heterogeneous \acrshort{cpu}s. This combination leads to a number of potential disadvantages in the \gls{hss} architecture development process:
 \begin{enumerate}
-\item Partition binaries need to be compiled differently.
-\item Partitions have distinct bootstrapping processes.
-\item Debugging the system as a whole is not possible.
+\item Partition binaries may need to be compiled differently.
+\item Partitions have distinct initialization processes.
+\item Debugging the system as a whole is not possible or very difficult.
 \item The asynchronous nature of partitions, along with point three, can lead to errors that are very difficult to replicate.
 \end{enumerate}
-This does not mean debugging problems in hypervisor implementations are impossible, just that they can be feasibly addressed in a centralized system. The hypervisor as an entity can have a complete view of the system and therefore the developer can provide appropriate tooling to debug hypervisor partitions or even the hypervisor itself.
+In contrast, the hypervisor's centralized nature allows the hypervisor developer to provide appropriate tooling to debug hypervisor partitions or even the hypervisor itself. The hypervisor also has a complete view of the system during operation, allowing it to provide monitoring and logging functionality.
+\subsection{Redundancy} \label{redundancy}
 
-\subsection{Advanced fault-tolerance} \label{advanced-fault-tolerance}
+
+
+
 % NOTE Name?
 % TODO Mention that DSP can not be used with a HV at the moment
 Advanced fault-tolerance is referring to the three practices of replication.
+
+
 \paragraph{Replication} Providing an identical replica of a system component or the entire system that computes the output in parallel. The replicated systems may only act as a supervisor to the primary system or have an influence on the final output via a quorum.
 \paragraph{Diversity} Virtually the same as replication except that the additional systems are not identical to the primary system. They can differ in both hard- and software or just one of the two. This approach requires more effort but can reduce the probability that both systems have the same fault. 
 \paragraph{Redundancy} In this approach the identical replica, instead acts as a backup in case of a failure in the primary component.
@@ -63,7 +71,7 @@ Advanced fault-tolerance is referring to the three practices of replication.
 While this does share the key characteristics with the hardware separated subsystems architecture the intention is a different one. 
 Replication has the sole purpose of increasing the fault-tolerance and subsequently the safety of the system, while the \acrshort{hss} architecture is focused on separating components of differing criticality to reduce effort and cost among other things.
 
-The hypervisor on the other hand can only provide software diversity on its own and can impede efficient and effective replication. Typically only the most safety-critical parts of the device would be made redundant but on the hypervisor architecture they are all consolidated onto one hardware platform. This means that either the entire hypervisor with all partitions is replicated, forcing the manufacturer to also copy the non-critical partition. Or only parts of the software are replicated and run in an additional partition. While this is a lot cheaper it is also not nearly as effective as hardware replication.
+The hypervisor on the other hand can only provide software diversity on its own and can impede efficient and effective replication. Typically only the most safety-critical parts of the device would be made redundant but on the hypervisor architecture they are all consolidated onto one hardware platform. This means that either the entire hypervisor with all partitions is replicated, forcing the manufacturer to also copy the non-critical partition. Or only parts of the software are replicated and run in an additional partition. While this is cheaper it is also not nearly as effective as hardware replication.
 \subsection{Cost of adding a partition}
 The core of the \acrshort{hss} architecture is that every partition is its own computation domain with separate resources. In the hypervisor architecture the most expensive partition to add is the second one, as it involves accommodating for the hypervisor in the first place. Any partition that is added beyond the second just requires the appropriate amount of memory and computational resources to be available. Naturally, there are limits to this as each partition also introduces some overhead in terms of kernel memory and process switching times.  Furthermore, a partition requires a certain amount of resources to even do useful work in the first place.
 
@@ -95,15 +103,13 @@ However, this use case is different from the pure mixed criticality problem. If 
 Since the lowest level of the hypervisor needs to be reimplemented for every platform, the hypervisor also needs to be reverified for every platform. However, this does not need mean the previous efforts are irrelevant. A case on regression analysis can be built.
 Furthermore, a project specific risk analysis also needs to be carried out regardless of the hypervisors certification status.
 
-Each \acrshort{hss} implementation needs to be verified from scratch but as stated in section \ref{HSS} providing sufficient evidence for separation should be much easier. The entire point of the architectures separation is that there is almost no avenue for influence to occur. Only through specifically implemented and controlled communication paths.
-% NOTE Think about that last point
+Each \acrshort{hss} implementation needs to be verified from scratch but as stated in section \ref{HSS} providing sufficient evidence for separation should be much easier. The main idea of the architectures separation is that there is almost no avenue for influence to occur. Only through specifically implemented and controlled communication paths.
 
-Ultimately the amount of control a system designer can exert on a device with the \acrshort{hss} architecture, the fact that is hardware and not software and it separation mechanism should make a \acrshort{hss} architecture cheaper to get approval for in most cases.
-
-% TODO Add recertification costs here?
+% NEW point
+Because the hypervisor is software based, it is more likely to contain to unexpected faults than an equivalent \acrshort{hss} architecture. The higher rigour that is often expected for software verification may increase the initial certification cost of a device using the hypervisor architecture. However, a third-party hypervisor developer may mitigate the cost of this with the documentation he can provide. Additionally, the microkernel based design of the safety-critical hypervisor also aids in the reduction of software complexity and aids verification.
 
 \paragraph{Impact of scalability on safety}
-The scalability problems of the \acrshort{hss} architecture have already been discussed but not their implications on safety. \acrlong{emc} or \acrshort{emc} for short is quite important for safety-critical devices, especially for ones operating in explosive atmospheres. Additional processors require more power and more cables that can act as antennas. This introduces more \acrshort{emc} challenges that need to be tackled by electromagnetic shielding and other methods. If they are not properly addresses they can cause high redesign costs at the end of the development cycle.
+The scalability problems of the \acrshort{hss} architecture have already been discussed but not their implications on safety. \acrlong{emc} or \acrshort{emc} for short is quite important for safety-critical devices, especially for ones operating in explosive atmospheres. Additional processors require more power and more wires that can act as antennas. This introduces more \acrshort{emc} challenges that need to be tackled by electromagnetic shielding and other methods \cite{perez2013safety}. If these problems are not properly addressed from the beginning they can cause high redesign costs at the end of the development cycle.
 
 Additional hardware components also introduce more points for random failure and degradation, which may further reduce a \acrshort{hss} device's safety with a growing amount of partitions.
 % NOTE Maybe mention HVs multicore support
@@ -195,6 +201,20 @@ Fault isolation is one of the key pillars of separation architectures, as it red
 At this point it is important to reiterate that the hypervisor represents a single point of failure and compromisation could lead to a compromisation of the entire system. The \acrshort{hss} architecture can not only offer features like redundancy but also offers much more control with any single points of failure being avoidable. Therefore, extremely high risk devices are most likely better off with its separation.
 
 \paragraph{Fault tolerance}
+
+
+* Redundancy is often used to conform to the fault tolerance requirements in highly critical scenarios
+* With the decreasing size of transistors in common application processors, transient hardware faults are becoming more likely \cite{constantinescu2003trends}. 
+* The same effect can be observed in environments with a lot of radiation like safety-critical devices that are deployed in space.
+* This makes redundancy more important.
+
+* Hardware redundancy has long been an effective technique for fault tolerance \cite{rennels1984fault}
+* Software redundancy on the other hand was not considered adequate for some time \cite{eckhardt1991experimental}. 
+* More recently however, the interest in software redundancy as a fault tolerance technique has increased \cite{de2016triple} \cite{carzaniga2009handling}.
+* Especially, hypervisors might be a strong enabler of effective software redundancy \cite{de2016triple}.
+* It is out of the scope of this thesis to compare the effectiveness of software and hardware redundancy but 
+* 
+
 The hypervisors centralized view of the system present the opportunity for detecting faults and other events of interest in each partition. It can recognize when a partition has shut down unexpectedly and either take action itself or delegate a manufacturer created partition to deal with the problem.
 
 But as stated in section \ref{advanced-fault-tolerance} the hypervisor can potentially fail to safeguard or even recognize hardware errors. Furthermore, it can only provide software diversity on its own.
