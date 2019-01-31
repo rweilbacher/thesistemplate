@@ -36,7 +36,7 @@ The current device generation uses no separation architecture because it is not 
 \begin{enumerate}
 \item There is easily sealable, expensive to verify code, in the form of the gas concentration algorithm.
 \item \acrshort{gui} libraries on Linux would be a great fit for realizing a more complex \acrshort{gui} with less effort than on a typical \acrshort{rtos}. But Linux cannot be feasibly verified for the safety-critical use case.
-\item Both safety-critical and non-safety-critical functionality will likely be extended in the future. As established in section  \ref{safety-analysis}, granular partitions or the ability to add more can make regression testing cheaper and less error-prone.
+\item Both safety-critical and non-safety-critical functionality will likely be extended in the future. As established in section \ref{safety-analysis}, granular partitions or the ability to add more can make regression testing cheaper and less error-prone.
 \end{enumerate}
 Additionally, the planned features do not directly impact the operator's safety. The only component that can pose a threat is the \acrshort{gui} because the display could show an incorrect concentration of dangerous gas. To mitigate this risk, a red \acrshort{led} controlled by the critical code, will begin blinking if the measured concentration is above the limit specified on the cartridge's \acrshort{nfc} tag. Any other failure in these components will either just prohibit retrieving data from the device for later analysis or render the device unusable. And while these effects are undesirable, the operator can recognize them and take actions to protect himself.
 
@@ -137,7 +137,7 @@ However, there still needs to be a scheduling algorithm for each physical \acrsh
 \multicolumn{1}{|l|}{Concentration algorithm} & \multicolumn{1}{l|}{2}                 & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{USB driver}         & \multicolumn{1}{l|}{2}                 \\ \cline{1-2} \cline{4-5} 
 \multicolumn{1}{|l|}{Measurement application} & \multicolumn{1}{l|}{1}                 & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{GUI application}    & \multicolumn{1}{l|}{1}                 \\ \cline{1-2} \cline{4-5} 
 \end{tabular}
-\caption{Partition priorities}
+\caption{Gas detector partition priorities}
 \label{tab:gasdetect_priorities}
 \end{table}
 
@@ -187,7 +187,7 @@ First of all, due to the nature of the device, perfect uptime is not required, t
 \centering
 \includegraphics[scale=0.75]{Figures/blood_diagnostics_arch}
 \decoRule
-\caption{Example hypervisor partition setup}
+\caption{Blood diagnostics diverse architecture}
 \label{fig:blood_diagnostics_hv_arch}
 \end{figure}
 
@@ -197,7 +197,7 @@ However, the system's need for fault tolerance means that some advanced fault to
 % NOTE The proximity things seems like bullshit. Where did I even get that from?
 If we assume that the separation is adequate and all basic safety requirements can be met, there are still factors left to consider. First of all, since this is a system that deals with real-time requirements, proximity to the machinery could be valuable. But in this case \acrshort{emc} can cause significant issues. In the hypervisor setup, a processor with a higher frequency would sit closer to the motors and other machinery which also themselves introduce \acrlong{emi}. This could easily lead to a violation of the \acrshort{emc} requirements of the regulatory body, introducing the need to add more electromagnetic shielding. 
 
-This device can also benefit from the hypervisor's architectural improvements and easier configuration, perhaps even more so. Since it is more complex, it is also more likely that functionality can be usefully extracted into partitions, carrying the benefits explained in \ref{Chapter4}. But it is important to keep in mind that for a device with these characteristics, some of the typical hypervisor benefits are less relevant.
+This device can also benefit from the hypervisor's architectural improvements and easier configuration, perhaps even more so. Since it is more complex, it is also more likely that functionality can be usefully extracted into partitions, carrying the benefits explained in chapter \ref{Chapter4}. But it is important to keep in mind that for a device with these characteristics, some of the typical hypervisor benefits are less relevant.
 
 First of all, the hardware cost savings are not going to make a big impact on a device this complex and big. Secondly, \acrshort{swap} are also not as crucial as for the portable gas detector. The housing of this unit is already going to be at least as big as a typical wardrobe, and an extra microcontroller is not going to change that. Same goes for weight. And since the device is connected to power all the time, making it as power efficient as possible is also not a primary goal.
 
@@ -215,7 +215,7 @@ Some of the hypervisor benefits are not as important as in other classes of devi
 
 \section{How to decide on a hypervisor implementation} \label{how-to-decide}
 % NOTE Maybe talk about how this applies to first-party hypervisors?
-This section explores the extended analysis that needs to be carried out by the manufacturer, once he is seriously considering using a third-party hypervisor. For the most part, it consists of a list of questions that need to be asked, with further explanation, if required. The categorization of the questions closely resembles the key wants established in \ref{Chapter3}.
+This section explores the extended analysis that needs to be carried out by the manufacturer, once he is seriously considering using a third-party hypervisor. For the most part, it consists of a list of questions that need to be asked, with further explanation, if required. The categorization of the questions closely resembles the key wants established in chapter \ref{Chapter3}.
 
 It is conceivable that the result of this analysis reveals that no third-party hypervisors exists that can satisfy the manufacturers targets. The importance of each question is going to vary on a project by project basis, and questions should be asked roughly in their order of importance. 
 
@@ -249,7 +249,7 @@ This requires the source code to be available and legally modifiable. Such actio
 \paragraph{If the device has real-time requirements, can they be met with the hypervisor architecture?}
 This is clearly a very difficult question to answer before development has even begun, but it still needs to be analyzed to avoid disaster.
 \subsection{Additional functionality}
-The core functionality the hypervisor offers has been explored in \ref{Chapter2}. This section is concerned with slightly more advanced features. Some hypervisor implementations are completely bare-bones and offer nothing beyond the features of a basic hypervisors, and others offer many advanced features. This difference is likely to be reflected in the price of the respective implementations.
+The core functionality the hypervisor offers has been explored in chapter \ref{Chapter2}. This section is concerned with slightly more advanced features. Some hypervisor implementations are completely bare-bones and offer nothing beyond the features of a basic hypervisors, and others offer many advanced features. This difference is likely to be reflected in the price of the respective implementations.
 \paragraph{What additional functionality can the developer offer?}
 Below is a list of some possible features that exist in current implementations.
 % NOTE Do any items require additional explanation?

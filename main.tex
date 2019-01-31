@@ -44,6 +44,7 @@
 11pt, % The default document font size, options: 10pt, 11pt, 12pt
 %oneside, % Two side (alternating margins) for binding by default, uncomment to switch to one side
 %english, % ngerman for German
+ngerman,
 english,
 singlespacing, % Single line spacing, alternatives: onehalfspacing or doublespacing
 %draft, % Uncomment to enable draft mode (no pictures, no links, overfull hboxes indicated)
@@ -73,7 +74,6 @@ headsepline, % Uncomment to get a line under the header
 \usepackage{float}
 \usepackage[acronym]{glossaries}
 \usepackage{listings}
-
 
 \definecolor{dark_blue}{HTML}{200090}
 \definecolor{gray}{HTML}{808080}
@@ -105,6 +105,7 @@ headsepline, % Uncomment to get a line under the header
 %----------------------------------------------------------------------------------------
 %	THESIS INFORMATION
 %----------------------------------------------------------------------------------------
+
 
 \thesistitle{Finding the best case scenarios for hypervisors in safety-critical devices} % Your thesis title, this is used in the title and abstract, print it elsewhere with \ttitle
 \supervisor{Dr. Sabine Berninger} % Your supervisor's name, this is used in the title page, print it elsewhere with \supname
@@ -172,7 +173,7 @@ headsepline, % Uncomment to get a line under the header
 \textsf{\makebox[3.5cm][l]{Referentin:}}            \textsf{\makebox[7cm][r]{\supname}} \\
 \textsf{\makebox[3.5cm][l]{Korreferent:}}           \textsf{\makebox[7cm][r]{\examname}} \\
 \textsf{\small{\makebox[3.5cm][l]{Ausgabedatum:}}}  \textsf{\small{\makebox[7cm][r]{1.11.2018}}} \\
-\textsf{\small{\makebox[3.5cm][l]{Abgabedatum:}}}   \textsf{\small{\makebox[7cm][r]{1.2.2019}}}
+\textsf{\small{\makebox[3.5cm][l]{Abgabedatum:}}}   \textsf{\small{\makebox[7cm][r]{31.1.2019}}}
 \end{spacing}
 
 \end{center}
@@ -181,7 +182,8 @@ headsepline, % Uncomment to get a line under the header
 %----------------------------------------------------------------------------------------
 %	DECLARATION PAGE
 %----------------------------------------------------------------------------------------
-
+%\authorshipname
+\begin{otherlanguage}{ngerman}
 \begin{declaration}
 \addchaptertocentry{\authorshipname} % Add the declaration to the table of contents
 \noindent Ich, \authorname, versichere hiermit, dass ich die vorliegende Arbeit selbstständig verfasst und keine anderen als die im Literaturverzeichnis angegebenen Quellen benutzt habe. \\ 
@@ -197,6 +199,7 @@ headsepline, % Uncomment to get a line under the header
 (Vollständige, handschriftliche Unterschrift)
 
 \end{declaration}
+\end{otherlanguage}
 
 %\cleardoublepage
 
@@ -204,6 +207,7 @@ headsepline, % Uncomment to get a line under the header
 %----------------------------------------------------------------------------------------
 %	GEHEIMHALTUNG
 %----------------------------------------------------------------------------------------
+\begin{comment}
 \begin{geheimhaltung}
 \addchaptertocentry{\confidentialityname} % Add the declaration to the table of contents
 \noindent Diese Arbeit darf weder vollständig noch auszugsweise ohne schriftliche Zustimmung des Autors vervielfältigt, veröffentlicht oder Dritten zugänglich gemacht werden. Die abgegebene Arbeit wird vom Hauptreferenten unter Verschluss gehalten. Mit ist bekannt, dass die Geheimhaltung nicht die Erstellung eines Thesis-Posters sowie die Durchführung des Kolloqiums betrifft. Die Geheimhaltungspflicht erlischt automatisch nach 5 Jahren.\\
@@ -215,11 +219,12 @@ headsepline, % Uncomment to get a line under the header
 (Vollständige, handschriftliche Unterschrift)
 \clearpage
 \end{geheimhaltung}
+\end{comment}
 
 %----------------------------------------------------------------------------------------
 %	QUOTATION PAGE
 %----------------------------------------------------------------------------------------
-%\begin{comment}
+\begin{comment}
     
 \vspace*{0.2\textheight}
 
@@ -227,7 +232,7 @@ headsepline, % Uncomment to get a line under the header
 
 \hfill Dave Barry
 
-%\end{comment}
+\end{comment}
 
 %----------------------------------------------------------------------------------------
 %	ABSTRACT PAGE
@@ -250,14 +255,14 @@ And finally, a list of questions is proposed that should be asked when deciding 
 %----------------------------------------------------------------------------------------
 %	ACKNOWLEDGEMENTS
 %----------------------------------------------------------------------------------------
-%\begin{comment}
+\begin{comment}
 
 \begin{acknowledgements}
 \addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
 The acknowledgments and the people to thank go here, don't forget to include your project advisor\ldots
 \end{acknowledgements}
 
-%\end{comment}
+\end{comment}
 
 %----------------------------------------------------------------------------------------
 %	LIST OF CONTENTS/FIGURES/TABLES PAGES
@@ -376,8 +381,9 @@ The acknowledgments and the people to thank go here, don't forget to include you
 %----------------------------------------------------------------------------------------
 %	DEDICATION
 %----------------------------------------------------------------------------------------
-
+\begin{comment}
 \dedicatory{For/Dedicated to/To my\ldots} 
+\end{comment}
 
 %----------------------------------------------------------------------------------------
 %	THESIS CONTENT - CHAPTERS
@@ -402,7 +408,7 @@ The acknowledgments and the people to thank go here, don't forget to include you
 %----------------------------------------------------------------------------------------
 \begin{comment}
 
-\appendix % Cue to tell LaTeX that the following "chapters" are Appendices
+%\appendix % Cue to tell LaTeX that the following "chapters" are Appendices
 
 % Include the appendices of the thesis as separate files from the Appendices folder
 % Uncomment the lines as you write the Appendices
@@ -416,6 +422,7 @@ The acknowledgments and the people to thank go here, don't forget to include you
 %	BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 
+\raggedright
 \printbibliography[heading=bibintoc]
 
 %----------------------------------------------------------------------------------------

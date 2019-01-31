@@ -17,7 +17,7 @@
 
 % REVIEW This section has two goals for each want: Explain what the want means and explain why it is important (if it is not self-evident) and maybe explain how it relates to other wants
 % NOTE I specifically avoid talking about architecture in this section, maybe I'm actually sabotaging myself with that
-The two separation architectures that will be analyzed in \ref{Chapter4} are the hardware separated subsystems architecture (from now on referred to as \acrshort{hss} architecture) and the embedded safety hypervisor architecture. It has been established that both can conceptually solve the mixed criticality problem and now it is time to compare the non-functional criteria of the architectures in question. 
+The two separation architectures that will be analyzed in chapter \ref{Chapter4} are the hardware separated subsystems architecture (from now on referred to as \acrshort{hss} architecture) and the embedded safety hypervisor architecture. It has been established that both can conceptually solve the mixed criticality problem and now it is time to compare the non-functional criteria of the architectures in question. 
 
 To achieve this a list of criteria will be proposed that will serve as a categorization tool for the analysis.
 This list comprises the key wants that manufactures want to achieve when engineering a device. A want can be understood as a business driver for device manufacturers. Fulfilling all wants to the best degree possible, would result in a perfect device. These idealized wants will be used to compare the hypervisor architecture to other device architectures and recommend the features to look for when choosing a real-world hypervisor implementation.
@@ -71,7 +71,7 @@ neither explicitly expressed nor expected by the customer. Fulfilling these requ
 This analysis is only based on the theoretical concepts and does not mean a Kano model analysis needs to be carried out. Furthermore, one-dimensional requirements will not be further considered as they can be simplified to be must-be requirements below zero satisfaction and attractive above zero satisfaction. 
 
 % TODO Maybe elaborate on TTM benefits
-Projects typically have an ideal time to market \cite{clark1989project}\cite{stalk1988time} that maximizes potential revenue and units sold. If some functionally takes less time to implement, more can be achieved within this ideal timeline. Especially, attractive requirements can be more easily considered and give the manufacturer an edge over his competitors. If the optimal time is missed and less overall units are sold the manufacturer can not take proper advantage of the economies of scale. More overall produced units means more components can be bought, which drives down the price. One way to reduce the time it takes to include functionality is to use third-party software, either free open-source or paid for. 
+Projects typically have an ideal time to market that maximizes potential revenue and units sold \cite{stalk1988time}. If some functionally takes less time to implement, more can be achieved within this ideal timeline. Especially, attractive requirements can be more easily considered and give the manufacturer an edge over his competitors. If the optimal time is missed and less overall units are sold the manufacturer can not take proper advantage of the economies of scale. More overall produced units means more components can be bought, which drives down the price. One way to reduce the time it takes to include functionality is to use third-party software, either free open-source or paid for. 
 
 \section{As few faults as feasible}
 % TODO Also talk about fault severity. If an architecture does not reduce the total amount of faults but reduces the number of faults that lead to defects or severe defects, it is still a win
@@ -83,7 +83,6 @@ Faults are undesirable in any engineering environment, but they are especially u
 Reducing the number of faults to a minimum has multiple dimensions:
 \paragraph{Reducing the frequency of fault implementation}
 % TODO Go into modular architecture benefits once that section exists 
-% CRITICAL Remove the "decades since" thing
 It is still the common understanding that all non-trivial software that isn't formally verified will contain faults \cite{klein2009sel4}\cite{lipow1982number}. But it has become evident that development processes and architectures can have a positive impact on how many faults are built into the software and many guidelines for how this can be achieved exist \cite{martin2009clean}. Measures that reduce the likelihood of fault implementation can avoid all costs associated with the faults entirely and can, therefore, bring the biggest improvements. 
 \paragraph{Finding faults effectively}
 % TODO Go into modular architecture benefits once that section exists 
@@ -113,7 +112,7 @@ Even in the event of a fault, a lot of safety-critical systems have to continue 
 Even human factors cannot be left unconsidered in such an important architectural decision. First and foremost there is the importance of the manufacturer's employees. If they are unhappy with their work, they are more prone to errors.
 
 % CRITICAL Find a different source for wyatt
-One example of this could be a difficult to work with software tool that requires performing many repetitive tasks. Repetitive tasks are shown to decrease efficiency and increase the chance for mistakes. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. In this instance, the employee dissatisfaction is only an indicator for a hidden root cause.
+One example of this could be a difficult to work with software tool that requires performing many repetitive tasks. Repetitive tasks may decrease efficiency and increase the chance for mistakes. Additionally, depending on the cause for the dissatisfaction it can also be indicative of problems that could them self introduce errors. In this instance, the employee dissatisfaction would only an indicator for a hidden root cause.
 
 % TODO Incorporate both of these points into the analysis if they are not there already
 % CRITICAL Find source

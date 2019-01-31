@@ -41,19 +41,18 @@ Certifying components to the lowest possible criticality level instead of the hi
 
 Historically speaking the only architecture that was capable of this separation, was the hardware separated subsystems architecture. In this architecture, additional processors, along with other necessary resources, are added to the system to separate the components from each other. If a safety-critical device manufacturer can solve the mixed criticality problem cheaper and make it feasible in smaller devices, it could be a significant edge over competitors.
 
-The primary contender for this better separation architecture is the embedded safety hypervisor. It typically consists of a microkernel which can host both native C runtimes and, to give the hypervisor its name, virtualized operating systems. Because it has already been gaining traction in the automotive industry and some outliers in other sectors, this architecture is also what this thesis set out to analyze.
+The primary contender for this better separation architecture is the embedded safety hypervisor. It typically consists of a microkernel which can host both native C runtimes and, to give the hypervisor its name, virtualized operating systems. Because it has already been gaining traction in the automotive industry and some outliers in other sectors, this architecture is also what this thesis set out to analyze. Chapter \ref{Chapter2} introduced a basic safety hypervisor that displays all the functionality of common hypervisor implementations. The features that can probably achieve the greatest value for the manufacturer were health monitoring and multicore support. Multicore support is a valuable tool for achieving maximum hardware consolidation. Health monitoring can be used to detect abnormal system events and react appropriately. 
 
 % TODO Make what I write here clear in the respective introduction.
 As a way to abstract the business goals of safety-critical device manufacturers, their \keyword{key wants} were introduced. These later served as categorization for the comparative analysis of the two architectures. And although the importance of each category was not explored fully, they should allow an eventual safety-critical device engineer to understand which are most important for his device. Consequently, it can be used to judge the importance of certain architecture benefits and drawbacks.
 
 % NOTE In the current structure they did not emerge from it, crucial differences come first.
-Through the theoretical analysis in \ref{Chapter4}, some crucial differences between the architectures emerged:
+Through the theoretical analysis in chapter \ref{Chapter4}, some crucial differences between the architectures emerged:
 \begin{itemize}
-    \item The hypervisor's separation can not surpass that of the \acrshort{hss} architecture.
+    \item The hypervisor's separation cannot surpass that of the \acrshort{hss} architecture.
     \item Hypervisor is more modifiable and can provide smaller utility features.
     \item Hypervisor is a reusable, general solution, so costs are shared between parties over a period of time.
     \item Hypervisor's centralized view give it unique opportunities for system management and fault tolerance.
-    \item Hypervisor loses some benefits if advanced fault tolerance, like redundancy, is required.
     \item Hypervisor partitions are cheaper to add and can, therefore, help achieve a more modular device architecture.
 \end{itemize}
 
@@ -74,7 +73,7 @@ Finally, the questions proposed in section \ref{how-to-decide} give a concrete l
 \end{itemize}
 Along with the noteworthy hypervisor implementations of section \ref{noteworthy-implementations} and the reference projects this should give the safety-critical device engineer, plenty of information to base his analysis on. 
 
-The hypervisor architecture for safety-critical devices is still young and connected to a lot of uncertainty but given time, a place in the toolbox will be found for it. It is unlikely to be a complete replacement for hardware-based separation architectures like the \acrshort{hss} architecture, but in a given niche it is certainly going to outperform the traditional architectures.
+The hypervisor architecture for safety-critical devices is still young and connected to a lot of uncertainty, but given time, these issues are surmountable. It is unlikely to be a complete replacement for hardware-based separation architectures like the \acrshort{hss} architecture, but there is bound to be a broad device category where it can outperform the traditional architectures.
 
 
 \begin{comment} 
