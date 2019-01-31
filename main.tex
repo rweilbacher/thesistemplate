@@ -235,7 +235,16 @@ headsepline, % Uncomment to get a line under the header
 
 \begin{abstract}
 \addchaptertocentry{\abstractname} % Add the abstract to the table of contents
-The Thesis Abstract is written here (and usually kept to just this page). The page is kept centered vertically so can expand into the blank space above the title too\ldots
+The main point of this thesis is that the safety-critical device industry has yet to realize the full potential of embedded safety hypervisors. While hypervisors are getting more and more attention in the automotive and aviation sectors, other industries, like healthcare, barely acknowledge them. Up to this point, software components with different risk factors have been separated by executing them on different processors. This ensures that a low-risk function cannot interfere with a high-risk function. However, adding processors increases the size, weight, power, and cost of the device. 
+Therefore, the primary goal of this thesis is to show that hypervisors may be used as a more efficient separation architecture with additional benefits.
+
+To achieve this, chapter two proposes a basic safety hypervisor that explains the functionality that can be expected. At its core, the hypervisor separates virtualized operating systems from each other. 
+The most interesting secondary hypervisor features that emerged are the ability to monitor system events and the support for multicore processors. 
+Then a theoretical analysis of the differences between the hypervisor and the multiprocessor separation was carried out. In this analysis, four crucial hypervisor benefits emerged: Hypervisor partitions are cheaper to add and consequently allow for more granular separation. The hypervisor has a centralized view of the system and can, therefore, monitor for abnormal events. Hypervisors are general and reusable solutions, which allows them to provide more features long-term. And the last benefit: A hypervisor is a software-based solution and can be more easily modified than a hardware-based approach. One potential downside of the hypervisor is that its  software-based separation may not be enough for some use-cases.
+However, the analysis is inconclusive, since the usefulness of a hypervisor depends on the specific requirements of the device. Furthermore, some details, like the license cost of a hypervisor, are not available to the public. It is up to the safety-critical device engineer to relate the analysis to his use-case.
+
+To help safety-critical device engineers build strong arguments for the hypervisor, the last part of this thesis puts the safety hypervisor into a more practical context. Two reference projects are described with one of them containing a  detailed example of a possible hypervisor configuration. These reference projects were designed to represent scenarios where the hypervisor architecture is beneficial.
+And finally, a list of questions is proposed that should be asked when deciding on a hypervisor implementation. It includes questions that could not be cleared up by the analysis.
 \end{abstract}
 
 %----------------------------------------------------------------------------------------

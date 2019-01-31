@@ -14,34 +14,34 @@
 %\newcommand{\option}[1]{\texttt{\itshape#1}}
 
 %----------------------------------------------------------------------------------------
-After the free form analysis of chapter \ref{Chapter4} it is now time to give more concrete examples on when and why the hypervisor architecture should be chosen. For this purpose several \keyword{reference projects} will be laid out and it will be discussed what makes them good or bad examples for the architecture. Afterwards some basic guidance will be given on how a specific third-party hypervisor implementation should be chosen and what metrics need to be gathered.
+After the free form analysis of chapter \ref{Chapter4} it is now time to give more concrete examples on when and why the hypervisor architecture should be chosen. For this purpose, several \keyword{reference projects} will be laid out, and it will be discussed what makes them good or bad examples for the architecture. Afterwards, some basic guidelines will be given on how a specific third-party hypervisor implementation should be chosen and what metrics need to be gathered.
 \section{Reference projects} \label{ref-projects}
-This list of imaginary reference projects serves as a tool for the safety-critical device engineer to categorize his project's characteristics. Each project is chosen to conform with a broad category of safety-critical devices in terms of scope and criticality to make a statement about the hypervisor architectures suitability for that category. 
+This list of imaginary reference projects serves as a tool for the safety-critical device engineer to categorize his project's characteristics. Each project is chosen to conform with a broad category of safety-critical devices regarding scope and criticality to make a statement about the hypervisor architectures suitability for that category. 
 
-The proposed projects are simplified and only attributes relevant to the architectural decision are examined. Metrics that can't be considered, like license cost, will not be mentioned. The first proposed project, the portable gas detector, will be used to construct a concrete implementation example. This will show an example of what a hypervisor configuration may actually look like on a real device.
+The proposed projects are simplified, and only attributes relevant to the architectural decision are examined. Metrics that can't be considered, like license cost, will not be mentioned. The first proposed project, the portable gas detector, will be used to construct a concrete implementation example. This will show an example of what a hypervisor configuration may look like on a real device.
 
 \subsection{Portable gas detector}
 % https://www.elektroniknet.de/markt-technik/elektronikfertigung/perfekte-symbiose-von-oem-und-ems-151254.html
 \subsubsection{Introduction}
-This example project is a general, portable gas detector that measures the concentration of different gases by detecting the color change of a chemical, sensitive to the gas in question. Cartridges with clear, sealed tubes can be inserted into the device and once a measurement begins, one of the tubes is punctured and air is pumped through at a specific rate. Then the color change is observed by a \acrshort{cmos} sensor. Because the color change, pump speed and other metrics are different for every gas, information can be extracted from the cartridge via an \acrshort{nfc} tag. This tag also contains general information about the cartridge in question. The basic functionality of this device was inspired by \cite{gasdetect} but everything after this section is made up to create an informative reference project.
+This example project is a general, portable gas detector that measures the concentration of different gases by detecting the color change of a chemical, sensitive to the gas in question. Cartridges with clear, sealed tubes can be inserted into the device and once a measurement begins, one of the tubes is punctured, and air is pumped through at a specific rate. Then the color change is observed by a \acrshort{cmos} sensor. Because the color change, pump speed, and other metrics are different for every gas, information can be extracted from the cartridge via an \acrshort{nfc} tag. This tag also contains general information about the cartridge in question. The basic functionality of this device was inspired by \cite{gasdetect} but everything after this section is made up to create an informative reference project.
 % TODO Mention device use environment
 
-In this thought experiment the first version of this device has already been on the market for some time and now the manufacturer is looking to create the next generation. The current generation is equipped with an ARM Cortex-M4, a USB port for transmitting measurement data and an LCD display with a simplistic \acrshort{gui}. All of the software sits on top of a small \acrshort{rtos}, with the \acrshort{gui} framework also being provided by the \acrshort{rtos} developer.
+In this thought experiment the first version of this device has already been on the market for some time, and now the manufacturer is looking to create the next generation. The current generation is equipped with an ARM Cortex-M4, a USB port for transmitting measurement data and an LCD display with a simplistic \acrshort{gui}. All of the software sits on top of a small \acrshort{rtos}, with the \acrshort{gui} framework also being provided by the \acrshort{rtos} developer.
 
-In the future generation, the manufacturer wants to expand the device's functionality by adding Bluetooth support and a more flexible \acrshort{gui} . Furthermore, the manufacturer wants to be able to extend both the safety-critical and non-safety-critical functionality without having to release a new hardware revision. The core gas measurement code is hardware independent and already verified. It is also very unlikely to change in the future, so it could be beneficial to attempt to \keyword{seal} the software. Oftentimes, if one part of the software has been changed, other potentially related parts, also need to be reverified to achieve regulatory compliance. A sealed piece of software can forego this reverification, if it can be reasonably evidenced that it will not be affected by changes in the other software. A separation architecture is ideal for providing this evidence.
+In the future generation, the manufacturer wants to expand the device's functionality by adding Bluetooth support and a more flexible \acrshort{gui} . Furthermore, the manufacturer wants to be able to extend both the safety-critical and non-safety-critical functionality without having to release a new hardware revision. The core gas measurement code is hardware independent and already verified. It is also very unlikely to change in the future, so it could be beneficial to attempt to \keyword{seal} the software. Oftentimes, if one part of the software has been changed, other potentially related parts, also need to be reverified to achieve regulatory compliance. A sealed piece of software can forego this re-verification if it can be reasonably evidenced that it will not be affected by changes in the other software. A separation architecture is ideal for providing this evidence.
 % NOTE How important is unit cost?
 \subsubsection{Discussion}
-% TODO I only mention SWaP but SWaP-C is probably improved. At least in terms of direct hardware cost!
+% TODO I only mention SWaP, but SWaP-C is probably improved. At least in terms of direct hardware cost!
 The current device generation uses no separation architecture because it is not very complex and any components of lower criticality were feasible to achieve within the chosen architecture. With the upcoming generation there are now stronger initial incentives to consider the separation of software components:
 \begin{enumerate}
 \item There is easily sealable, expensive to verify code, in the form of the gas concentration algorithm.
-\item \acrshort{gui} libraries on Linux would be a great fit for realizing a more complex \acrshort{gui} with less effort than on a typical \acrshort{rtos}. But Linux can not be feasibly verified for the safety-critical use case.
+\item \acrshort{gui} libraries on Linux would be a great fit for realizing a more complex \acrshort{gui} with less effort than on a typical \acrshort{rtos}. But Linux cannot be feasibly verified for the safety-critical use case.
 \item Both safety-critical and non-safety-critical functionality will likely be extended in the future. As established in section  \ref{safety-analysis}, granular partitions or the ability to add more can make regression testing cheaper and less error-prone.
 \end{enumerate}
-Additionally, the planned features do not directly impact the operators safety. The only component that can pose a threat is the \acrshort{gui} because the display could show an incorrect concentration of dangerous gas. To mitigate this risk, a red \acrshort{led} controlled by the critical code, will begin blinking if the measured concentration is above the limit specified on the cartridge's \acrshort{nfc} tag. Any other failure in these components will either just prohibit retrieving data from the device for later analysis or render the device unusable. And while these effects are undesirable, the operator can recognize them and take actions to protect himself.
+Additionally, the planned features do not directly impact the operator's safety. The only component that can pose a threat is the \acrshort{gui} because the display could show an incorrect concentration of dangerous gas. To mitigate this risk, a red \acrshort{led} controlled by the critical code, will begin blinking if the measured concentration is above the limit specified on the cartridge's \acrshort{nfc} tag. Any other failure in these components will either just prohibit retrieving data from the device for later analysis or render the device unusable. And while these effects are undesirable, the operator can recognize them and take actions to protect himself.
 
 % NOTE References to relevant sections?
-So now that the manufacturer has come to the conclusion that a separation architecture would be beneficial for the device, he needs to find one that supports his use case. \bold{For a battery powered, hand-held device \acrfull{swap} are all very important and this provides a big advantage for the hypervisor, as the \acrshort{hss} architecture compares unfavourably in regards to these criteria.} Of course using the Linux \acrshort{gui} offerings would invariably lead to a stronger processor being necessary to support Linux but this would be the case for both separation architectures and for this case we will assume the manufacturer has decided that this is a worthwhile drawback for the increased graphical fidelity. 
+So now that the manufacturer has concluded that a separation architecture would be beneficial for the device, he needs to find one that supports his use case. \bold{For a battery-powered, hand-held device \acrfull{swap} are all very important, and this provides a big advantage for the hypervisor, as the \acrshort{hss} architecture compares unfavourably in regards to these criteria.} Of course using the Linux \acrshort{gui} offerings would invariably lead to a stronger processor being necessary to support Linux but this would be the case for both separation architectures and for this case we will assume the manufacturer has decided that this is a worthwhile drawback for the increased graphical fidelity. 
 
 Separating the gas measurement code from other parts of the software is equally doable on both architectures. However, the hypervisor's support for more granular partitions makes regression testing of a software revision cheaper and can generally aid the software extendibility and maintainability.
 
@@ -49,19 +49,19 @@ One last benefit the hypervisor has in this scenario is established by its hardw
 % TODO Maybe mention advanced safety features?
 \subsubsection{Conclusion}
 % FINAL This could be improved
-This project exemplifies a case where separation is becoming increasingly attractive because of growing consumer demands and processing power but where the \acrshort{hss} architecture violates the core demands of the use case. Battery-powered devices like this, that are sensitive to changes in size, weight and power are also likely to become more and more common.
+This project exemplifies a case where separation is becoming increasingly attractive because of growing consumer demands and processing power but where the \acrshort{hss} architecture violates the core demands of the use case. Battery-powered devices like this that are sensitive to changes in size, weight, and power are also likely to become more and more common.
 
-With the criticality level of the device and the specific risks involved, the hypervisor architecture's lack of support for advanced safety features and its less provable separation do not render it unusable. And finally, the hypervisors granularity lends itself well to creating a future-proof design, if unit cost is not a bigger concern. 
+With the criticality level of the device and the specific risks involved, the hypervisor architecture's lack of support for advanced safety features and its less provable separation does not render it unusable. And finally, the hypervisors granularity lends itself well to creating a future-proof design, if unit cost is not a bigger concern. 
 % TODO Is there more I want to say?
 \subsubsection{Possible implementation}
 To show what the hypervisor configuration could look like for the gas detector, there will be a more detailed example in this section. Keep in mind that this is an imagined project. That means the requirements of the device were chosen to create a plausible and informative example and may or may not be common in real-world devices.
 
-\paragraph{High level architecture}
+\paragraph{ High-level architecture}
 Figure \ref{fig:gas_detect_high_level} shows a high level view of the device architecture. Communication paths between the partitions will be explored in a later section.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.75]{Figures/gas_detect_high_level_no_ipc_with_criticality.png}
+\includegraphics[scale=0.9]{Figures/gas_detect_high_level_no_ipc_with_criticality.png}
 \decoRule
 \caption{High-level view of the gas detector architecture}
 \label{fig:gas_detect_high_level}
@@ -77,7 +77,7 @@ Figure \ref{fig:gas_detect_high_level} shows a high level view of the device arc
 
 % TODO Explain in more detail
 The hypervisor is running on a dual-core ARM Cortex-A7 with hardware virtualization extensions. The virtualization extensions are used for the two-stage \acrshort{mmu} address translation and to stop the guests from using privileged processor instructions. Two-stage address translation means that the \acrshort{mmu} maintains a page table for each partition. 
-For performance reasons, the virtualization extensions are not used to fully virtualize the guest operating systems. Instead the operating systems have been modified to support paravirtualization.
+For performance reasons, the virtualization extensions are not used to fully virtualize the guest operating systems. Instead, the operating systems have been modified to support paravirtualization.
 
 % TODO Risk levels belong to introduction (Or does it)
 There are four partitions on the hypervisor. Two safety-critical partitions running a generic \acrshort{rtos} and a native C environment respectively. The non-safety critical partition responsible for the \acrshort{gui} is running a paravirtualized Linux and the \acrshort{usb} driver is also in a native C runtime environment. 
@@ -86,12 +86,12 @@ The only job of the \acrshort{usb} driver partition is to share the \acrshort{us
 
 The \acrshort{gui} application takes care of displaying the results, as well as exporting them over Bluetooth or \acrshort{usb} with the help of the \acrshort{usb} driver partition. \acrshort{usb} is used by the safety-critical partition to update the firmware of the device. That means the measurement application will receive the update over \acrshort{usb}, verify that it is correct and then apply the update.
 
-All safety-critical peripherals are assigned to the measurement application. It carries out the measurements, monitors the system and updates the firmware over \acrshort{usb}. It is also responsible for providing the measurement data to the concentration algorithm partition. With that data the concentration algorithm partition calculates the correct gas concentration and reports it to back to the measurement partition. \bold{These two partitions were separated to seal the complex algorithm.} The measurement partition is quite likely to be modified after release but the concentration algorithm will probably never have to be modified again. If the two are in separate partitions the manufacturer does not have to reverify the algorithm, if the measurement software was changed.
+All safety-critical peripherals are assigned to the measurement application. It carries out the measurements, monitors the system and updates the firmware over \acrshort{usb}. It is also responsible for providing the measurement data to the concentration algorithm partition. With that data, the concentration algorithm partition calculates the correct gas concentration and reports it to back to the measurement partition. \bold{These two partitions were separated to seal the complex algorithm.} The measurement partition is quite likely to be modified after release, but the concentration algorithm will probably never have to be modified again. If the two are in separate partitions, the manufacturer does not have to reverify the algorithm, if the measurement software was changed.
 
-The development of the two safety-critical partitions will need to conform to the IEC 61508 standard. They're risk levels were classified as \acrshort{sil} 3, as a failure can potentially cause the loss of a life. But because of their risk mitigation techniques, like the warning \acrshort{led} and the start button being connected to the safety-critical application, it is reasonably unlikely that an operator would get injured. If the \acrshort{gui} partition fails, the device may no longer be usable but the operator can recognize this and leave the area before a dangerous gas concentration could cause harm.
+The development of the two safety-critical partitions will need to conform to the IEC 61508 standard. Their risk levels were classified as \acrshort{sil} 3, as a failure can potentially cause the loss of life. But because of their risk mitigation techniques, like the warning \acrshort{led} and the start button is connected to the safety-critical application, it is reasonably unlikely that an operator would get injured. If the \acrshort{gui} partition fails, the device may no longer be usable, but the operator can recognize this and leave the area before a dangerous gas concentration could cause harm.
 
 \paragraph{A more detailed look at user-space}
-Figure \ref{fig:gas_detect_low_leve} shows a more detailed view of the user-space in the previous figure. The hardware and hypervisor layer are not shown here but all communication paths between the partitions are included and numbered. Assigned peripherals are in grey. All the attachment points of communication channels and peripherals were chosen purely for aesthetic reasons. The following paragraphs will explain this figure in more detail.
+Figure \ref{fig:gas_detect_low_leve} shows a more detailed view of the user-space in the previous figure. The hardware and hypervisor layer are not shown here, but all communication paths between the partitions are included and numbered. Assigned peripherals are in grey. All the attachment points of communication channels and peripherals were chosen purely for aesthetic reasons. The following paragraphs will explain this figure in more detail.
 
 \begin{figure}[ht!]
 \centering
@@ -114,16 +114,16 @@ The measurement application on the other hand directly controls all the peripher
 The warning \acrshort{led} will begin blinking red, if the measured concentration is above the dangerous limit, indicated on the cartridge \acrshort{nfc} tag. That is also part of the reason, why the \acrshort{nfc} tag needs to be read in the certified, safety-critical application.
 
 % TODO Maybe talk about the impairment of the GUI partition in this relationship and how the manufacturer aims to resolve it
-Unlike the other peripherals the \acrshort{usb} peripheral is not directly connected to the partition that uses it. The \acrshort{usb} stack for it is isolated on a native C partition. If either the \acrshort{gui} application or the measurement application want to use the \acrshort{usb} they start communicating over their \acrshort{ipc} channels that are connected to the \acrshort{usb} driver partition. So the two channels marked with 4 for the \acrshort{gui} application and the two channels marked with 5 for the measurement application. Arbitration implemented by the driver is very simple, it always gives access to the safety-critical partition. This ensures that the \acrshort{gui} application can not interfere with the firmware update process. 
+Unlike the other peripherals, the \acrshort{usb} peripheral is not directly connected to the partition that uses it. The \acrshort{usb} stack for it is isolated on a native C partition. If either the \acrshort{gui} application or the measurement application wants to use the \acrshort{usb} they start communicating over their \acrshort{ipc} channels that are connected to the \acrshort{usb} driver partition. So the two channels marked with 4 for the \acrshort{gui} application and the two channels marked with 5 for the measurement application. Arbitration implemented by the driver is very simple, it always gives access to the safety-critical partition. This ensures that the \acrshort{gui} application cannot interfere with the firmware update process. 
 
 \paragraph{Scheduling}
 Since this system is a dual-core system, scheduling has to take this into account. Figure \ref{fig:gas_detect_vcpu_schedule} depicts how the physical cores are distributed among the partitions. Each partition only has one virtual \acrshort{cpu} which is assigned to one of the physical \acrshort{cpu}s. Both safety-critical applications are scheduled on one physical \acrshort{cpu} while the non-critical partitions are scheduled on the other to reduce the chance of interference and keep the system simple. The second level cache that is shared between cores is disabled to eliminate the problems with determinism. 
 
-However, there still needs to be a scheduling algorithm for each physical \acrshort{cpu}. In this case it is a simple priority based preemptive scheduling algorithm. Whenever, the partition with the higher priority wants to execute it gets control over the \acrshort{cpu}. The priorities for this system are shown in table \ref{tab:gasdetect_priorities}. For the non-critical partitions, resource starvation is not a dangerous issue but in theory, the concentration algorithm partition could consume all \acrshort{cpu} time from the measurement application. However, the concentration algorithm is much simpler than the other applications and it can be mathematically asserted that the chance of the algorithm doing this are sufficiently low.
+However, there still needs to be a scheduling algorithm for each physical \acrshort{cpu}. In this case, it is a simple priority-based preemptive scheduling algorithm. Whenever the partition with the higher priority wants to execute it gets control over the \acrshort{cpu}. The priorities for this system are shown in table \ref{tab:gasdetect_priorities}. For the non-critical partitions, resource starvation is not a dangerous issue, but in theory, the concentration algorithm partition could consume all \acrshort{cpu} time from the measurement application. However, the concentration algorithm is much simpler than the other applications, and it can be mathematically asserted that the chance of the algorithm doing this is sufficiently low.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=1]{Figures/gas_detect_vcpu_schedule.png}
+\includegraphics[scale=0.8]{Figures/gas_detect_vcpu_schedule.png}
 \decoRule
 \caption{\acrshort{cpu} allocation for gas detector.}
 \label{fig:gas_detect_vcpu_schedule}
@@ -146,7 +146,7 @@ The memory allocation of the device is depicted in figure \ref{fig:gas_detect_me
 
 \begin{figure}[hb!]
 \centering
-\includegraphics[scale=1]{Figures/gas_detect_memory_allocation.png}
+\includegraphics[scale=0.9 ]{Figures/gas_detect_memory_allocation.png}
 \decoRule
 \caption{Memory allocation for gas detector}
 \label{fig:gas_detect_memory_allocation}
@@ -154,7 +154,7 @@ The memory allocation of the device is depicted in figure \ref{fig:gas_detect_me
 
 \paragraph{Health monitoring}
 To keep an eye on the system's status, the measurement application also periodically checks the health monitoring log for abnormal events. If it encounters any unrecoverable issues in the Linux partition, it will simply restart the partition. 
-For the algorithm partition however this behavior would not be appropriate, since an incorrect calculation could lead to the endangerment of the operator. If there is an unexpected error in the algorithm partition during a calculation, the measurement application will attempt to restart the algorithm partition and reattempt the concentration calculation. After three failed attempts, it will begin flashing the red warning \acrshort{led} rapidly to indicate that there is a dangerous problem.
+For the algorithm partition, however, this behavior would not be appropriate, since an incorrect calculation could lead to the endangerment of the operator. If there is an unexpected error in the algorithm partition during a calculation, the measurement application will attempt to restart the algorithm partition and reattempt the concentration calculation. After three failed attempts, it will begin flashing the red warning \acrshort{led} rapidly to indicate that there is a dangerous problem.
 
 \paragraph{Normal operation}
 A measurement is started once the button connected to the safety-critical measurement application is pressed. First, the algorithm parameters are read from the \acrshort{nfc} chip on the reagent cartridge. Then the pump is activated to suck air through the glass tube with the reagent. At the same time, several images are captured by the \acrshort{cmos} sensor.
@@ -165,21 +165,21 @@ If the calculated concentration is higher than the dangerous limit specified on 
 
 \subsection{Automated blood diagnostics device}
 % FINAL Make it clear how the operator station is related to the rest of the device
-In this example, the focus will be on the decision between the \acrshort{hss} architecture and the hypervisor architecture. A detailed example, like the last reference project will not given.
+In this example, the focus will be on the decision between the \acrshort{hss} architecture and the hypervisor architecture. A detailed example, like the last reference project, will not be given.
 \subsubsection{Introduction}
 % TODO Describe informally what the machinery does and what it consists of
-This reference project is an upcoming in vitro diagnostics device that analyzes a patient's blood. Its functionalities include automatic test processing, result interpretation and data management. Blood assays include both standard blood characteristics, as well as disease screening.
-The device's use environment are clinical blood labs and donation centers. It allows an operator to define and schedule automatic assays on top of displaying results on the attached operator station. The operator station consists of a monitor, a computer-mouse and a keyboard. Furthermore, the device is connected to a database of blood data for the synchronization of results.
+This reference project is an upcoming in vitro diagnostics device that analyzes a patient's blood. Its functionalities include automatic test processing, result interpretation, and data management. Blood assays include both standard blood characteristics, as well as disease screening.
+The device's use environments are clinical blood labs and donation centers. It allows an operator to define and schedule automatic assays on top of displaying results on the attached operator station. The operator station is connected via HDMI for the monitor and USB for the keyboard and mouse. Additionally, the device is connected to a database of blood data for the synchronization of results.
 
-There is a clear divide of criticality between the operator station and the components responsible for handling and analyzing the blood samples. For the operator station it is important that the assay configuration gets sent to analysis component correctly and that the test results received after an analysis are correct. Transmitting and receiving results from the database is also not critical to the patients safety.
+There is a clear divide of criticality between the operator station and the components responsible for handling and analyzing the blood samples. For the operator station, it is important that the assay configuration gets sent to analysis component correctly and that the test results received after the analysis are correct. Transmitting and receiving results from the database is also not critical to the patient's safety.
 
 % TODO Mention in Vitro medical standard 
-The blood analysis component on the other hand is more critical. A perfect uptime is not required as a patient is not immediately dependent on the device. Instead, it is much more important that faults or incorrect measurements are discovered and communicated to an operator. Avoiding the cross-contamination of blood samples also has a very high priority.
+The blood analysis component, on the other hand, is more critical. A perfect uptime is not required as a patient is not immediately dependent on the device. Instead, it is much more important that faults or incorrect measurements are discovered and communicated to an operator. Avoiding the cross-contamination of blood samples also has a very high priority.
 
 \subsubsection{Discussion}
 With this device, separation is almost mandatory because the operator station contains a large low-criticality \acrshort{gui} that can be most optimally realized on a general purpose operating system, while the critical part needs to reliably control motors and react to input within a short time-frame. Traditionally this system would have been realized using the \acrshort{hss} architecture so now the question remains whether or not a hypervisor can be used effectively instead.
 
-First of all, due to the nature of the device, perfect uptime is not required, this means that redundancy is also not essential. This works in the favor of the hypervisor, since in the \acrshort{hss} architecture only the safety-critical component could be made redundant but that option would not be available for a hypervisor because all partitions are part of one processor. 
+First of all, due to the nature of the device, perfect uptime is not required, this means that redundancy is also not essential. This works in the favor of the hypervisor since in the \acrshort{hss} architecture only the safety-critical component could be made redundant but that option would not be available for a hypervisor because all partitions are part of one processor. 
 
 % TODO Make smaller
 % FIGURE Refine this figure
@@ -191,15 +191,15 @@ First of all, due to the nature of the device, perfect uptime is not required, t
 \label{fig:blood_diagnostics_hv_arch}
 \end{figure}
 
-However, the system's need for fault tolerance means that some advanced fault tolerance techniques are necessary to mitigate the risks as much as possible. One way this could be achieved with a hypervisor architecture can be seen in figure \ref{fig:blood_diagnostics_hv_arch}. In this case both the safety-critical partition and the operator station partition are running on the hypervisor, with a secondary microcontroller performing the same calculations and verifying the output of the safety-critical hypervisor partition. Even though this means there are now multiple processors present, the hypervisor still provides consolidating effects. A pure \acrshort{hss} architecture would still require a minimum of three partitions for the same setup.
+However, the system's need for fault tolerance means that some advanced fault tolerance techniques are necessary to mitigate the risks as much as possible. One way this could be achieved with a hypervisor architecture can be seen in figure \ref{fig:blood_diagnostics_hv_arch}. In this case, both the safety-critical partition and the operator station partition are running on the hypervisor, with a secondary microcontroller performing the same calculations and verifying the output of the safety-critical hypervisor partition. Even though this means there are now multiple processors present, the hypervisor still provides consolidating effects. A pure \acrshort{hss} architecture would still require a minimum of three partitions for the same setup.
 % FIGURE Make an architecture figure 
 
 % NOTE The proximity things seems like bullshit. Where did I even get that from?
-If we assume that the separation is adequate and all basic safety requirements can be met, there are still factors left to consider. First of all, since this is a system that deals with real-time requirements, proximity to the machinery could be valuable. But in this case \acrshort{emc} can cause significant issues. In the hypervisor setup a processor with a higher frequency would sit closer to the motors and other machinery which also themselves have \acrshort{emi}. This could easily lead to a violation of the \acrshort{emc} requirements of the regulatory body, introducing the need to add more electromagnetic shielding. 
+If we assume that the separation is adequate and all basic safety requirements can be met, there are still factors left to consider. First of all, since this is a system that deals with real-time requirements, proximity to the machinery could be valuable. But in this case \acrshort{emc} can cause significant issues. In the hypervisor setup, a processor with a higher frequency would sit closer to the motors and other machinery which also themselves introduce \acrlong{emi}. This could easily lead to a violation of the \acrshort{emc} requirements of the regulatory body, introducing the need to add more electromagnetic shielding. 
 
 This device can also benefit from the hypervisor's architectural improvements and easier configuration, perhaps even more so. Since it is more complex, it is also more likely that functionality can be usefully extracted into partitions, carrying the benefits explained in \ref{Chapter4}. But it is important to keep in mind that for a device with these characteristics, some of the typical hypervisor benefits are less relevant.
 
-First of all, the hardware cost savings are not going to make a big impact on a device this complex and big. Secondly, \acrshort{swap} are also not as crucial as for the portable gas detector. The housing of this unit is already going to be at least as big as a typical wardrobe and an extra microcontroller is not going to change that. Same goes for weight. And since the device is connected to power all the time, making it as power efficient as possible is also not a primary goal.
+First of all, the hardware cost savings are not going to make a big impact on a device this complex and big. Secondly, \acrshort{swap} are also not as crucial as for the portable gas detector. The housing of this unit is already going to be at least as big as a typical wardrobe, and an extra microcontroller is not going to change that. Same goes for weight. And since the device is connected to power all the time, making it as power efficient as possible is also not a primary goal.
 
 \begin{comment}
 % NOTE Did I say it is necessary in the introduction?! If not why am I arguing about his here. Bad section
@@ -209,7 +209,7 @@ One last thing that needs to be kept in mind is the typical hypervisor's current
 \subsubsection{Conclusion}
 This example represents a high complexity, high criticality project that can already profit from the more traditional approaches of separation but where, in a reevaluation of device architecture, the hypervisor approach might come out on top. 
 
-Some of the hypervisor benefits are not as important as in other classes of devices but it might still be an overall better choice, if the other factors like \acrshort{emc} and safety of separation can be adequately satisfied. This example has of course been significantly simplified to construct a discussion about devices that are in this range of complexity and criticality and in a real-world example a lot more analysis will be necessary to determine whether the hypervisor is a good fit. As of 2018 this may still be a risky technical decision but with the push into hypervisors by the aviation and automotive industry, industries that manufacturer exactly this class of devices, this could evaporate within the next decade.
+Some of the hypervisor benefits are not as important as in other classes of devices, but it might still be an overall better choice, if the other factors like \acrshort{emc} and safety of separation can be adequately satisfied. This example has of course been significantly simplified to construct a discussion about devices that are in this range of complexity and criticality and in a real-world example a lot more analysis will be necessary to determine whether the hypervisor is a good fit. As of 2018, this may still be a risky technical decision, but with the push into hypervisors by the aviation and automotive industry, industries that manufacturer exactly this class of devices, this could evaporate within the next decade.
 
 %----------------------------------------------------------------------------------------
 
@@ -217,20 +217,20 @@ Some of the hypervisor benefits are not as important as in other classes of devi
 % NOTE Maybe talk about how this applies to first-party hypervisors?
 This section explores the extended analysis that needs to be carried out by the manufacturer, once he is seriously considering using a third-party hypervisor. For the most part, it consists of a list of questions that need to be asked, with further explanation, if required. The categorization of the questions closely resembles the key wants established in \ref{Chapter3}.
 
-Actually, it is conceivable that the result of this analysis reveals that no third-party hypervisors exists that can satisfy the manufacturers targets. The importance of each question is going to vary on a project by project basis and questions should be asked roughly in their order of importance. 
+It is conceivable that the result of this analysis reveals that no third-party hypervisors exists that can satisfy the manufacturers targets. The importance of each question is going to vary on a project by project basis, and questions should be asked roughly in their order of importance. 
 
 \subsection{Certifiability}
 \paragraph{Which level of criticality does the hypervisor developer claim to be able to certify to?}
-Since, this section is concerned with the concrete real-world examples, the abstract concept of criticality levels also has to be abandoned. It only makes sense to ask this question in relation to the actual regulations that the device will be certified to.
+Since this section is concerned with the concrete, real-world examples, the abstract concept of criticality levels also has to be abandoned. It only makes sense to ask this question in relation to the actual regulations that the device will be certified to.
 
 \paragraph{What deliverables and services does he offer to aid with certification?}
-Usually the developer will offer documentation and test cases for the hypervisor that can be presented as evidence of safety to the regulatory bodies. But typically there is more work to do: the specifics depend on the standard but at the very least the risk of using the hypervisor needs to be evaluated and justified. Developers will also usually offer services to help with the certification of the hypervisor. Depending on the manufacturer's prowess with the regulations and the hypervisor such a service could be worthwhile.
+Usually, the developer will offer documentation and test cases for the hypervisor that can be presented as evidence of safety to the regulatory bodies. But typically there is more work to do: the specifics depend on the standard, but at the very least the risk of using the hypervisor needs to be evaluated and justified. Developers will also usually offer services to help with the certification of the hypervisor. Depending on the manufacturer's prowess with the regulations and the hypervisor such a service could be worthwhile.
 \paragraph{Has the hypervisor successfully been used in a device that has to comply to the same regulations?}
-Although, a "proven-in use" status is not enough to convince a regulatory body of a piece of software's safety it is at least evidence, that it can be done.
+Although, a "proven in use" status is not enough to convince a regulatory body of a piece of software's safety it is at least evidence, that it can be done.
 \paragraph{Do the claims of the developer and his documentation survive more intense scrutiny and project specific risk analysis?}
 Because the hypervisor developers are clearly trying to sell a product, their claims should be met with scrutiny. This is a question that should probably be analyzed in the latter stages of the decision process.
 \subsection{Cost}
-The question of the hypervisor license cost has been mostly avoided in this thesis, since it can't be answered on a general level. Now is the time to come back to it.
+The question of the hypervisor license cost has been mostly avoided in this thesis since it can't be answered on a general level. Now is the time to come back to it.
 \paragraph{What license model is applicable and what will the license cost?}
 License models tend to vary based on unit cost and rate of production.
 The cost of the license is probably exclusively subject to negotiation. 
@@ -239,17 +239,17 @@ One possibility for an extra service has already been listed; enlisting the deve
 \paragraph{What costs are associated with the operating system that will run on the hypervisor?}
 This question doesn't necessarily have to do with the hypervisor developer directly, although it can. The default paravirtualized \acrshort{os} is supplied by the hypervisor developer and may incur additional costs. If the manufacturer decides to customize an operating system himself or use a fully virtualized free open-source \acrshort{os} these license costs can be avoided. 
 \subsection{Dependence}
-The last question in the previous section already hints at it: using a third-party hypervisor can introduce significant dependence to said third-party, especially sine the third-party also offers the \acrshort{os} running on top of the hypervisor.
+The last question in the previous section already hints at it: using a third-party hypervisor can introduce significant dependence to said third-party, especially since the third-party also offers the \acrshort{os} running on top of the hypervisor.
 \paragraph{Is the hypervisor source code available?}
 \paragraph{Is it feasible for the manufacturer to modify the hypervisor on his own?}
-This requires the source code to be available and legally modifiable. Such actions could include supporting additional hardware and changing or adding hypervisor functionality. If the manufacturer is planning to build expertise with the hypervisor implementation this can allow him to save costs by not enlisting the original developer to fulfill these services.
+This requires the source code to be available and legally modifiable. Such actions could include supporting additional hardware and changing or adding hypervisor functionality. If the manufacturer is planning to build expertise with the hypervisor implementation, this can allow him to save costs by not enlisting the original developer to fulfill these services.
 
 \paragraph{What paravirtualized operating systems are available and can the manufacturer feasibly add new ones?}
 
 \paragraph{If the device has real-time requirements, can they be met with the hypervisor architecture?}
-This is clearly a very difficult question to answer, before development has even begun but it still needs to be analyzed to avoid disaster.
+This is clearly a very difficult question to answer before development has even begun, but it still needs to be analyzed to avoid disaster.
 \subsection{Additional functionality}
-The core functionality the hypervisor offers has been explored in \ref{Chapter2}. This section is concerned with slightly more advanced features. Some hypervisor implementations are completely bare-bones and offer nothing beyond the features of a basic hypervisors and others offer many advanced features. This difference is likely to be reflected in the price of the respective implementations.
+The core functionality the hypervisor offers has been explored in \ref{Chapter2}. This section is concerned with slightly more advanced features. Some hypervisor implementations are completely bare-bones and offer nothing beyond the features of a basic hypervisors, and others offer many advanced features. This difference is likely to be reflected in the price of the respective implementations.
 \paragraph{What additional functionality can the developer offer?}
 Below is a list of some possible features that exist in current implementations.
 % NOTE Do any items require additional explanation?
@@ -261,13 +261,13 @@ Below is a list of some possible features that exist in current implementations.
     \item Virtual input device support
     \item Security certifications
     \item Automatic tests during operation
-    \item Virtual high resolution timers
+    \item Virtual high-resolution timers
 \end{itemize}
 
 \subsection{Impact on the development process}
 \subsubsection{Tooling}
 \paragraph{What tools are available for hypervisor configuration?}
-The two possible categories of tools are \acrshort{cli} and \acrshort{ide} tools. A \acrshort{cli} tool may take input directly or from configuration files in a specific format. An \acrshort{ide} could instead offer a graphical representation with possible values, hints and even drag and drop configuration of some features. If done well this can greatly reduce the barrier of entry for new users, if done badly this can cloud the users understanding of the actual configuration and introduce errors.
+The two possible categories of tools are \acrshort{cli} and \acrshort{ide} tools. A \acrshort{cli} tool may take input directly or from configuration files in a specific format. An \acrshort{ide} could instead offer a graphical representation with possible values, hints and even drag and drop configuration of some features. If done well this can greatly reduce the barrier of entry for new users. If done badly this can cloud the users understanding of the actual configuration and introduce errors.
 
 Some regulations also require that all tools used to created safety-critical devices need to be verified and the same applies for the tools used to configure and build the hypervisor. It can be expected that an \acrshort{ide} is more expensive to verify than a \acrshort{cli} tool and while this may not impact the manufacturer directly, it may increase the cost of the hypervisor license.
 \paragraph{What compilers and debuggers are supported and do they align with the project requirements?}
@@ -275,16 +275,16 @@ Compilers and potentially even debuggers need to be verified as well. This means
 \subsubsection{Debugging and tracing}
 Since the hypervisor acts as a layer of abstraction between the hardware and software it has the potential to be a great aid in debugging the system. But simultaneously it could also act as a great hindrance, obfuscating issues in the business code and not providing access to partition data that would have been available without the hypervisor.
 \paragraph{Does the hypervisor provide standard debugging functionality?}
-There are multiple ways to achieve this and they will not be explored in detail here but the two most prominent examples are: a debugging server running on the device and a hypervisor aware \acrshort{jtag} environment. Ideally, it is possible to debug both the hypervisor and the guest operating systems independently \cite{Lauterbach.2018}. 
+There are multiple ways to achieve this, and they will not be explored in detail here, but the two most prominent examples are a debugging server running on the device and a hypervisor-aware \acrshort{jtag} environment. Ideally, it is possible to debug both the hypervisor and the guest operating systems independently \cite{Lauterbach.2018}. 
 \paragraph{Does the hypervisor provide special debugging or tracing functionality?}
-As established in section \ref{distributed-or-centralized}, the hypervisor has a unique centralized view of the system. It can therefore expose its internal events to a developer and provide high level insight into what exactly is happening inside the hypervisor.
+As established in section \ref{distributed-or-centralized}, the hypervisor has a unique centralized view of the system. It can, therefore, expose its internal events to a developer and provide high-level insight into what exactly is happening inside the hypervisor.
 
 %----------------------------------------------------------------------------------------
 
 \section{Noteworthy implementations} \label{noteworthy-implementations}
 As a contrast to the "basic safety-hypervisor" established early in the thesis, now will be given some noteworthy implementations. Keep in mind that no claim is being made about their respective quality, it is just being pointed out what interesting and unique features or characteristics they have.
 \subsection{seL4 and CAmkES} \label{seL4}
-seL4 is a formally verified microkernel with a focus on security, so far it has been mostly confined to academia but some advances into realistic products have been made since \cite{fisher2012hacms}. \textquote{CAmkES (component architecture for microkernel-based embedded systems) is a software development and runtime framework for quickly and reliably building microkernel-based multiserver (operating) systems.}\cite{camkes}. A system that is built with these two can also host virtual machines on some platforms. This implementation provides much more flexibility than a basic hypervisor, as it can be used to design general modular software systems. The formal verification of seL4 and CAmkES, as well as the additional verification output that can be generated automatically, can go a long way in certifying a safety-critical device.
+seL4 is a formally verified microkernel with a focus on security, so far it has been mostly confined to academia, but some advances into realistic products have been made since \cite{fisher2012hacms}. \textquote{CAmkES (component architecture for microkernel-based embedded systems) is a software development and runtime framework for quickly and reliably building microkernel-based multiserver (operating) systems.}\cite{camkes}. A system that is built with these two can also host virtual machines on some platforms. This implementation provides much more flexibility than a basic hypervisor, as it can be used to design general modular software systems. The formal verification of seL4 and CAmkES, as well as the additional verification output that can be generated automatically, can go a long way in certifying a safety-critical device.
 % Link CAmkES source: https://docs.sel4.systems/CAmkES/
 \subsection{SYSGO's PikeOS}
 PikeOS is unique because it is a real-time operating system first and foremost with hypervisor functionality added on top \cite{pikeos}. Similar to seL4 with CAmkES it can provide much more flexibility in designing the system than a hypervisor that offers only virtualized guest environments. Partitions can host \acrshort{rtos} task trees or a virtualized operating system. This also eliminates the need to virtualize an \acrshort{rtos} in the first place.

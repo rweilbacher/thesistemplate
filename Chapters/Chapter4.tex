@@ -225,7 +225,7 @@ Since the \acrshort{hss} architecture itself is typically implemented by the dev
 % NOTE I have written this a million times by now
 Not only is software more easy to modify than hardware but adding partitions is also cheaper in the hypervisor than in the \acrshort{hss} architecture. Therefore, it is conceivable that another partition may be added in a future software update, assuming that the necessary computational resources are still available on the platform. 
 
-A point that applies to both extending the device as well as resolving bugs is one introduced in section \ref{effective-fault-fixing}. Any separation architecture can make regression testing significantly cheaper and consequently also the deployment of an update. 
+After a device update, the manufacturer needs to recertify the software. By default, the entire software needs to be tested again because it is certain that the changes impacted an unforeseen part of the software. Any separation architecture can make this process significantly cheaper because a change in one partition can be guaranteed to not impact another partition. This benefit is enhanced through the hypervisor cheaper partitions since a software component that may change regularly can be more easily separated.
 
 %----------------------------------------------------------------------------------------
 
@@ -247,6 +247,6 @@ Additionally, while using unverified third-party or open-source software is poss
 A robust modular architecture requires that additional modules can be added at a low cost. In this manner, a hypervisor can help improve the software architecture of the device and consequently help with all aspects of fault reduction. Furthermore, its centralized view on the system allows the hypervisor to provide unique information to the manufacturer during development and runtime, further improving the devices fault tolerance.
 But it is still ultimately on the device manufacturer to make use of this property.
 
-One last significant potential benefit of the hypervisor is that the combination of it being a software solution and the cheap partitions, lead to a more extendable device. Software updates can be deployed to the device to add new partitions and modify existing ones, while also enabling efficient regression testing through separation.
+One last significant potential benefit of the hypervisor is that the combination of it being a software solution and the cheap partitions, lead to a more extendable device. Software updates can be deployed to the device to add new partitions and modify existing ones. 
 
-To conclude: Even though the hypervisor does not have perfect separation its scalability and features beyond the separation can add a lot of value to the project. In the next chapter, it will become clearer when each benefit and downside may be at its most pronounced.
+This chapter was a theoretical analysis that mostly outlined the expected and potential benefits of the hypervisor architecture. It shows that hypervisors can add much value to safety-critical devices if their drawbacks can be mitigated. \bold{Especially, the low cost of adding partitions and its positive impact on size, weight, and power make the hypervisor an attractive architectural choice.} In the next chapter, it will be further elaborated under what circumstances each difference is at its most pronounced.
